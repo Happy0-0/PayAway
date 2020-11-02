@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// Class used when creating new merchants 
+    /// Class used when creating new merchants
     /// </summary>
     public class NewMerchantMBE
     {
