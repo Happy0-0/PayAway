@@ -9554,11 +9554,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\gabriel.levit\\source\\repos\\PayAway.WebAPI\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
+      "projectUniqueName": "C:\\Users\\gabriel.levit\\Source\\Repos\\PayAway\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
       "projectName": "PayAway.WebAPI",
-      "projectPath": "C:\\Users\\gabriel.levit\\source\\repos\\PayAway.WebAPI\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
+      "projectPath": "C:\\Users\\gabriel.levit\\Source\\Repos\\PayAway\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
       "packagesPath": "C:\\Users\\gabriel.levit\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\gabriel.levit\\source\\repos\\PayAway.WebAPI\\PayAway.WebAPI\\obj\\",
+      "outputPath": "C:\\Users\\gabriel.levit\\Source\\Repos\\PayAway\\PayAway.WebAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\gabriel.levit\\AppData\\Roaming\\NuGet\\NuGet.Config",

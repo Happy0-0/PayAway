@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Av+H9QZ7evUaj3/hEPDrf6r/ZdkGRs1HeywBYmJbSeq9XDGGOPXnmniAR0qmDO9/m5lpVp/x1HXBNVdZ0zHz4Q==",
+  "dgSpecHash": "IMARdd54QuuAyGsOGKXWRBhv/at6/UKb1SdOSCrVzEIAf7FoqPyfPnzBUN1pwxefipykAKnxBZMlVgkdmTWa+g==",
   "success": true,
-  "projectFilePath": "C:\\Users\\gabriel.levit\\source\\repos\\PayAway.WebAPI\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
+  "projectFilePath": "C:\\Users\\gabriel.levit\\Source\\Repos\\PayAway\\PayAway.WebAPI\\PayAway.WebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\gabriel.levit\\.nuget\\packages\\bouncycastle.netcore\\1.8.3\\bouncycastle.netcore.1.8.3.nupkg.sha512",
     "C:\\Users\\gabriel.levit\\.nuget\\packages\\google.protobuf\\3.11.4\\google.protobuf.3.11.4.nupkg.sha512",
