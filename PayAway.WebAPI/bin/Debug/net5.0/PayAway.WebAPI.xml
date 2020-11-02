@@ -90,7 +90,7 @@
             
             </summary>
             <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
-            /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         </member>
         <member name="P:PayAway.WebAPI.Entities.v0.CustomerMBE.CustomerID">
             <summary>
@@ -135,7 +135,7 @@
         </member>
         <member name="T:PayAway.WebAPI.Entities.v0.NewMerchantMBE">
             <summary>
-            Class used when creating new merchants 
+            Class used when creating new merchants
             </summary>
         </member>
         <member name="P:PayAway.WebAPI.Entities.v0.NewMerchantMBE.LogoUrl">
