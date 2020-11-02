@@ -269,7 +269,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// 
         /// </summary>
         /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
-        /// /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

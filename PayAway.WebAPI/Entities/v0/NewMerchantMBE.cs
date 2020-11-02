@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace PayAway.WebAPI.Entities.v0
 {
@@ -12,8 +7,6 @@ namespace PayAway.WebAPI.Entities.v0
     /// </summary>
     public class NewMerchantMBE
     {
-        
-
         /// <summary>
         /// Gets or sets the logo url
         /// </summary>
@@ -41,9 +34,5 @@ namespace PayAway.WebAPI.Entities.v0
         /// <value>True</value>
         [JsonPropertyName("isSupportsTips")]
         public bool IsSupportsTips { get; set; }
-
-       
-        
-
     }
 }
