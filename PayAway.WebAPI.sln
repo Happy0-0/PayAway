@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30608.117
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayAway.WebAPI", "PayAway.WebAPI\PayAway.WebAPI.csproj", "{658A1190-1C32-4180-A4FB-20B0830FA5D3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{658A1190-1C32-4180-A4FB-20B0830FA5D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{658A1190-1C32-4180-A4FB-20B0830FA5D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{658A1190-1C32-4180-A4FB-20B0830FA5D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{658A1190-1C32-4180-A4FB-20B0830FA5D3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {96F99404-6203-4D46-AF88-0F85ADCF8314}
+	EndGlobalSection
+EndGlobal

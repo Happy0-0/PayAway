@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PayAway.WebAPI</name>
+    </assembly>
+    <members>
+        <member name="T:PayAway.WebAPI.Controllers.v0.DemoController">
+            <summary>
+            This is v0 for the Demo Controller.
+            </summary>
+            <remarks>
+            This version is for the front-end team to have data to develop on until further development.
+            </remarks>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.ResetDatabase">
+            <summary>
+            Resets Database
+            </summary>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetAllMerchants">
+            <summary>
+            Gets all merchants
+            </summary>
+            <returns>all merchants</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetMerchant(System.Guid)">
+            <summary>
+            Gets merchant information and associated customers using a GUID.
+            </summary>
+            <param name="merchantID"></param>
+            <returns></returns>
+            <remarks>Requires a merchantID</remarks>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.SetupNewMerchant(PayAway.WebAPI.Entities.v0.NewMerchantMBE)">
+            <summary>
+            Adds a new merchant
+            </summary>
+            <returns>new merchant</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.DeleteMerchantByID(System.Guid)">
+            <summary>
+             Delete specific merchant by merchantID
+            </summary>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetCustomers(System.Guid)">
+            <summary>
+            Gets list of all customers that belong to a specific merchant
+            </summary>
+            <param name="merchantID"></param>
+            <returns>list of customers</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetCustomer(System.Guid,System.Guid)">
+            <summary>
+            Gets a specific customer by merchantID and customerID
+            </summary>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+            <returns>customer</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.AddCustomer(System.Guid,PayAway.WebAPI.Entities.v0.NewCustomerMBE)">
+            <summary>
+            Adds a new customer
+            </summary>
+            <param name="merchantID"></param>
+            <param name="customer"></param>
+            <returns>new customer</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.UpdateCustomer(System.Guid,System.Guid,PayAway.WebAPI.Entities.v0.CustomerMBE)">
+            <summary>
+            Updates a customer
+            </summary>
+            <param name="merchantID"></param>
+            <param name="customerID"></param>
+            <param name="customer"></param>
+            <returns></returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.DeleteCustomerByID(System.Guid)">
+            <summary>
+             Delete specific customer by customerID
+            </summary>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.CustomerMBE.CustomerID">
+            <summary>
+            Gets or sets the customerID
+            </summary>
+            <returns>customerID</returns>
+        </member>
+        <member name="T:PayAway.WebAPI.Entities.v0.MerchantMBE">
+            <summary>
+            class used when a method needs to get merchant information. Inherits from NewMerchantMBE.
+            </summary>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.MerchantMBE.MerchantID">
+            <summary>
+            Gets or sets merchantID guid
+            </summary>
+            <value>merchantID</value>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.MerchantMBE.NumberOfCustomers">
+            <summary>
+            Gets the number of customers a merchant has
+            </summary>
+            <value>number of customers</value>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.MerchantMBE.Customers">
+            <summary>
+            Gets and sets a list of customers
+            </summary>
+            <returns>a list of customers</returns>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewCustomerMBE.CustomerName">
+            <summary>
+            Gets or sets the customer name
+            </summary>
+            <remarks>the customer name</remarks>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewCustomerMBE.CustomerPhoneNo">
+            <summary>
+            Gets or sets the customer phone number
+            </summary>
+            <value>The customer phone number</value>
+        </member>
+        <member name="T:PayAway.WebAPI.Entities.v0.NewMerchantMBE">
+            <summary>
+            Class used when creating new merchants 
+            </summary>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewMerchantMBE.LogoUrl">
+            <summary>
+            Gets or sets the logo url
+            </summary>
+            <value>The logo url</value>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewMerchantMBE.MerchantName">
+            <summary>
+            Gets or sets the merchant name
+            </summary>
+            <value>The merchants name</value>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewMerchantMBE.IsActive">
+            <summary>
+            True if the merchant is active
+            </summary>
+            <value>True</value>
+        </member>
+        <member name="P:PayAway.WebAPI.Entities.v0.NewMerchantMBE.IsSupportsTips">
+            <summary>
+            True if the merchant supports tips
+            </summary>
+            <value>True</value>
+        </member>
+        <member name="M:PayAway.WebAPI.Startup.ApiExplorerGroupPerVersionConvention.Apply(Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerModel)">
+            <summary>
+            Called to apply the convention to the <see cref="T:Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerModel" />.
+            </summary>
+            <param name="controller">The <see cref="T:Microsoft.AspNetCore.Mvc.ApplicationModels.ControllerModel" />.</param>
+        </member>
+    </members>
+</doc>
