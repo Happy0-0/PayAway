@@ -57,8 +57,14 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/10/28</td>
-                                    <td>v0</td>
+                                    <td>v0.1</td>
                                     <td>Added Demo controller to get stubbed results
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/2</td>
+                                    <td>v0.2</td>
+                                    <td>Finalized changes for demo controller. All methods return stubbed data.
                                     </td>
                                 </tr>
                                 </tbody>

@@ -11,7 +11,7 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyMetadata("CompileTimestamp", "Monday, November 2, 2020 1:30:39 PM")]
+[assembly: System.Reflection.AssemblyMetadata("CompileTimestamp", "Monday, November 2, 2020 3:43:57 PM")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("PayAway.WebAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]

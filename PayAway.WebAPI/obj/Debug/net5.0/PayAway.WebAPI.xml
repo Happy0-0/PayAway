@@ -27,7 +27,7 @@
             <summary>
             Gets merchant information and associated customers using a GUID.
             </summary>
-            <param name="merchantID"></param>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
             <returns></returns>
             <remarks>Requires a merchantID</remarks>
         </member>
@@ -35,18 +35,29 @@
             <summary>
             Adds a new merchant
             </summary>
-            <returns>new merchant</returns>
+            <param name="newMerchant"></param>
+            <returns>newMerchant</returns>
+        </member>
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.UpdateMerchant(System.Guid,PayAway.WebAPI.Entities.v0.MerchantMBE)">
+            <summary>
+            Updates merchants using merchantID
+            </summary>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <param name="merchant"></param>
+            <returns></returns>
         </member>
         <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.DeleteMerchantByID(System.Guid)">
             <summary>
-             Delete specific merchant by merchantID
+            Deletes merchant by merchantID
             </summary>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <returns></returns>
         </member>
         <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetCustomers(System.Guid)">
             <summary>
             Gets list of all customers that belong to a specific merchant
             </summary>
-            <param name="merchantID"></param>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
             <returns>list of customers</returns>
         </member>
         <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.GetCustomer(System.Guid,System.Guid)">
@@ -61,23 +72,25 @@
             <summary>
             Adds a new customer
             </summary>
-            <param name="merchantID"></param>
-            <param name="customer"></param>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <param name="newCustomer"></param>
             <returns>new customer</returns>
         </member>
         <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.UpdateCustomer(System.Guid,System.Guid,PayAway.WebAPI.Entities.v0.CustomerMBE)">
             <summary>
             Updates a customer
             </summary>
-            <param name="merchantID"></param>
-            <param name="customerID"></param>
+            <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+            <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
             <param name="customer"></param>
             <returns></returns>
         </member>
-        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.DeleteCustomerByID(System.Guid)">
+        <member name="M:PayAway.WebAPI.Controllers.v0.DemoController.DeleteCustomerByID(System.Guid,System.Guid)">
             <summary>
-             Delete specific customer by customerID
+            
             </summary>
+            <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+            /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         </member>
         <member name="P:PayAway.WebAPI.Entities.v0.CustomerMBE.CustomerID">
             <summary>

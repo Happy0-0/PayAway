@@ -23,7 +23,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// Resets Database
         /// </summary>
         [HttpPost("reset")]
-        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase()
         {
             return NoContent();
@@ -56,7 +56,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Gets merchant information and associated customers using a GUID.
         /// </summary>
-        /// <param name="merchantID"></param>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
         /// <remarks>Requires a merchantID</remarks>
         [HttpGet("merchants/{merchantID:guid}")]
@@ -92,7 +92,8 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Adds a new merchant
         /// </summary>
-        /// <returns>new merchant</returns>
+        /// <param name="newMerchant"></param>
+        /// <returns>newMerchant</returns>
         [HttpPost("merchant")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
@@ -108,7 +109,12 @@ namespace PayAway.WebAPI.Controllers.v0
             };
             return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID}, merchant);
         }
-
+        /// <summary>
+        /// Updates merchants using merchantID
+        /// </summary>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchant"></param>
+        /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -130,8 +136,10 @@ namespace PayAway.WebAPI.Controllers.v0
         }
 
         /// <summary>
-        ///  Delete specific merchant by merchantID
+        /// Deletes merchant by merchantID
         /// </summary>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <returns></returns>
         [HttpDelete("merchants/{merchantID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
@@ -150,7 +158,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Gets list of all customers that belong to a specific merchant
         /// </summary>
-        /// <param name="merchantID"></param>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns>list of customers</returns>
         [HttpGet("merchants/{merchantID:guid}/customers")]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
@@ -203,8 +211,8 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Adds a new customer
         /// </summary>
-        /// <param name="merchantID"></param>
-        /// <param name="customer"></param>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="newCustomer"></param>
         /// <returns>new customer</returns>
         [HttpPost("merchants/{merchantID:guid}/customers")]
         [Produces("application/json")]
@@ -230,8 +238,8 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Updates a customer
         /// </summary>
-        /// <param name="merchantID"></param>
-        /// <param name="customerID"></param>
+        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
         /// <param name="customer"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}/customers/{customerID:guid}")]
@@ -258,15 +266,20 @@ namespace PayAway.WebAPI.Controllers.v0
         }
 
         /// <summary>
-        ///  Delete specific customer by customerID
+        /// 
         /// </summary>
+        /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+        /// /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteCustomerByID(Guid customerID)
+        public ActionResult DeleteCustomerByID(Guid merchantID, Guid customerID)
         {
-
+            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            {
+                return NotFound($"Merchant with ID: {merchantID} not found");
+            }
             if (customerID != new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"))
             {
                 return NotFound($"Customer with ID: {customerID} not found");
