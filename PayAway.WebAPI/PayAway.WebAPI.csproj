@@ -23,7 +23,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20308.1454</FileVersion>
+		<FileVersion>1.0.20308.1508</FileVersion>
 	</PropertyGroup>
 
 	<!-- Add custom metadata field containing build d&t-->

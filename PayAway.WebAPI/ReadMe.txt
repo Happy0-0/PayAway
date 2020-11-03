@@ -5,3 +5,6 @@ remove Microsoft.EntityFrameworkCore.SqlServer
 
 dotnet ef migrations add CreateDatabase
 dotnet ef database update
+
+DB Browser for SQLite
+	https://sqlitebrowser.org/
