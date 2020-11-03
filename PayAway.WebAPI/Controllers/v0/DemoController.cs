@@ -129,9 +129,7 @@ namespace PayAway.WebAPI.Controllers.v0
             var merchant = new MerchantMBE{ 
                 MerchantID = merchant_1_id,
                 MerchantName = newMerchant.MerchantName,
-                LogoUrl = newMerchant.LogoUrl,
-                IsSupportsTips = newMerchant.IsSupportsTips,
-                IsActive = newMerchant.IsActive
+                IsSupportsTips = newMerchant.IsSupportsTips
             };
 
             return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID}, merchant);

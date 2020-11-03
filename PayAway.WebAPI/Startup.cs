@@ -57,6 +57,12 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/3</td>
+                                    <td>v0.3</td>
+                                    <td>removed url, IsActive from add merchant request object
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/3</td>
                                     <td>v0.21</td>
                                     <td>Internal Code Cleanup
                                     </td>
@@ -106,6 +112,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/3</td>
+                                    <td>v1.02</td>
+                                    <td>Added insert Merchant Method
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/3</td>
                                     <td>v1.01</td>

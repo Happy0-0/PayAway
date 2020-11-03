@@ -67,8 +67,15 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantID = merchant_1_id,
                     CustomerID = merchant_1_customer_1_id,
-                    CustomerName = @"Test Customer",
+                    CustomerName = @"Test Customer 1",
                     CustomerPhoneNo = @"(513) 498-6016"
+                },
+                new CustomerDBE()
+                {
+                    MerchantID = merchant_1_id,
+                    CustomerID = merchant_1_customer_2_id,
+                    CustomerName = @"Test Customer 2",
+                    CustomerPhoneNo = @"(513) 791-9800"
                 }
             };
 

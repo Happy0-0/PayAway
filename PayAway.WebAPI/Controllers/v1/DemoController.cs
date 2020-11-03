@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -89,6 +92,40 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // return the response
             return Ok(merchant);
+        }
+
+        /// <summary>
+        /// Adds a new merchant
+        /// </summary>
+        /// <param name="newMerchant"></param>
+        /// <returns>newMerchant</returns>
+        [HttpPost("merchant")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult<MerchantMBE> SetupNewMerchant(NewMerchantMBE newMerchant)
+        {
+            // validate request data
+            if(string.IsNullOrEmpty(newMerchant.MerchantName))
+            {
+                return BadRequest(new ArgumentNullException(nameof(newMerchant.MerchantName), @"You must supply a non blank value for the Merchant Name."));
+            }
+
+            try
+            {
+                // store the new merchant
+                var dbMerchant = SQLiteDBContext.InsertMerchant(newMerchant);
+
+                // convert DB entity to the public entity type
+                var merchant = (MerchantMBE)dbMerchant;
+
+                // return the response
+                return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID }, merchant);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         #endregion

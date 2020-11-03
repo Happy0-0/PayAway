@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
-
+using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 
 namespace PayAway.WebAPI.DB
@@ -54,6 +54,9 @@ namespace PayAway.WebAPI.DB
             modelBuilder.Entity<MerchantDBE>().ToTable("Merchants");
             modelBuilder.Entity<MerchantDBE>()
                 .HasKey(m => new { m.MerchantID });
+            modelBuilder.Entity<MerchantDBE>()
+                .HasIndex(m => new { m.MerchantName })
+                .IsUnique();
 
             modelBuilder.Entity<CustomerDBE>().ToTable("Customers");
             modelBuilder.Entity<CustomerDBE>()
@@ -85,7 +88,7 @@ namespace PayAway.WebAPI.DB
         /// <param name="merchantID">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
         /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
-        public static MerchantDBE GetMerchant(Guid merchantID)
+        internal static MerchantDBE GetMerchant(Guid merchantID)
         {
             using (var context = new SQLiteDBContext())
             { 
@@ -100,13 +103,36 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantID">The merchant identifier.</param>
         /// <returns>List&lt;CustomerDBE&gt;.</returns>
-        public static List<CustomerDBE> GetCustomers(Guid merchantID)
+        internal static List<CustomerDBE> GetCustomers(Guid merchantID)
         {
             using (var context = new SQLiteDBContext())
             {
                 var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
 
                 return dbCustomers;
+            }
+        }
+
+        /// <summary>
+        /// Inserts the merchant.
+        /// </summary>
+        /// <param name="newMerchant">The merchant.</param>
+        /// <returns>MerchantDBE.</returns>
+        internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbMerchant = new MerchantDBE
+                {
+                    MerchantID = Guid.NewGuid(),
+                    MerchantName = newMerchant.MerchantName,
+                    IsSupportsTips = newMerchant.IsSupportsTips
+                };
+
+                context.Merchants.Add(dbMerchant);
+                context.SaveChanges();
+
+                return dbMerchant;
             }
         }
     }
