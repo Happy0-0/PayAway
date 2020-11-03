@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
 
 namespace PayAway.WebAPI.Controllers.v1
@@ -36,25 +36,14 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<List<MerchantMBE>> GetAllMerchants()
         {
-            return Ok(new List<MerchantMBE>
-            {
-                new MerchantMBE
-                {
-                    MerchantID = merchant_1_id,
-                    MerchantName = @"Domino's Pizza",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
-                    IsSupportsTips = true,
-                    IsActive = true
-                },
-                new MerchantMBE
-                {
-                    MerchantID = merchant_2_id,
-                    MerchantName = @"Raising Cane's",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_2_logo_id}.png",
-                    IsSupportsTips = true,
-                    IsActive = false
-                }
-            });
+            // query the DB
+            var dbMerchants = SQLiteDBContext.GetAllMerchants();
+
+            // convert to the public entity types
+            var merchants = dbMerchants.ConvertAll(oe => (MerchantMBE)oe);
+
+            // return the data
+            return Ok(merchants);
         }
     }
 }
