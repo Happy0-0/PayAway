@@ -120,7 +120,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// </summary>
         /// <param name="newMerchant"></param>
         /// <returns>newMerchant</returns>
-        [HttpPost("merchant")]
+        [HttpPost("merchants")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

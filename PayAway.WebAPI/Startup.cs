@@ -59,6 +59,7 @@ namespace PayAway.WebAPI
                                     <td>2020/11/3</td>
                                     <td>v0.3</td>
                                     <td>removed url, IsActive from add merchant request object
+                                        corrected path for adding a new merchant was /merchant now /merchants
                                     </td>
                                 </tr>
                                 <tr>
