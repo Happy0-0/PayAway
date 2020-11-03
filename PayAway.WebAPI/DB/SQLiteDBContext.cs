@@ -78,5 +78,36 @@ namespace PayAway.WebAPI.DB
                 return context.Merchants.ToList();
             }
         }
+
+        /// <summary>
+        /// Gets the merchant.
+        /// </summary>
+        /// <param name="merchantID">The merchant unique identifier.</param>
+        /// <returns>MerchantDBE.</returns>
+        /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
+        public static MerchantDBE GetMerchant(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            { 
+                var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchantID);
+
+                return dbMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Gets the customers.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <returns>List&lt;CustomerDBE&gt;.</returns>
+        public static List<CustomerDBE> GetCustomers(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
+
+                return dbCustomers;
+            }
+        }
     }
 }
