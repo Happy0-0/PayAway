@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using PayAway.WebAPI.Entities.v0;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
+
+using PayAway.WebAPI.Entities.v0;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -19,6 +21,15 @@ namespace PayAway.WebAPI.Controllers.v0
     [ApiController]
     public class DemoController : ControllerBase
     {
+        // demo ids
+        static Guid merchant_1_id = new Guid(@"f8c6f5b6-533e-455f-87a1-ced552898e1d");
+        static Guid merchant_1_logo_id = new Guid(@"4670e0dc-0335-4370-a3b1-24d9fa1dfdbf");
+        static Guid merchant_1_customer_1_id = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21");
+        static Guid merchant_1_customer_2_id = new Guid("8b9b276a-cf81-47bf-97dc-3977cd464787");
+        static Guid merchant_2_id = new Guid(@"5d590431-95d2-4f8a-b2d9-6eb4d8cabc89");
+        static Guid merchant_2_logo_id = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
+
+        #region === Overall Demo Methods ================================
         /// <summary>
         /// Resets Database
         /// </summary>
@@ -28,6 +39,9 @@ namespace PayAway.WebAPI.Controllers.v0
         {
             return NoContent();
         }
+        #endregion
+
+        #region === Merchant Methods ================================
 
         /// <summary>
         /// Gets all merchants
@@ -42,51 +56,63 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 new MerchantMBE
                 {
-                    MerchantID = new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"),
-                    MerchantName = "Dominoes Pizza",
-                    LogoUrl = "https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/4670e0dc-0335-4370-a3b1-24d9fa1dfdbf.png",
+                    MerchantID = merchant_1_id,
+                    MerchantName = @"Domino's Pizza",
+                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
                     IsSupportsTips = true,
                     IsActive = true
+                },
+                new MerchantMBE
+                {
+                    MerchantID = merchant_2_id,
+                    MerchantName = @"Raising Cane's",
+                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_2_logo_id}.png",
+                    IsSupportsTips = true,
+                    IsActive = false
                 }
             });
-
-
         }
 
         /// <summary>
         /// Gets merchant information and associated customers using a GUID.
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
         /// <remarks>Requires a merchantID</remarks>
         [HttpGet("merchants/{merchantID:guid}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(MerchantMBE),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<MerchantMBE> GetMerchant(Guid merchantID)       
         {
-            if(merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if(merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
+
             return Ok(new MerchantMBE
             {
-                MerchantID = new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"),
-                MerchantName = "Dominoes Pizza",
-                LogoUrl = "https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/4670e0dc-0335-4370-a3b1-24d9fa1dfdbf.png",
+                MerchantID = merchant_1_id,
+                MerchantName = @"Domino's Pizza",
+                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
                 IsSupportsTips = true,
                 IsActive = true,
                 Customers = new List<CustomerMBE>()
                 {
                     new CustomerMBE
                     {
-                        CustomerID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"),
-                        CustomerName = "Joe Smith",
-                        CustomerPhoneNo = "(513) 456-7890"
+                        CustomerID = merchant_1_customer_1_id,
+                        CustomerName = @"Joe Smith",
+                        CustomerPhoneNo = @"(513) 456-7890"
+                    },
+                    new CustomerMBE
+                    {
+                        CustomerID = merchant_1_customer_2_id,
+                        CustomerName = @"Jane Doe",
+                        CustomerPhoneNo = @"(513) 555-1212"
                     }
                 }
             });
-
         }
 
         /// <summary>
@@ -101,44 +127,45 @@ namespace PayAway.WebAPI.Controllers.v0
         public ActionResult<MerchantMBE> SetupNewMerchant(NewMerchantMBE newMerchant)
         {
             var merchant = new MerchantMBE{ 
-                MerchantID = new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"),
+                MerchantID = merchant_1_id,
                 MerchantName = newMerchant.MerchantName,
                 LogoUrl = newMerchant.LogoUrl,
                 IsSupportsTips = newMerchant.IsSupportsTips,
                 IsActive = newMerchant.IsActive
             };
+
             return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID}, merchant);
         }
+
         /// <summary>
         /// Updates merchants using merchantID
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <param name="merchant"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateMerchant(Guid merchantID, MerchantMBE merchant)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
-            
-            if (merchantID != merchant.MerchantID)
+            else if (merchantID != merchant.MerchantID)
             {
                 return BadRequest(new ArgumentException(nameof(merchant.MerchantID), @"The merchantID in the request body did not match the url."));
             }
-            return NoContent();
 
+            return NoContent();
         }
 
         /// <summary>
         /// Deletes merchant by merchantID
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
         [HttpDelete("merchants/{merchantID:guid}")]
         [Produces("application/json")]
@@ -146,8 +173,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteMerchantByID(Guid merchantID)
         {
-
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
@@ -155,27 +181,37 @@ namespace PayAway.WebAPI.Controllers.v0
             return NoContent();
         }
 
+        #endregion
+
+        #region === Customer Methods ================================
         /// <summary>
         /// Gets list of all customers that belong to a specific merchant
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns>list of customers</returns>
         [HttpGet("merchants/{merchantID:guid}/customers")]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<List<CustomerMBE>> GetCustomers(Guid merchantID)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
+
             return new List<CustomerMBE>
             {
                 new CustomerMBE
                 {
-                    CustomerID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"),
+                    CustomerID = merchant_1_customer_1_id,
                     CustomerName = "Joe Smith",
                     CustomerPhoneNo = "(513) 456-7890"
+                },
+                new CustomerMBE
+                {
+                    CustomerID = merchant_1_customer_2_id,
+                    CustomerName = @"Jane Doe",
+                    CustomerPhoneNo = @"(513) 555-1212"
                 }
             };
         }
@@ -191,17 +227,18 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerMBE> GetCustomer(Guid merchantID, Guid customerID)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
-            if (customerID != new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"))
+            else if (customerID != merchant_1_customer_1_id)
             {
                 return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
             }
+
             return new CustomerMBE
             {
-                CustomerID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"),
+                CustomerID = merchant_1_customer_1_id,
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(513) 456-7890"
             };
@@ -211,7 +248,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Adds a new customer
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <param name="newCustomer"></param>
         /// <returns>new customer</returns>
         [HttpPost("merchants/{merchantID:guid}/customers")]
@@ -220,72 +257,75 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<CustomerMBE> AddCustomer(Guid merchantID, NewCustomerMBE newCustomer)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
+
             var customer = new CustomerMBE
             {
-                CustomerID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"),
+                CustomerID = merchant_1_customer_1_id,
                 CustomerName = newCustomer.CustomerName,
                 CustomerPhoneNo = newCustomer.CustomerPhoneNo
             };
 
-            return CreatedAtAction(nameof(GetCustomer), new { merchantID = merchantID, 
-                customerID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21")}, customer);
+            return CreatedAtAction(nameof(GetCustomer), new { merchantID = merchantID, customerID = customer.CustomerID}, customer);
         }
 
         /// <summary>
         /// Updates a customer
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="customerID">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
         /// <param name="customer"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}/customers/{customerID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, CustomerMBE customer)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
-            if (customerID != new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"))
+            else if (customerID != merchant_1_customer_1_id)
             {
                 return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
             }
-            if (customerID != customer.CustomerID)
+            else if (customerID != customer.CustomerID)
             {
                 return BadRequest(new ArgumentException(nameof(customer.CustomerID), @"The customerID in the request body did not match the one in the url"));
             }
-            return NoContent();
 
+            return NoContent();
         }
 
         /// <summary>
-        /// 
+        /// Delete a customer on a merchant
         /// </summary>
-        /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="customerID">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
         [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteCustomerByID(Guid merchantID, Guid customerID)
         {
-            if (merchantID != new Guid("f8c6f5b6-533e-455f-87a1-ced552898e1d"))
+            if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
-            if (customerID != new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21"))
+            else if (customerID != merchant_1_customer_1_id)
             {
-                return NotFound($"Customer with ID: {customerID} not found");
+                return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
             }
 
             return NoContent();
         }
+
+        #endregion
+
     }
 }

@@ -45,7 +45,7 @@ namespace PayAway.WebAPI
                         { 
                             Title = "PayAway.WebAPI", 
                             Version = "v0",
-                            Description = @"Improved documentation with more complete swagger support to be used as a baseline for new controllers. 
+                            Description = @"This version of the controller has stubbed out responses to enable front-end development to begin. 
                             <table>
                                 <thead>
                                 <tr>
@@ -56,15 +56,21 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>2020/10/28</td>
-                                    <td>v0.1</td>
-                                    <td>Added Demo controller to get stubbed results
+                                    <td>2020/11/3</td>
+                                    <td>v0.21</td>
+                                    <td>Internal Code Cleanup
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/2</td>
                                     <td>v0.2</td>
                                     <td>Finalized changes for demo controller. All methods return stubbed data.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/10/28</td>
+                                    <td>v0.1</td>
+                                    <td>Added Demo controller to get stubbed results
                                     </td>
                                 </tr>
                                 </tbody>
@@ -107,7 +113,6 @@ namespace PayAway.WebAPI
                 {
                     c.SwaggerEndpoint("/swagger/v0/swagger.json", "PayAway.WebAPI v0");
                     
-
                     // serve the Swagger UI at the app's root (http://localhost:<port>/) otherwise it is at https://localhost:44331/swagger/index.html
                     // note: if you chg this you likely also want to edit launchsettings.json with sets the debug startup up (and remove the swagger from the startup url attribute
                     c.RoutePrefix = string.Empty;

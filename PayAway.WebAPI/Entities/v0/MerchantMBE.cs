@@ -28,14 +28,7 @@ namespace PayAway.WebAPI.Entities.v0
         [JsonPropertyName("numberOfCustomers")]
         public int? NumberOfCustomers 
         {
-            get{
-                if(Customers != null)
-                {
-                    return Customers.Count;
-                }
-                return null; 
-            }
-            
+            get { return Customers != null ? Customers.Count : null; }
         }
 
         /// <summary>
