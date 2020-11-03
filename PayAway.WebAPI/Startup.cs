@@ -30,7 +30,7 @@ namespace PayAway.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors();
             services.AddControllers();
 
             // routes and endpoints are discovered automatically
@@ -177,6 +177,12 @@ namespace PayAway.WebAPI
 
             //  adds route matching to the middleware pipeline. This middleware looks at the set of endpoints defined in the app, and selects the best match based on the request.
             app.UseRouting();
+
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true)); // allow any origin
 
             app.UseAuthorization();
 
