@@ -6,8 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0-rc.2.20475.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-rc.2.20475.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.0-rc.2.20475.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.0-rc.2.20475.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0-rc.2.20475.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,7 +23,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20308.1031</FileVersion>
+		<FileVersion>1.0.20308.1418</FileVersion>
 	</PropertyGroup>
 
 	<!-- Add custom metadata field containing build d&t-->
@@ -29,6 +32,11 @@
 			<_Parameter1>CompileTimestamp</_Parameter1>
 			<_Parameter2>$([System.DateTime]::Now.ToString('F'))</_Parameter2>
 		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Update="PrestoPayv2.db">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

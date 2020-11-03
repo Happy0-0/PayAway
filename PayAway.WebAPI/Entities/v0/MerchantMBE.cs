@@ -18,7 +18,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("merchantID")]
-        [Key]
         public Guid? MerchantID { get; set; }
 
         /// <summary>

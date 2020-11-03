@@ -89,7 +89,47 @@ namespace PayAway.WebAPI
                                 Name = "Use under LICX",
                                 Url = new Uri("https://example.com/license"),
                             }
-                });
+                    }
+                );
+
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "PayAway.WebAPI",
+                    Version = "v1",
+                    Description = @"This is a functional implemention of v0. 
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Version</th>
+                                    <th>Changes</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>2020/11/3</td>
+                                    <td>v1.01</td>
+                                    <td>Initial Implementation
+                                    </td>
+                                </tr>
+                                </tbody>
+                            <table>
+                            ",
+
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Gabriel Levit",
+                        Email = @"gabriel.levit@fisglobal.com",
+                        Url = new Uri("https://twitter.com/demo"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use under LICX",
+                        Url = new Uri("https://example.com/license"),
+                    }
+                }
+);
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -112,7 +152,8 @@ namespace PayAway.WebAPI
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v0/swagger.json", "PayAway.WebAPI v0");
-                    
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PayAway.WebAPI v1");
+
                     // serve the Swagger UI at the app's root (http://localhost:<port>/) otherwise it is at https://localhost:44331/swagger/index.html
                     // note: if you chg this you likely also want to edit launchsettings.json with sets the debug startup up (and remove the swagger from the startup url attribute
                     c.RoutePrefix = string.Empty;
