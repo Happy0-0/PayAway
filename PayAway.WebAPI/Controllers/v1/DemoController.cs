@@ -38,7 +38,6 @@ namespace PayAway.WebAPI.Controllers.v1
         }
         #endregion
 
-
         #region === Merchant Methods ================================
 
         /// <summary>
@@ -296,8 +295,6 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, CustomerMBE customer)
         {
-            
-
             // validate the input params
             if (customerID != customer.CustomerID)
             {

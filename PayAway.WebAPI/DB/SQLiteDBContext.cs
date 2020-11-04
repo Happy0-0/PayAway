@@ -64,8 +64,6 @@ namespace PayAway.WebAPI.DB
             modelBuilder.Entity<CustomerDBE>()
                 .HasIndex(c => new { c.MerchantID, c.CustomerPhoneNo })
                 .IsUnique();
-
-            modelBuilder.Seed();
         }
 
         #endregion
@@ -330,6 +328,11 @@ namespace PayAway.WebAPI.DB
                 // turn off change tracking since we are going to overwite the entity
                 // Note: I would not do this if there was a db assigned unique id for the record
                 context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+                if(customer.MerchantID == Guid.Empty)
+                {
+                    customer.MerchantID = merchantID;
+                }
 
                 var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customer.CustomerID);
 
