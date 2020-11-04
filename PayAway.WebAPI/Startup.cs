@@ -56,6 +56,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v0.4</td>
+                                    <td>reset method now takes a boolean parameter
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/3</td>
                                     <td>v0.3</td>
                                     <td>removed url, IsActive from add merchant request object
@@ -113,6 +119,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.03</td>
+                                    <td>Started implementation of ResetDB method, Implemented UpdateMerchant and DeleteMerchant methods
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/3</td>
                                     <td>v1.02</td>

@@ -70,6 +70,46 @@ namespace PayAway.WebAPI.DB
 
         #endregion
 
+        #region === Reset DB =============
+
+        /// <summary>
+        /// Resets the database.
+        /// </summary>
+        /// <param name="isPreloadEnabled">The is preload enabled.</param>
+        public static void ResetDB(bool isPreloadEnabled)
+        {
+            // Step 1a: Purge the exisiting Merchants & Orders & Order Events
+            var existingMerchants = SQLiteDBContext.GetAllMerchants();
+            foreach (var existingMerchant in existingMerchants)
+            {
+                var existingCustomers = SQLiteDBContext.GetCustomers(existingMerchant.MerchantID);
+
+                foreach (var existingCustomer in existingCustomers)
+                {
+                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
+                }
+
+                SQLiteDBContext.DeleteMerchant(existingMerchant.MerchantID);
+            }
+
+            if (isPreloadEnabled)
+            {
+                // Step 2: Reload the Merchants
+                var seedMerchants = ModelBuilderExtensions.GetSeedMerchants();
+                foreach (var seedMerchant in seedMerchants)
+                {
+                    SQLiteDBContext.InsertMerchant(seedMerchant);
+                }
+
+                // Step 3: Reload the Customers
+                var seedCustomers = ModelBuilderExtensions.GetSeedCustomers(seedMerchants);
+                //TODO: Gabe, write this step
+            }
+        }
+
+        #endregion
+
+        #region === Merchant Methods =====
         /// <summary>
         /// Gets the merchants.
         /// </summary>
@@ -99,22 +139,7 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
-        /// Gets the customers.
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        /// <returns>List&lt;CustomerDBE&gt;.</returns>
-        internal static List<CustomerDBE> GetCustomers(Guid merchantID)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
-
-                return dbCustomers;
-            }
-        }
-
-        /// <summary>
-        /// Inserts the merchant.
+        /// Inserts the merchant (used by the public controllers).
         /// </summary>
         /// <param name="newMerchant">The merchant.</param>
         /// <returns>MerchantDBE.</returns>
@@ -135,5 +160,137 @@ namespace PayAway.WebAPI.DB
                 return dbMerchant;
             }
         }
+
+        /// <summary>
+        /// Inserts the merchant (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// </summary>
+        /// <param name="newMerchant">The new merchant.</param>
+        /// <returns>MerchantDBE.</returns>
+        private static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                context.Merchants.Add(newMerchant);
+                context.SaveChanges();
+
+                return newMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the merchant and customers.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        internal static bool DeleteMerchantAndCustomers(Guid merchantID)
+        {
+            // try to get any associated customers
+            var existingCustomers = SQLiteDBContext.GetCustomers(merchantID);
+
+            // there may not be any customers
+            if (existingCustomers != null)
+            {
+                foreach (var existingCustomer in existingCustomers)
+                {
+                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
+                }
+            }
+
+            return SQLiteDBContext.DeleteMerchant(merchantID);
+        }
+
+        /// <summary>
+        /// Deletes the merchant.
+        /// </summary>
+        /// <param name="merchantID">The merchant unique identifier.</param>
+        internal static bool DeleteMerchant(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var currentMerchant = context.Merchants.FirstOrDefault(o => o.MerchantID == merchantID);
+
+                if (currentMerchant != null)
+                {
+                    context.Merchants.Remove(currentMerchant);
+                    context.SaveChanges();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the merchant.
+        /// </summary>
+        /// <param name="merchant">The merchant.</param>
+        /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
+        public static void UpdateMerchant(MerchantDBE merchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // turn off change tracking since we are going to overwite the entity
+                // Note: I would not do this if there was a db assigned unique id for the record
+                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+                var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchant.MerchantID);
+
+                if (currentMerchant != null)
+                {
+                    context.Update(merchant);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    throw new ApplicationException($"Merchant: [{merchant.MerchantID}] is not valid");
+                }
+            }
+        }
+
+        #endregion
+
+        #region ==== Customer Methods =======
+
+        /// <summary>
+        /// Gets the customers.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <returns>List&lt;CustomerDBE&gt;.</returns>
+        internal static List<CustomerDBE> GetCustomers(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
+
+                return dbCustomers;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the customer.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <param name="customerID">The customer identifier.</param>
+        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
+        internal static void DeleteCustomer(Guid merchantID, Guid customerID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customerID);
+
+                if (currentCustomer != null)
+                {
+                    context.Customers.Remove(currentCustomer);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    throw new ApplicationException($"Customer: [{customerID}] on Merchant: [{merchantID}] is not valid");
+                }
+            }
+        }
+        #endregion
     }
 }

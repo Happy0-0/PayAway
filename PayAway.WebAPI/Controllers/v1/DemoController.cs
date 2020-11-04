@@ -22,6 +22,22 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class DemoController : Controller
     {
+        #region === Overall Demo Methods ================================
+
+        /// <summary>
+        /// Resets Database
+        /// </summary>
+        /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
+        [HttpPost("reset")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult ResetDatabase(bool isPreloadEnabled)
+        {
+            SQLiteDBContext.ResetDB(isPreloadEnabled);
+
+            return NoContent();
+        }
+        #endregion
+
 
         #region === Merchant Methods ================================
 
@@ -53,7 +69,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Gets merchant information and associated customers using a GUID.
         /// </summary>
-        /// <param name="merchantID">the unique, system assigned identifier for this merchant</param>
+        /// <param name="merchantID">The unique identifier of the merchant to retrieve.</param>>
         /// <returns></returns>
         /// <remarks>Requires a merchantID</remarks>
         [HttpGet("merchants/{merchantID:guid}")]
@@ -97,7 +113,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Adds a new merchant
         /// </summary>
-        /// <param name="newMerchant"></param>
+        /// <param name="newMerchant">The new merchant</param>
         /// <returns>newMerchant</returns>
         [HttpPost("merchants")]
         [Produces("application/json")]
@@ -128,8 +144,78 @@ namespace PayAway.WebAPI.Controllers.v1
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Updates merchants using merchantID
+        /// </summary>
+        /// <param name="merchantID">The unique identifier of the merchant to update.</param>
+        /// <param name="merchant"></param>
+        /// <returns></returns>
+        [HttpPut("merchants/{merchantID:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult UpdateMerchant(Guid merchantID, MerchantMBE merchant)
+        {
+            // validate the input params
+            if (merchantID != merchant.MerchantID)
+            {
+                return BadRequest(new ArgumentException(nameof(merchant.MerchantID), @"The merchantID in the request body did not match the url."));
+            }
+            else if (string.IsNullOrEmpty(merchant.MerchantName))
+            {
+                return BadRequest(new ArgumentException(nameof(merchant.MerchantName), @"The merchant name cannot be blank."));
+            }
 
+            try 
+            {
+                // save the updated merchant
+                var updatedDBMerchant = (MerchantDBE)merchant;
+                SQLiteDBContext.UpdateMerchant(updatedDBMerchant);
+            }
+            catch(Exception ex)
+            {
+                // this coudld be from an invalid MerchantID
+                return BadRequest(ex);
+            }
+
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Deletes merchant by merchantID
+        /// </summary>
+        /// <param name="merchantID">The unique identifier of the merchant to delete.</param>
+        /// <returns></returns>
+        [HttpDelete("merchants/{merchantID:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult DeleteMerchantByID(Guid merchantID)
+        {
+            bool isValidMerchant = false;
+
+            try
+            {
+                isValidMerchant = SQLiteDBContext.DeleteMerchantAndCustomers(merchantID);
+            }
+            catch (Exception ex)
+            {
+                // this coudld be from an invalid MerchantID
+                return BadRequest(ex);
+            }
+
+            if (isValidMerchant)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound($"MerchantID : [{merchantID}] is not valid");
+            }
+        }
+
+        #endregion
 
     }
 }

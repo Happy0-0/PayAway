@@ -30,12 +30,14 @@ namespace PayAway.WebAPI.Controllers.v0
         static Guid merchant_2_logo_id = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
 
         #region === Overall Demo Methods ================================
+
         /// <summary>
         /// Resets Database
         /// </summary>
+        /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
         [HttpPost("reset")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase()
+        public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
             return NoContent();
         }

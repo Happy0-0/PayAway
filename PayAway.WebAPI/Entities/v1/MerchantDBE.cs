@@ -43,5 +43,24 @@ namespace PayAway.WebAPI.Entities.v1
 
             return to;
         }
+
+        public static explicit operator MerchantDBE(MerchantMBE from)
+        {
+            MerchantDBE to = null;
+
+            if (from != null)
+            {
+                to = new MerchantDBE()
+                {
+                    MerchantID = from.MerchantID.Value,
+                    MerchantName = from.MerchantName,
+                    LogoUrl = from.LogoUrl,
+                    IsSupportsTips = from.IsSupportsTips,
+                    IsActive = from.IsActive,
+                };
+            }
+
+            return to;
+        }
     }
 }
