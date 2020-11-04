@@ -104,6 +104,10 @@ namespace PayAway.WebAPI.DB
                 // Step 3: Reload the Customers
                 var seedCustomers = ModelBuilderExtensions.GetSeedCustomers(seedMerchants);
                 //TODO: Gabe, write this step
+                foreach(var seedCustomer in seedCustomers)
+                {
+                    SQLiteDBContext.InsertCustomer(seedCustomer);
+                }
             }
         }
 
@@ -269,7 +273,7 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
-        /// Inserts new customer into DB
+        /// Inserts new customer into DB (used by the public controllers).
         /// </summary>
         /// <param name="merchantID">The merchant identifier.</param>
         /// <param name="newCustomer">object containing information for new customer</param>
@@ -290,6 +294,25 @@ namespace PayAway.WebAPI.DB
                 context.SaveChanges();
 
                 return dbCustomer;
+            }
+        }
+
+        /// <summary>
+        /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <param name="newCustomer">object containing information for new customer</param>
+        /// <returns></returns>
+        internal static CustomerDBE InsertCustomer( CustomerDBE newCustomer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                //var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == newCustomer.CustomerID);
+
+                context.Customers.Add(newCustomer);
+                context.SaveChanges();
+
+                return newCustomer;
             }
         }
 
@@ -344,6 +367,8 @@ namespace PayAway.WebAPI.DB
                 }
             }
         }
+
+
         #endregion
     }
 }
