@@ -320,6 +320,30 @@ namespace PayAway.WebAPI.Controllers.v1
             return NoContent();
 
         }
+
+        /// <summary>
+        /// Delete a customer on a merchant
+        /// </summary>
+        /// <param name="merchantID"></param>
+        /// <param name="customerID"></param>
+        [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult DeleteCustomerByID(Guid merchantID, Guid customerID)
+        {
+            try
+            {
+                SQLiteDBContext.DeleteCustomer(merchantID, customerID);
+            }
+            catch (Exception ex)
+            {
+                // this could be from an invalid Customer
+                return BadRequest(ex);
+            }
+
+            return NoContent();
+        }
         #endregion
     }
 }
