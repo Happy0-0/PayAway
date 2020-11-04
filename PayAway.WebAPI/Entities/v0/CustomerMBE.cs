@@ -14,6 +14,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <returns>customerID</returns>
         [JsonPropertyName("customerID")]
-        public Guid? CustomerID { get; set; }
+        public Guid CustomerID { get; set; }
     }
 }

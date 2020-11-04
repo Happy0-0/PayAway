@@ -39,5 +39,24 @@ namespace PayAway.WebAPI.Entities.v1
 
             return to;
         }
+
+        public static explicit operator CustomerDBE(CustomerMBE from)
+        {
+            CustomerDBE to = null;
+
+            if (from != null)
+            {
+                to = new CustomerDBE()
+                {
+                    CustomerID = from.CustomerID,
+                    CustomerName = from.CustomerName,
+                    CustomerPhoneNo = from.CustomerPhoneNo
+                };
+            }
+
+            return to;
+        }
+
+        
     }
 }

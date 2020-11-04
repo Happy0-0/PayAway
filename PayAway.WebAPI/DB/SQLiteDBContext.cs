@@ -269,6 +269,31 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
+        /// Inserts new customer into DB
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <param name="newCustomer">object containing information for new customer</param>
+        /// <returns></returns>
+        internal static CustomerDBE InsertCustomer(Guid merchantID, NewCustomerMBE newCustomer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbCustomer= new CustomerDBE
+                {
+                    MerchantID = merchantID,
+                    CustomerID = Guid.NewGuid(),
+                    CustomerName = newCustomer.CustomerName,
+                    CustomerPhoneNo = newCustomer.CustomerPhoneNo
+                };
+
+                context.Customers.Add(dbCustomer);
+                context.SaveChanges();
+
+                return dbCustomer;
+            }
+        }
+
+        /// <summary>
         /// Deletes the customer.
         /// </summary>
         /// <param name="merchantID">The merchant identifier.</param>
@@ -288,6 +313,34 @@ namespace PayAway.WebAPI.DB
                 else
                 {
                     throw new ApplicationException($"Customer: [{customerID}] on Merchant: [{merchantID}] is not valid");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates a customer
+        /// </summary>
+        /// <param name="merchantID">Unique identifier for merchant</param>
+        /// <param name="customer">object containing information about customers</param>
+        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
+        public static void UpdateCustomer(Guid merchantID, CustomerDBE customer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // turn off change tracking since we are going to overwite the entity
+                // Note: I would not do this if there was a db assigned unique id for the record
+                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customer.CustomerID);
+
+                if (currentCustomer != null)
+                {
+                    context.Update(customer);
+                    context.SaveChanges();
+                }
+                else
+                {
+                    throw new ApplicationException($"Customer: [{customer.CustomerID}] is not valid on MerchantID: [{merchantID}]");
                 }
             }
         }

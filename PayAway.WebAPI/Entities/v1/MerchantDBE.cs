@@ -52,7 +52,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantDBE()
                 {
-                    MerchantID = from.MerchantID.Value,
+                    MerchantID = from.MerchantID,
                     MerchantName = from.MerchantName,
                     LogoUrl = from.LogoUrl,
                     IsSupportsTips = from.IsSupportsTips,
