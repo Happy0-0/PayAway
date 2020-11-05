@@ -57,6 +57,12 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/5</td>
+                                    <td>v0.10</td>
+                                    <td>Changed UpdateCustomer method to take newCustomer object
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
                                     <td>v0.6</td>
                                     <td>Added MakeMerchantActive method.
                                     </td>
@@ -131,6 +137,24 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v1.10</td>
+                                    <td>Changed UpdateCustomer method to take newCustomer object
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v1.06</td>
+                                    <td>Added MakeMerchantActive method.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.05</td>
+                                    <td>Changed UpdateMerchant method to take newMerchant object.
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/4</td>
                                     <td>v1.04</td>

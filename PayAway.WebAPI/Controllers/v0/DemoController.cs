@@ -141,7 +141,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// Updates merchants using merchantID
         /// </summary>
         /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="newMerchant"></param>
+        /// <param name="merchant"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}")]
         [Produces("application/json")]
@@ -278,6 +278,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerMBE> AddCustomer(Guid merchantID, NewCustomerMBE newCustomer)
         {
             if (merchantID != merchant_1_id)
@@ -307,7 +308,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, CustomerMBE customer)
+        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
         {
             if (merchantID != merchant_1_id)
             {
@@ -316,10 +317,6 @@ namespace PayAway.WebAPI.Controllers.v0
             else if (customerID != merchant_1_customer_1_id)
             {
                 return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
-            }
-            else if (customerID != customer.CustomerID)
-            {
-                return BadRequest(new ArgumentException(nameof(customer.CustomerID), @"The customerID in the request body did not match the one in the url"));
             }
 
             return NoContent();

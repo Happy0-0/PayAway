@@ -154,14 +154,11 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantID, MerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
         {
+
             // validate the input params
-            if (merchantID != merchant.MerchantID)
-            {
-                return BadRequest(new ArgumentException(nameof(merchant.MerchantID), @"The merchantID in the request body did not match the url."));
-            }
-            else if (string.IsNullOrEmpty(merchant.MerchantName))
+            if (string.IsNullOrEmpty(merchant.MerchantName))
             {
                 return BadRequest(new ArgumentException(nameof(merchant.MerchantName), @"The merchant name cannot be blank."));
             }
@@ -196,6 +193,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             try
             {
+                //Delete merchant using the merchantID
                 isValidMerchant = SQLiteDBContext.DeleteMerchantAndCustomers(merchantID);
             }
             catch (Exception ex)
@@ -203,7 +201,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 // this could be from an invalid MerchantID
                 return BadRequest(ex);
             }
-
+            //If the merchant is not valid return no content, return error otherwise
             if (isValidMerchant)
             {
                 return NoContent();
@@ -226,18 +224,30 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);
+            var activeMerchant = SQLiteDBContext.GetMerchant(merchantID);
 
             // if we did not find a matching merchant
-            if (dbMerchant == null)
+            if (activeMerchant == null)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
             }
+            
+            //gets all merchants who are active in a list
+            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
 
+            //set merchant to active
+            activeMerchant.IsActive = true;
+            //update merchant in the db
+            SQLiteDBContext.UpdateMerchant(activeMerchant);
+
+            //set each merchant to inactive
+            foreach(var merchant in merchantsToChange)
+            {
+                merchant.IsActive = false;
+                SQLiteDBContext.UpdateMerchant(merchant);
+            }
 
             return NoContent();
-
-
         }
 
         #endregion
@@ -256,6 +266,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerMBE> GetCustomer(Guid merchantID, Guid customerID)
         {
+            //query DB for a collection of customers from a specific merchant.
             var dbCustomer = SQLiteDBContext.GetCustomers(merchantID).Where(c => c.CustomerID == customerID).FirstOrDefault();
 
             if (dbCustomer == null)
@@ -327,14 +338,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, CustomerMBE customer)
+        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
         {
             // validate the input params
-            if (customerID != customer.CustomerID)
-            {
-                return BadRequest(new ArgumentException(nameof(customer.CustomerID), @"The customerID in the request body did not match the url."));
-            }
-            else if (string.IsNullOrEmpty(customer.CustomerName))
+            if (string.IsNullOrEmpty(customer.CustomerName))
             {
                 return BadRequest(new ArgumentException(nameof(customer.CustomerName), @"The customer name cannot be blank."));
             }
@@ -344,7 +351,6 @@ namespace PayAway.WebAPI.Controllers.v1
                 //Save the updated customer
                 var updatedDBCustomer = (CustomerDBE)customer;
                 SQLiteDBContext.UpdateCustomer(merchantID, updatedDBCustomer);
-
             }
             catch (Exception ex)
             {
@@ -368,6 +374,7 @@ namespace PayAway.WebAPI.Controllers.v1
         {
             try
             {
+                //Delete cutomser 
                 SQLiteDBContext.DeleteCustomer(merchantID, customerID);
             }
             catch (Exception ex)
