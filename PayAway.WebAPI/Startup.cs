@@ -55,7 +55,13 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
-<tr>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v0.6</td>
+                                    <td>Added MakeMerchantActive method.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/4</td>
                                     <td>v0.5</td>
                                     <td>Changed UpdateMerchant method to take newMerchant object.
