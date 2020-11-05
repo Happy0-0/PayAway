@@ -55,6 +55,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+<tr>
+                                    <td>2020/11/4</td>
+                                    <td>v0.5</td>
+                                    <td>Changed UpdateMerchant method to take newMerchant object.
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/4</td>
                                     <td>v0.4</td>
@@ -119,6 +125,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.04</td>
+                                    <td>Implemented AddNewCustomer, UpdateCustomer and DeleteCustomer methods. Finished Implementation of ResetDB method.
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/4</td>
                                     <td>v1.03</td>
