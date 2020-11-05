@@ -141,22 +141,18 @@ namespace PayAway.WebAPI.Controllers.v0
         /// Updates merchants using merchantID
         /// </summary>
         /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="merchant"></param>
+        /// <param name="newMerchant"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantID, MerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
         {
             if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
-            }
-            else if (merchantID != merchant.MerchantID)
-            {
-                return BadRequest(new ArgumentException(nameof(merchant.MerchantID), @"The merchantID in the request body did not match the url."));
             }
 
             return NoContent();
@@ -180,6 +176,33 @@ namespace PayAway.WebAPI.Controllers.v0
 
             return NoContent();
         }
+        /// <summary>
+        /// Makes selected merchant active and all other merchants inactive.
+        /// </summary>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <returns></returns>
+        [HttpPost("merchants/{merchantID:guid}/setactive")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
+        {
+            if (merchantID != merchant_1_id)
+            {
+                return NotFound($"Merchant with ID: {merchantID} not found");
+            }
+            var activeMerchant = new MerchantMBE
+            {
+                MerchantID = merchant_1_id,
+                MerchantName = @"Domino's Pizza",
+                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
+                IsActive = true,
+            };
+
+            return NoContent();            
+
+        }
+
 
         #endregion
 

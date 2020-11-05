@@ -174,7 +174,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch(Exception ex)
             {
-                // this coudld be from an invalid MerchantID
+                // this could be from an invalid MerchantID
                 return BadRequest(ex);
             }
 
@@ -213,6 +213,33 @@ namespace PayAway.WebAPI.Controllers.v1
                 return NotFound($"MerchantID : [{merchantID}] is not valid");
             }
         }
+
+        /// <summary>
+        /// Makes selected merchant active and all other merchants inactive.
+        /// </summary>
+        /// <param name="merchantID">Unique identifier for merchant</param>
+        /// <returns></returns>
+        [HttpPost("merchants/{merchantID:guid}/active")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
+        {
+            // query the DB
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);
+
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return NotFound($"Merchant with ID: {merchantID} not found");
+            }
+
+
+            return NoContent();
+
+
+        }
+
         #endregion
 
         #region === Customer Methods ================================
@@ -288,6 +315,13 @@ namespace PayAway.WebAPI.Controllers.v1
             }
         }
 
+        /// <summary>
+        /// Updates customer using merchantID and customerID
+        /// </summary>
+        /// <param name="merchantID">The unique indentifier for the merchant</param>
+        /// <param name="customerID">The unique idnentifier for the customer</param>
+        /// <param name="customer">object that contains information about the customer</param>
+        /// <returns></returns>
         [HttpPut("merchants/{merchantID:guid}/customers/{customerID:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -330,7 +364,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteCustomerByID(Guid merchantID, Guid customerID)
+        public ActionResult DeleteCustomer(Guid merchantID, Guid customerID)
         {
             try
             {
