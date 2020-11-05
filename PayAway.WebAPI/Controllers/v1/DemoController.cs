@@ -217,7 +217,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantID">Unique identifier for merchant</param>
         /// <returns></returns>
-        [HttpPost("merchants/{merchantID:guid}/active")]
+        [HttpPost("merchants/{merchantID:guid}/setactive")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
