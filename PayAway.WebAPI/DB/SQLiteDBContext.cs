@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
@@ -149,15 +149,35 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
+                // make the db entity
                 var dbMerchant = new MerchantDBE
                 {
+                    // create a new guid
                     MerchantID = Guid.NewGuid(),
+
                     MerchantName = newMerchant.MerchantName,
                     IsSupportsTips = newMerchant.IsSupportsTips
                 };
 
                 context.Merchants.Add(dbMerchant);
-                context.SaveChanges();
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw;
+                }
 
                 return dbMerchant;
             }
@@ -204,7 +224,7 @@ namespace PayAway.WebAPI.DB
         /// Deletes the merchant.
         /// </summary>
         /// <param name="merchantID">The merchant unique identifier.</param>
-        internal static bool DeleteMerchant(Guid merchantID)
+        private static bool DeleteMerchant(Guid merchantID)
         {
             using (var context = new SQLiteDBContext())
             {
@@ -229,7 +249,7 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchant">The merchant.</param>
         /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
-        public static void UpdateMerchant(MerchantDBE merchant)
+        internal static void UpdateMerchant(MerchantDBE merchant)
         {
             using (var context = new SQLiteDBContext())
             {
@@ -237,18 +257,56 @@ namespace PayAway.WebAPI.DB
                 // Note: I would not do this if there was a db assigned unique id for the record
                 context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
+                // try and find the existing merchant
                 var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchant.MerchantID);
 
-                if (currentMerchant != null)
-                {
-                    context.Update(merchant);
-                    context.SaveChanges();
-                }
-                else
+                if (currentMerchant == null)
                 {
                     throw new ApplicationException($"Merchant: [{merchant.MerchantID}] is not valid");
                 }
+
+                context.Update(merchant);
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw;
+                }
             }
+        }
+
+        internal static void SetActiveMerchant(Guid merchantID)
+        {
+            //gets all merchants who are already active (logically should only be 0 or 1)
+            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
+
+            //set other active merchant to inactive
+            foreach (var merchant in merchantsToChange)
+            {
+                merchant.IsActive = false;
+                SQLiteDBContext.UpdateMerchant(merchant);
+            }
+
+            // query the DB
+            var activeMerchant = SQLiteDBContext.GetMerchant(merchantID);
+
+            //set merchant to active
+            activeMerchant.IsActive = true;
+
+            //update merchant in the db
+            SQLiteDBContext.UpdateMerchant(activeMerchant);
         }
 
         #endregion
@@ -280,16 +338,34 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
-                var dbCustomer= new CustomerDBE
+                // make the db entity
+                var dbCustomer = new CustomerDBE
                 {
                     MerchantID = merchantID,
+                    // create a new guid
                     CustomerID = Guid.NewGuid(),
                     CustomerName = newCustomer.CustomerName,
                     CustomerPhoneNo = newCustomer.CustomerPhoneNo
                 };
 
                 context.Customers.Add(dbCustomer);
-                context.SaveChanges();
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw; 
+                }
 
                 return dbCustomer;
             }
@@ -298,15 +374,12 @@ namespace PayAway.WebAPI.DB
         /// <summary>
         /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
         /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
         /// <param name="newCustomer">object containing information for new customer</param>
         /// <returns></returns>
-        internal static CustomerDBE InsertCustomer( CustomerDBE newCustomer)
+        private static CustomerDBE InsertCustomer( CustomerDBE newCustomer)
         {
             using (var context = new SQLiteDBContext())
             {
-                //var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == newCustomer.CustomerID);
-
                 context.Customers.Add(newCustomer);
                 context.SaveChanges();
 
@@ -320,7 +393,7 @@ namespace PayAway.WebAPI.DB
         /// <param name="merchantID">The merchant identifier.</param>
         /// <param name="customerID">The customer identifier.</param>
         /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
-        internal static void DeleteCustomer(Guid merchantID, Guid customerID)
+        internal static bool DeleteCustomer(Guid merchantID, Guid customerID)
         {
             using (var context = new SQLiteDBContext())
             {
@@ -330,10 +403,12 @@ namespace PayAway.WebAPI.DB
                 {
                     context.Customers.Remove(currentCustomer);
                     context.SaveChanges();
+
+                    return true;
                 }
                 else
                 {
-                    throw new ApplicationException($"Customer: [{customerID}] on Merchant: [{merchantID}] is not valid");
+                    return false;
                 }
             }
         }
@@ -362,7 +437,24 @@ namespace PayAway.WebAPI.DB
                 if (currentCustomer != null)
                 {
                     context.Update(customer);
-                    context.SaveChanges();
+
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        // exception was raised by the db (ex: UK violation)
+                        var sqlException = ex.InnerException;
+
+                        // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                        throw new ApplicationException(sqlException.Message);
+                    }
+                    catch (Exception)
+                    {
+                        // rethrow exception
+                        throw;
+                    }
                 }
                 else
                 {

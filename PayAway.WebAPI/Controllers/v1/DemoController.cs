@@ -83,7 +83,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if(dbMerchant == null)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"MerchantID: [{merchantID}] not found");
             }
 
             // convert DB entity to the public entity type
@@ -139,7 +139,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant: [{newMerchant.MerchantName}]"));
             }
         }
 
@@ -156,23 +156,34 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
         {
-
             // validate the input params
             if (string.IsNullOrEmpty(merchant.MerchantName))
             {
                 return BadRequest(new ArgumentException(nameof(merchant.MerchantName), @"The merchant name cannot be blank."));
             }
 
+            // query the DB
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);
+
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return NotFound($"MerchantID: [{merchantID}] not found");
+            }
+
+            string exisitingDBMerchantName = dbMerchant.MerchantName;
+
             try 
             {
                 // save the updated merchant
-                var updatedDBMerchant = (MerchantDBE)merchant;
-                SQLiteDBContext.UpdateMerchant(updatedDBMerchant);
+                dbMerchant.MerchantName = merchant.MerchantName;
+                dbMerchant.IsSupportsTips = merchant.IsSupportsTips;
+
+                SQLiteDBContext.UpdateMerchant(dbMerchant);
             }
             catch(Exception ex)
             {
-                // this could be from an invalid MerchantID
-                return BadRequest(ex);
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to update merchant: [{exisitingDBMerchantName}]"));
             }
 
             return NoContent();
@@ -201,7 +212,8 @@ namespace PayAway.WebAPI.Controllers.v1
                 // this could be from an invalid MerchantID
                 return BadRequest(ex);
             }
-            //If the merchant is not valid return no content, return error otherwise
+
+            //If the merchant is valid return no content, return not found
             if (isValidMerchant)
             {
                 return NoContent();
@@ -224,28 +236,16 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
         {
             // query the DB
-            var activeMerchant = SQLiteDBContext.GetMerchant(merchantID);
+            var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantID);
 
             // if we did not find a matching merchant
-            if (activeMerchant == null)
+            if (merchantToMakeActive == null)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"MerchantID: [{merchantID}] not found");
             }
-            
-            //gets all merchants who are active in a list
-            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
 
-            //set merchant to active
-            activeMerchant.IsActive = true;
             //update merchant in the db
-            SQLiteDBContext.UpdateMerchant(activeMerchant);
-
-            //set each merchant to inactive
-            foreach(var merchant in merchantsToChange)
-            {
-                merchant.IsActive = false;
-                SQLiteDBContext.UpdateMerchant(merchant);
-            }
+            SQLiteDBContext.SetActiveMerchant(merchantID);
 
             return NoContent();
         }
@@ -271,8 +271,9 @@ namespace PayAway.WebAPI.Controllers.v1
 
             if (dbCustomer == null)
             {
-                return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
+                return NotFound($"CustomerID: [{customerID}] on MerchantID: [{merchantID}] not found");
             }
+
             var customer = (CustomerMBE)dbCustomer;
 
             return Ok(customer);
@@ -306,7 +307,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantID), $"Merchant with ID: {merchantID} not found"));
+                return BadRequest(new ArgumentException(nameof(merchantID), $"MerchantID: [{merchantID}] not found"));
             }
 
             try
@@ -322,7 +323,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{newCustomer.CustomerPhoneNo}] to merchant: [{merchantID}]"));
             }
         }
 
@@ -357,8 +358,8 @@ namespace PayAway.WebAPI.Controllers.v1
                 // this coudld be from an invalid Customer
                 return BadRequest(ex);
             }
-            return NoContent();
 
+            return NoContent();
         }
 
         /// <summary>
@@ -372,10 +373,12 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteCustomer(Guid merchantID, Guid customerID)
         {
+            bool isValidCustomer = false;
+
             try
             {
                 //Delete cutomser 
-                SQLiteDBContext.DeleteCustomer(merchantID, customerID);
+                isValidCustomer = SQLiteDBContext.DeleteCustomer(merchantID, customerID);
             }
             catch (Exception ex)
             {
@@ -383,7 +386,15 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(ex);
             }
 
-            return NoContent();
+            //If the merchant is not valid return no content, return not found
+            if (isValidCustomer)
+            {
+                return NoContent();
+            }
+            else
+            {
+                return NotFound($"CustomerID: [{customerID}] on Merchant : [{merchantID}] is not valid");
+            }
         }
         #endregion
     }

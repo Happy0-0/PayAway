@@ -138,6 +138,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/6</td>
+                                    <td>v1.11</td>
+                                    <td>Resolved common issue with Insert & Update methods that masked the underlying DB UK violation exception with a different vague exception
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/5</td>
                                     <td>v1.10</td>
                                     <td>Changed UpdateCustomer method to take newCustomer object
