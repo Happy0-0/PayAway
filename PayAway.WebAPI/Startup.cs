@@ -137,7 +137,13 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
-<tr>
+                                <tr>
+                                    <td>2020/11/6</td>
+                                    <td>v1.13</td>
+                                    <td>Added Fix to UpdateCustomers.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/6</td>
                                     <td>v1.12</td>
                                     <td>Trimed Merchant Names and Customer Names when updating or adding a new merchant or customer.

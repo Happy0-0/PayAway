@@ -359,16 +359,27 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(customer.CustomerName), @"The customer name cannot be blank."));
             }
 
+            //query DB for a collection of customers from a specific merchant.
+            var dbCustomer = SQLiteDBContext.GetCustomers(merchantID).Where(c => c.CustomerID == customerID).FirstOrDefault();
+
+            if (dbCustomer == null)
+            {
+                return NotFound($"CustomerID: [{customerID}] on MerchantID: [{merchantID}] not found");
+            }
+
+            string existingCustomerPhoneNo = dbCustomer.CustomerPhoneNo;
+
             try
             {
                 //Save the updated customer
-                var updatedDBCustomer = (CustomerDBE)customer;
-                SQLiteDBContext.UpdateCustomer(merchantID, updatedDBCustomer);
+                dbCustomer.CustomerName = customer.CustomerName;
+                dbCustomer.CustomerPhoneNo = customer.CustomerPhoneNo;
+
+                SQLiteDBContext.UpdateCustomer(merchantID, dbCustomer);
             }
             catch (Exception ex)
             {
-                // this coudld be from an invalid Customer
-                return BadRequest(ex);
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{existingCustomerPhoneNo}] to merchant: [{merchantID}]"));
             }
 
             return NoContent();
