@@ -118,8 +118,11 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantMBE> SetupNewMerchant(NewMerchantMBE newMerchant)
+        public ActionResult<MerchantMBE> AddMerchant(NewMerchantMBE newMerchant)
         {
+            //trims merchant name so that it doesn't have trailing characters
+            newMerchant.MerchantName = newMerchant.MerchantName.Trim();
+
             // validate request data
             if(string.IsNullOrEmpty(newMerchant.MerchantName))
             {
@@ -156,6 +159,9 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
         {
+            //trims merchant name so that it doesn't have trailing characters
+            merchant.MerchantName = merchant.MerchantName.Trim();
+
             // validate the input params
             if (string.IsNullOrEmpty(merchant.MerchantName))
             {
@@ -291,6 +297,9 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<CustomerMBE> AddNewCustomer(Guid merchantID, NewCustomerMBE newCustomer)
         {
+            //trims Customer name so that it doesn't have trailing characters
+            newCustomer.CustomerName = newCustomer.CustomerName.Trim();
+
             // validate request data
             if (string.IsNullOrEmpty(newCustomer.CustomerName))
             {
@@ -341,6 +350,9 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
         {
+            //trims Customer name so that it doesn't have trailing characters
+            customer.CustomerName = customer.CustomerName.Trim();
+
             // validate the input params
             if (string.IsNullOrEmpty(customer.CustomerName))
             {
