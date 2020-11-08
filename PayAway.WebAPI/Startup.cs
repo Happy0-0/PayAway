@@ -30,7 +30,7 @@ namespace PayAway.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            services.AddCors();
             services.AddControllers();
 
             // routes and endpoints are discovered automatically
@@ -55,6 +55,37 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v0.10</td>
+                                    <td>Changed UpdateCustomer method to take newCustomer object
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v0.6</td>
+                                    <td>Added MakeMerchantActive method.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v0.5</td>
+                                    <td>Changed UpdateMerchant method to take newMerchant object.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v0.4</td>
+                                    <td>reset method now takes a boolean parameter
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/3</td>
+                                    <td>v0.3</td>
+                                    <td>removed url, IsActive from add merchant request object
+                                        corrected path for adding a new merchant was /merchant now /merchants
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/3</td>
                                     <td>v0.21</td>
@@ -89,7 +120,101 @@ namespace PayAway.WebAPI
                                 Name = "Use under LICX",
                                 Url = new Uri("https://example.com/license"),
                             }
-                });
+                    }
+                );
+
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "PayAway.WebAPI",
+                    Version = "v1",
+                    Description = @"This is a functional implemention of v0. 
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Version</th>
+                                    <th>Changes</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>2020/11/6</td>
+                                    <td>v1.13</td>
+                                    <td>Added Fix to UpdateCustomers.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/6</td>
+                                    <td>v1.12</td>
+                                    <td>Trimed Merchant Names and Customer Names when updating or adding a new merchant or customer.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/6</td>
+                                    <td>v1.11</td>
+                                    <td>Resolved common issue with Insert & Update methods that masked the underlying DB UK violation exception with a different vague exception
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v1.10</td>
+                                    <td>Changed UpdateCustomer method to take newCustomer object
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
+                                    <td>v1.06</td>
+                                    <td>Added MakeMerchantActive method.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.05</td>
+                                    <td>Changed UpdateMerchant method to take newMerchant object.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.04</td>
+                                    <td>Implemented AddNewCustomer, UpdateCustomer and DeleteCustomer methods. Finished Implementation of ResetDB method.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/4</td>
+                                    <td>v1.03</td>
+                                    <td>Started implementation of ResetDB method, Implemented UpdateMerchant and DeleteMerchant methods
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/3</td>
+                                    <td>v1.02</td>
+                                    <td>Added insert Merchant Method
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/3</td>
+                                    <td>v1.01</td>
+                                    <td>Initial Implementation
+                                    </td>
+                                </tr>
+                                </tbody>
+                            <table>
+                            ",
+
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Gabriel Levit",
+                        Email = @"gabriel.levit@fisglobal.com",
+                        Url = new Uri("https://twitter.com/demo"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "Use under LICX",
+                        Url = new Uri("https://example.com/license"),
+                    }
+                }
+);
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -112,7 +237,8 @@ namespace PayAway.WebAPI
                 app.UseSwaggerUI(c =>
                 {
                     c.SwaggerEndpoint("/swagger/v0/swagger.json", "PayAway.WebAPI v0");
-                    
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "PayAway.WebAPI v1");
+
                     // serve the Swagger UI at the app's root (http://localhost:<port>/) otherwise it is at https://localhost:44331/swagger/index.html
                     // note: if you chg this you likely also want to edit launchsettings.json with sets the debug startup up (and remove the swagger from the startup url attribute
                     c.RoutePrefix = string.Empty;
@@ -123,6 +249,12 @@ namespace PayAway.WebAPI
 
             //  adds route matching to the middleware pipeline. This middleware looks at the set of endpoints defined in the app, and selects the best match based on the request.
             app.UseRouting();
+
+            // global cors policy
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true)); // allow any origin
 
             app.UseAuthorization();
 
