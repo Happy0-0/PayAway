@@ -23,10 +23,7 @@ namespace PayAway.WebAPI.Controllers.v1
     [Route("api/[controller]/v1")]
     [ApiController]
     public class DemoController : ControllerBase
-    public class DemoController : Controller
     {
-        #region === Overall Demo Methods ================================
-
         #region === Overall Demo Methods ================================
         /// <summary>
         /// Resets Database
@@ -34,7 +31,6 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
         [HttpPost("reset")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase()
         public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
             SQLiteDBContext.ResetDB(isPreloadEnabled);
