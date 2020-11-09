@@ -18,8 +18,21 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("merchantID")]
-        [Key]
-        public Guid? MerchantID { get; set; }
+        public Guid MerchantID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the logo url
+        /// </summary>
+        /// <value>The logo url</value>
+        [JsonPropertyName("logoUrl")]
+        public string LogoUrl { get; set; }
+
+        /// <summary>
+        /// True if the merchant is active
+        /// </summary>
+        /// <value>True</value>
+        [JsonPropertyName("isActive")]
+        public bool IsActive { get; set; }
 
         /// <summary>
         /// Gets the number of customers a merchant has

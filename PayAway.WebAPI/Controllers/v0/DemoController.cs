@@ -30,12 +30,14 @@ namespace PayAway.WebAPI.Controllers.v0
         static Guid merchant_2_logo_id = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
 
         #region === Overall Demo Methods ================================
+
         /// <summary>
         /// Resets Database
         /// </summary>
+        /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
         [HttpPost("reset")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase()
+        public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
             return NoContent();
         }
@@ -120,7 +122,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// </summary>
         /// <param name="newMerchant"></param>
         /// <returns>newMerchant</returns>
-        [HttpPost("merchant")]
+        [HttpPost("merchants")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -129,9 +131,7 @@ namespace PayAway.WebAPI.Controllers.v0
             var merchant = new MerchantMBE{ 
                 MerchantID = merchant_1_id,
                 MerchantName = newMerchant.MerchantName,
-                LogoUrl = newMerchant.LogoUrl,
-                IsSupportsTips = newMerchant.IsSupportsTips,
-                IsActive = newMerchant.IsActive
+                IsSupportsTips = newMerchant.IsSupportsTips
             };
 
             return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID}, merchant);
@@ -148,15 +148,11 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantID, MerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
         {
             if (merchantID != merchant_1_id)
             {
                 return NotFound($"Merchant with ID: {merchantID} not found");
-            }
-            else if (merchantID != merchant.MerchantID)
-            {
-                return BadRequest(new ArgumentException(nameof(merchant.MerchantID), @"The merchantID in the request body did not match the url."));
             }
 
             return NoContent();
@@ -180,6 +176,33 @@ namespace PayAway.WebAPI.Controllers.v0
 
             return NoContent();
         }
+        /// <summary>
+        /// Makes selected merchant active and all other merchants inactive.
+        /// </summary>
+        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <returns></returns>
+        [HttpPost("merchants/{merchantID:guid}/setactive")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
+        {
+            if (merchantID != merchant_1_id)
+            {
+                return NotFound($"Merchant with ID: {merchantID} not found");
+            }
+            var activeMerchant = new MerchantMBE
+            {
+                MerchantID = merchant_1_id,
+                MerchantName = @"Domino's Pizza",
+                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
+                IsActive = true,
+            };
+
+            return NoContent();            
+
+        }
+
 
         #endregion
 
@@ -255,6 +278,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerMBE> AddCustomer(Guid merchantID, NewCustomerMBE newCustomer)
         {
             if (merchantID != merchant_1_id)
@@ -284,7 +308,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, CustomerMBE customer)
+        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
         {
             if (merchantID != merchant_1_id)
             {
@@ -293,10 +317,6 @@ namespace PayAway.WebAPI.Controllers.v0
             else if (customerID != merchant_1_customer_1_id)
             {
                 return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
-            }
-            else if (customerID != customer.CustomerID)
-            {
-                return BadRequest(new ArgumentException(nameof(customer.CustomerID), @"The customerID in the request body did not match the one in the url"));
             }
 
             return NoContent();

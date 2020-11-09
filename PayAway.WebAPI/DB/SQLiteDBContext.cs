@@ -1,0 +1,469 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
+
+namespace PayAway.WebAPI.DB
+{
+    public class SQLiteDBContext : DbContext
+    {
+
+        public DbSet<MerchantDBE> Merchants { get; set; }
+
+        public DbSet<CustomerDBE> Customers { get; set; }
+
+        #region ==== Configure DB ================
+
+        /// <summary>
+        /// <para>
+        /// Override this method to configure the database (and other options) to be used for this context.
+        /// This method is called for each instance of the context that is created.
+        /// The base implementation does nothing.
+        /// </para>
+        /// <para>
+        /// In situations where an instance of <see cref="T:Microsoft.EntityFrameworkCore.DbContextOptions" /> may or may not have been passed
+        /// to the constructor, you can use <see cref="P:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.IsConfigured" /> to determine if
+        /// the options have already been set, and skip some or all of the logic in
+        /// <see cref="M:Microsoft.EntityFrameworkCore.DbContext.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)" />.
+        /// </para>
+        /// </summary>
+        /// <param name="optionsBuilder">A builder used to create or modify options for this context. Databases (and other extensions)
+        /// typically define extension methods on this object that allow you to configure the context.</param>
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseSqlite(@"Data Source=PrestoPayv2.db;");
+        }
+
+        /// <summary>
+        /// Override this method to further configure the model that was discovered by convention from the entity types
+        /// exposed in <see cref="T:Microsoft.EntityFrameworkCore.DbSet`1" /> properties on your derived context. The resulting model may be cached
+        /// and re-used for subsequent instances of your derived context.
+        /// </summary>
+        /// <param name="modelBuilder">The builder being used to construct the model for this context. Databases (and other extensions) typically
+        /// define extension methods on this object that allow you to configure aspects of the model that are specific
+        /// to a given database.</param>
+        /// <remarks>If a model is explicitly set on the options for this context (via <see cref="M:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.UseModel(Microsoft.EntityFrameworkCore.Metadata.IModel)" />)
+        /// then this method will not be run.</remarks>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MerchantDBE>().ToTable("Merchants");
+            modelBuilder.Entity<MerchantDBE>()
+                .HasKey(m => new { m.MerchantID });
+            modelBuilder.Entity<MerchantDBE>()
+                .HasIndex(m => new { m.MerchantName })
+                .IsUnique();
+
+            modelBuilder.Entity<CustomerDBE>().ToTable("Customers");
+            modelBuilder.Entity<CustomerDBE>()
+                .HasKey(c => new { c.MerchantID, c.CustomerID });
+            modelBuilder.Entity<CustomerDBE>()
+                .HasIndex(c => new { c.MerchantID, c.CustomerPhoneNo })
+                .IsUnique();
+        }
+
+        #endregion
+
+        #region === Reset DB =============
+
+        /// <summary>
+        /// Resets the database.
+        /// </summary>
+        /// <param name="isPreloadEnabled">The is preload enabled.</param>
+        public static void ResetDB(bool isPreloadEnabled)
+        {
+            // Step 1a: Purge the exisiting Merchants & Orders & Order Events
+            var existingMerchants = SQLiteDBContext.GetAllMerchants();
+            foreach (var existingMerchant in existingMerchants)
+            {
+                var existingCustomers = SQLiteDBContext.GetCustomers(existingMerchant.MerchantID);
+
+                foreach (var existingCustomer in existingCustomers)
+                {
+                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
+                }
+
+                SQLiteDBContext.DeleteMerchant(existingMerchant.MerchantID);
+            }
+
+            if (isPreloadEnabled)
+            {
+                // Step 2: Reload the Merchants
+                var seedMerchants = ModelBuilderExtensions.GetSeedMerchants();
+                foreach (var seedMerchant in seedMerchants)
+                {
+                    SQLiteDBContext.InsertMerchant(seedMerchant);
+                }
+
+                // Step 3: Reload the Customers
+                var seedCustomers = ModelBuilderExtensions.GetSeedCustomers(seedMerchants);
+                //TODO: Gabe, write this step
+                foreach(var seedCustomer in seedCustomers)
+                {
+                    SQLiteDBContext.InsertCustomer(seedCustomer);
+                }
+            }
+        }
+
+        #endregion
+
+        #region === Merchant Methods =====
+        /// <summary>
+        /// Gets the merchants.
+        /// </summary>
+        /// <returns>List&lt;MerchantDBE&gt;.</returns>
+        internal static List<MerchantDBE> GetAllMerchants()
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                return context.Merchants.ToList();
+            }
+        }
+
+        /// <summary>
+        /// Gets the merchant.
+        /// </summary>
+        /// <param name="merchantID">The merchant unique identifier.</param>
+        /// <returns>MerchantDBE.</returns>
+        /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
+        internal static MerchantDBE GetMerchant(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            { 
+                var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchantID);
+
+                return dbMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Inserts the merchant (used by the public controllers).
+        /// </summary>
+        /// <param name="newMerchant">The merchant.</param>
+        /// <returns>MerchantDBE.</returns>
+        internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // make the db entity
+                var dbMerchant = new MerchantDBE
+                {
+                    // create a new guid
+                    MerchantID = Guid.NewGuid(),
+
+                    MerchantName = newMerchant.MerchantName,
+                    IsSupportsTips = newMerchant.IsSupportsTips
+                };
+
+                context.Merchants.Add(dbMerchant);
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw;
+                }
+
+                return dbMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Inserts the merchant (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// </summary>
+        /// <param name="newMerchant">The new merchant.</param>
+        /// <returns>MerchantDBE.</returns>
+        private static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                context.Merchants.Add(newMerchant);
+                context.SaveChanges();
+
+                return newMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the merchant and customers.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        internal static bool DeleteMerchantAndCustomers(Guid merchantID)
+        {
+            // try to get any associated customers
+            var existingCustomers = SQLiteDBContext.GetCustomers(merchantID);
+
+            // there may not be any customers
+            if (existingCustomers != null)
+            {
+                foreach (var existingCustomer in existingCustomers)
+                {
+                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
+                }
+            }
+
+            return SQLiteDBContext.DeleteMerchant(merchantID);
+        }
+
+        /// <summary>
+        /// Deletes the merchant.
+        /// </summary>
+        /// <param name="merchantID">The merchant unique identifier.</param>
+        private static bool DeleteMerchant(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var currentMerchant = context.Merchants.FirstOrDefault(o => o.MerchantID == merchantID);
+
+                if (currentMerchant != null)
+                {
+                    context.Merchants.Remove(currentMerchant);
+                    context.SaveChanges();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the merchant.
+        /// </summary>
+        /// <param name="merchant">The merchant.</param>
+        /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
+        internal static void UpdateMerchant(MerchantDBE merchant)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // turn off change tracking since we are going to overwite the entity
+                // Note: I would not do this if there was a db assigned unique id for the record
+                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+                // try and find the existing merchant
+                var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchant.MerchantID);
+
+                if (currentMerchant == null)
+                {
+                    throw new ApplicationException($"Merchant: [{merchant.MerchantID}] is not valid");
+                }
+
+                context.Update(merchant);
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw;
+                }
+            }
+        }
+
+        internal static void SetActiveMerchant(Guid merchantID)
+        {
+            //gets all merchants who are already active (logically should only be 0 or 1)
+            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
+
+            //set other active merchant to inactive
+            foreach (var merchant in merchantsToChange)
+            {
+                merchant.IsActive = false;
+                SQLiteDBContext.UpdateMerchant(merchant);
+            }
+
+            // query the DB
+            var activeMerchant = SQLiteDBContext.GetMerchant(merchantID);
+
+            //set merchant to active
+            activeMerchant.IsActive = true;
+
+            //update merchant in the db
+            SQLiteDBContext.UpdateMerchant(activeMerchant);
+        }
+
+        #endregion
+
+        #region ==== Customer Methods =======
+
+        /// <summary>
+        /// Gets the customers.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <returns>List&lt;CustomerDBE&gt;.</returns>
+        internal static List<CustomerDBE> GetCustomers(Guid merchantID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
+
+                return dbCustomers;
+            }
+        }
+
+        /// <summary>
+        /// Inserts new customer into DB (used by the public controllers).
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <param name="newCustomer">object containing information for new customer</param>
+        /// <returns></returns>
+        internal static CustomerDBE InsertCustomer(Guid merchantID, NewCustomerMBE newCustomer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // make the db entity
+                var dbCustomer = new CustomerDBE
+                {
+                    MerchantID = merchantID,
+                    // create a new guid
+                    CustomerID = Guid.NewGuid(),
+                    CustomerName = newCustomer.CustomerName,
+                    CustomerPhoneNo = newCustomer.CustomerPhoneNo
+                };
+
+                context.Customers.Add(dbCustomer);
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw; 
+                }
+
+                return dbCustomer;
+            }
+        }
+
+        /// <summary>
+        /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// </summary>
+        /// <param name="newCustomer">object containing information for new customer</param>
+        /// <returns></returns>
+        private static CustomerDBE InsertCustomer( CustomerDBE newCustomer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                context.Customers.Add(newCustomer);
+                context.SaveChanges();
+
+                return newCustomer;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the customer.
+        /// </summary>
+        /// <param name="merchantID">The merchant identifier.</param>
+        /// <param name="customerID">The customer identifier.</param>
+        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
+        internal static bool DeleteCustomer(Guid merchantID, Guid customerID)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customerID);
+
+                if (currentCustomer != null)
+                {
+                    context.Customers.Remove(currentCustomer);
+                    context.SaveChanges();
+
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates a customer
+        /// </summary>
+        /// <param name="merchantID">Unique identifier for merchant</param>
+        /// <param name="customer">object containing information about customers</param>
+        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
+        public static void UpdateCustomer(Guid merchantID, CustomerDBE customer)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                // turn off change tracking since we are going to overwite the entity
+                // Note: I would not do this if there was a db assigned unique id for the record
+                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+                if(customer.MerchantID == Guid.Empty)
+                {
+                    customer.MerchantID = merchantID;
+                }
+
+                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customer.CustomerID);
+
+                if (currentCustomer != null)
+                {
+                    context.Update(customer);
+
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        // exception was raised by the db (ex: UK violation)
+                        var sqlException = ex.InnerException;
+
+                        // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                        throw new ApplicationException(sqlException.Message);
+                    }
+                    catch (Exception)
+                    {
+                        // rethrow exception
+                        throw;
+                    }
+                }
+                else
+                {
+                    throw new ApplicationException($"Customer: [{customer.CustomerID}] is not valid on MerchantID: [{merchantID}]");
+                }
+            }
+        }
+
+
+        #endregion
+    }
+}
