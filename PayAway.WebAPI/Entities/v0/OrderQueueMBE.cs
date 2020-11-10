@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// class that contains the order queue information
+    /// class that contains a list of orders
     /// </summary>
     public class OrderQueueMBE
     {

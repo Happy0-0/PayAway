@@ -32,6 +32,12 @@ namespace PayAway.WebAPI.Entities.v0
         [JsonPropertyName("logoUrl")]
         public string LogoUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets a list containing items
+        /// </summary>
+        [JsonPropertyName("itemCatalogue")]
+        public List<ItemCatalogueMBE> ItemCatalogue { get; set; }
+
         
     }
 }
