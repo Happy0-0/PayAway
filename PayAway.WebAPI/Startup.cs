@@ -57,50 +57,56 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/5</td>
+                                    <td>v0.20</td>
+                                    <td>Implemented Merchant Controller. Added GetActiveMerchants and GetOrderQueue methods.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/5</td>
                                     <td>v0.10</td>
                                     <td>Changed UpdateCustomer method to take newCustomer object
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/5</td>
-                                    <td>v0.6</td>
+                                    <td>v0.06</td>
                                     <td>Added MakeMerchantActive method.
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/4</td>
-                                    <td>v0.5</td>
+                                    <td>v0.05</td>
                                     <td>Changed UpdateMerchant method to take newMerchant object.
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/4</td>
-                                    <td>v0.4</td>
+                                    <td>v0.04</td>
                                     <td>reset method now takes a boolean parameter
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/3</td>
-                                    <td>v0.3</td>
+                                    <td>v0.03</td>
                                     <td>removed url, IsActive from add merchant request object
                                         corrected path for adding a new merchant was /merchant now /merchants
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/3</td>
-                                    <td>v0.21</td>
+                                    <td>v0.021</td>
                                     <td>Internal Code Cleanup
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/11/2</td>
-                                    <td>v0.2</td>
+                                    <td>v0.02</td>
                                     <td>Finalized changes for demo controller. All methods return stubbed data.
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>2020/10/28</td>
-                                    <td>v0.1</td>
+                                    <td>v0.01</td>
                                     <td>Added Demo controller to get stubbed results
                                     </td>
                                 </tr>
