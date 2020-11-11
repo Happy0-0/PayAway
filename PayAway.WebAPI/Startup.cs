@@ -57,6 +57,12 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/11</td>
+                                    <td>v0.3</td>
+                                    <td>Added methods GetMerchantOrder, CreateMerchantOrder, and UpdateMerchantOrder.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/11</td>
                                     <td>v0.21</td>
                                     <td>Get active merchant call on Merchant's Controller now includes the list of default Catalog Items
                                     </td>
