@@ -34,25 +34,25 @@ namespace PayAway.WebAPI.Controllers.v0
                 MerchantID = merchant_1_id,
                 MerchantName = @"Domino's Pizza",
                 LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
-                ItemCatalogue = new List<ItemCatalogueMBE>
+                CatalogItems = new List<CatalogItemMBE>
                 {
-                    new ItemCatalogueMBE
+                    new CatalogItemMBE
                     {
                         ItemID = Guid.NewGuid(),
                         ItemName = "Product/Service 1",
-                        ItemPrice = 10.51M
+                        ItemUnitPrice = 10.51M
                     },
-                    new ItemCatalogueMBE
+                    new CatalogItemMBE
                     {
                         ItemID = Guid.NewGuid(),
                         ItemName = "Product/Service 2",
-                        ItemPrice = 20.52M
+                        ItemUnitPrice = 20.52M
                     },
-                    new ItemCatalogueMBE
+                    new CatalogItemMBE
                     {
                         ItemID = Guid.NewGuid(),
                         ItemName = "Product/Service 3",
-                        ItemPrice = 15.92M
+                        ItemUnitPrice = 15.92M
                     }
                 }
             });

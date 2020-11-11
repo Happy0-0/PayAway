@@ -56,7 +56,13 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>2020/11/5</td>
+                                    <td>2020/11/11</td>
+                                    <td>v0.21</td>
+                                    <td>Get active merchant call on Merchant's Controller now includes the list of default Catalog Items
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/10</td>
                                     <td>v0.20</td>
                                     <td>Implemented Merchant Controller. Added GetActiveMerchants and GetOrderQueue methods.
                                     </td>

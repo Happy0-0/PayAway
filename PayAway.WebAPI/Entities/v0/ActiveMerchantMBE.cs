@@ -35,8 +35,8 @@ namespace PayAway.WebAPI.Entities.v0
         /// <summary>
         /// Gets or sets a list containing items
         /// </summary>
-        [JsonPropertyName("itemCatalogue")]
-        public List<ItemCatalogueMBE> ItemCatalogue { get; set; }
+        [JsonPropertyName("catalogItems")]
+        public List<CatalogItemMBE> CatalogItems { get; set; }
 
         
     }

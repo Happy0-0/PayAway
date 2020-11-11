@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace PayAway.WebAPI.Entities.v0
 {
-    public class ItemCatalogueMBE
+    public class CatalogItemMBE
     {
         public Guid ItemID { get; set; }
 
         public string ItemName { get; set; }
 
-        public decimal ItemPrice { get; set; }
+        public decimal ItemUnitPrice { get; set; }
     }
 }
