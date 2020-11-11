@@ -99,7 +99,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// </summary>
         /// <param name="orderID">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <returns>merchant Order</returns>
-        [HttpGet("merchant/orders/{orderID:Guid}")]
+        [HttpGet("orders/{orderID:Guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -162,7 +162,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// </summary>
         /// <param name="newMerchantOrder"></param>
         /// <returns></returns>
-        [HttpPost("merchant/create")]
+        [HttpPost("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -211,7 +211,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <param name="orderID">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <param name="newMerchantOrder"></param>
         /// <returns>updated merchant order</returns>
-        [HttpPut("merchant/orders/{orderID:Guid}")]
+        [HttpPut("orders/{orderID:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
