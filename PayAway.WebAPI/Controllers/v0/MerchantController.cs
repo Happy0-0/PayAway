@@ -219,10 +219,15 @@ namespace PayAway.WebAPI.Controllers.v0
             return NoContent();
         }
 
+        /// <summary>
+        /// Sends merchant order
+        /// </summary>
+        /// <param name="orderID">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
+        /// <returns></returns>
         [HttpPost("orders/{orderID:Guid}")]
-        [ProducesResponseType(typeof(NewMerchantOrderMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> SendOrder(Guid orderID)
+        public ActionResult SendOrder(Guid orderID)
         {
             if (orderID != order_1_id)
             {
