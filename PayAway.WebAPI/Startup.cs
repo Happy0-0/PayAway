@@ -56,6 +56,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/12</td>
+                                    <td>v0.4</td>
+                                    <td>Added SendOrder method.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/11</td>
                                     <td>v0.3</td>
                                     <td>Added methods GetMerchantOrder, CreateMerchantOrder, and UpdateMerchantOrder.

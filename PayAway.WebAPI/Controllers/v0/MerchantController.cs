@@ -122,15 +122,13 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
-                        ItemName = "Product/Service 1",
-                        ItemUnitPrice = 10.51M
+                        ItemID = Guid.NewGuid()
+                        
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
-                        ItemName = "Product/Service 2",
-                        ItemUnitPrice = 29.43M
+                        ItemID = Guid.NewGuid()
+                        
                     }
                 },
                 OrderEvents = new List<OrderEventsMBE>
@@ -180,15 +178,11 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
-                        ItemName = "Product/Service 1",
-                        ItemUnitPrice = 10.51M
+                        ItemID = Guid.NewGuid()
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
-                        ItemName = "Product/Service 2",
-                        ItemUnitPrice = 29.43M
+                        ItemID = Guid.NewGuid()
                     }
                 },
                 OrderEvents = new List<OrderEventsMBE>
@@ -225,16 +219,17 @@ namespace PayAway.WebAPI.Controllers.v0
             return NoContent();
         }
 
-        /*[HttpPost("merchant/sendOrder")]
+        [HttpPost("orders/{orderID:Guid}")]
         [ProducesResponseType(typeof(NewMerchantOrderMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> SendOrder(Guid merchantID)
+        public ActionResult<MerchantOrderMBE> SendOrder(Guid orderID)
         {
-            if (merchantID != merchant_1_id)
+            if (orderID != order_1_id)
             {
-                return NotFound($"Merchant order with ID: {merchantID} not found");
+                return NotFound($"Merchant order with ID: {orderID} not found");
             }
-        }*/
+            return NoContent();
+        }
 
     }
 }

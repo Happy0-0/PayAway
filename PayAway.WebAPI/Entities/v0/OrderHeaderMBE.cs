@@ -40,6 +40,12 @@ namespace PayAway.WebAPI.Entities.v0
         public string PhoneNumber { get; set; }
 
         /// <summary>
+        /// Gets or sets a credit card number
+        /// </summary>
+        [JsonPropertyName("creditCardNumber")]
+        public string CreditCardNumber { get; set; }
+
+        /// <summary>
         /// Gets or sets order status
         /// </summary>
         /// <value>order status</value>
