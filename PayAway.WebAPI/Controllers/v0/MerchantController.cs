@@ -220,11 +220,11 @@ namespace PayAway.WebAPI.Controllers.v0
         }
 
         /// <summary>
-        /// Sends merchant order
+        /// Sends a payment link to the customer.
         /// </summary>
         /// <param name="orderID">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <returns></returns>
-        [HttpPost("orders/{orderID:Guid}")]
+        [HttpPost("orders/{orderID:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult SendOrder(Guid orderID)
