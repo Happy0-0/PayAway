@@ -30,6 +30,9 @@ namespace PayAway.WebAPI.DB
             modelBuilder.Entity<MerchantDBE>().HasData(seedMerchants);
 
             modelBuilder.Entity<CustomerDBE>().HasData(GetSeedCustomers(seedMerchants));
+
+            var seedCatalogueData = GetSeedCatalogueData();
+            modelBuilder.Entity<CatalogItemDBE>().HasData(seedCatalogueData);
         }
 
         public static List<MerchantDBE> GetSeedMerchants()
@@ -81,5 +84,36 @@ namespace PayAway.WebAPI.DB
 
             return seedCustomers;
         }
-}
+
+        public static List<CatalogItemDBE> GetSeedCatalogueData()
+        {
+            var seedCatalogueData = new List<CatalogItemDBE>()
+            {
+                new CatalogItemDBE
+                {
+                    MerchantID = Guid.Empty,
+                    ItemGuid = Guid.NewGuid(),
+                    ItemName = "Product/Service 1",
+                    ItemUnitPrice = 10.51M
+                },
+                new CatalogItemDBE
+                {
+                    MerchantID = Guid.Empty,
+                    ItemGuid = Guid.NewGuid(),
+                    ItemName = "Product/Service 2",
+                    ItemUnitPrice = 20.52M
+                },
+                new CatalogItemDBE
+                {
+                    MerchantID = Guid.Empty,
+                    ItemGuid = Guid.NewGuid(),
+                    ItemName = "Product/Service 3",
+                    ItemUnitPrice = 15.92M
+                },
+            };
+
+            return seedCatalogueData;
+        }
+
+    }
 }

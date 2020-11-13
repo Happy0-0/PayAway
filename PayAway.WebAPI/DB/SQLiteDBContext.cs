@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 
@@ -15,6 +16,14 @@ namespace PayAway.WebAPI.DB
         public DbSet<MerchantDBE> Merchants { get; set; }
 
         public DbSet<CustomerDBE> Customers { get; set; }
+
+        public DbSet<OrderDBE> Orders { get; set; }
+
+        public DbSet<OrderEventDBE> OrderEvents { get; set; }
+
+        public DbSet<OrderItemDBE> OrderItems { get; set; }
+
+        public DbSet<CatalogItemDBE> CatalogItems { get; set; }
 
         #region ==== Configure DB ================
 
@@ -63,6 +72,25 @@ namespace PayAway.WebAPI.DB
                 .HasKey(c => new { c.MerchantID, c.CustomerID });
             modelBuilder.Entity<CustomerDBE>()
                 .HasIndex(c => new { c.MerchantID, c.CustomerPhoneNo })
+                .IsUnique();
+
+            modelBuilder.Entity<OrderDBE>().ToTable("Orders");
+            modelBuilder.Entity<OrderDBE>()
+                .HasKey(o => new { o.OrderGuid });
+
+            modelBuilder.Entity<OrderEventDBE>().ToTable("OrderEvents");
+            modelBuilder.Entity<OrderEventDBE>()
+                .HasKey(e => new { e.OrderGuid, e.EventGuid });
+
+            modelBuilder.Entity<OrderItemDBE>().ToTable("OrderItems");
+            modelBuilder.Entity<OrderItemDBE>()
+                .HasKey(i => new { i.OrderGuid, i.ItemGuid });
+
+            modelBuilder.Entity<CatalogItemDBE>().ToTable("CatalogItems");
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasKey(c => new { c.MerchantID, c.ItemGuid });
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasIndex(c => new { c.MerchantID, c.ItemName })
                 .IsUnique();
         }
 
