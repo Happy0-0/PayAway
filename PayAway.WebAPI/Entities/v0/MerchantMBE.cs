@@ -15,7 +15,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("merchantID")]
-        public Guid MerchantID { get; set; }
+        public Guid MerchantGuid { get; set; }
 
         /// <summary>
         /// Gets or sets the logo url

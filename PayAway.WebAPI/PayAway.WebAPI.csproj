@@ -25,7 +25,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20316.2124</FileVersion>
+		<FileVersion>1.0.20319.1648</FileVersion>
 		<UserSecretsId>a99deb02-3b4c-4115-9777-c610d8a7d9cb</UserSecretsId>
 	</PropertyGroup>
 
@@ -35,11 +35,6 @@
 			<_Parameter1>CompileTimestamp</_Parameter1>
 			<_Parameter2>$([System.DateTime]::Now.ToString('F'))</_Parameter2>
 		</AssemblyAttribute>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Update="PrestoPayv2.db">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
 	</ItemGroup>
 
 </Project>

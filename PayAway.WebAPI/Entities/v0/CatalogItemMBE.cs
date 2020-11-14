@@ -7,7 +7,7 @@ namespace PayAway.WebAPI.Entities.v0
 {
     public class CatalogItemMBE
     {
-        public Guid ItemID { get; set; }
+        public Guid ItemGuid { get; set; }
 
         public string ItemName { get; set; }
 

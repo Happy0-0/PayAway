@@ -10,9 +10,20 @@ namespace PayAway.WebAPI.Entities.v1
 {
     public class MerchantDBE
     {
+        /// <summary>
+        /// DB Generated PK for this Merchant.
+        /// </summary>
+        /// <value>The merchant identifier.</value>
         [Key]
         [Required]
-        public Guid MerchantID { get; set; }
+        public int MerchantId { get; set; }
+
+        /// <summary>
+        /// Publicly Usable Unique Identifier for this Merchant
+        /// </summary>
+        /// <value>The merchant unique identifier.</value>
+        [Required]
+        public Guid MerchantGuid { get; set; }
 
         public string LogoUrl { get; set; }
 
@@ -33,7 +44,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantMBE()
                 {
-                    MerchantID = from.MerchantID,
+                    MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
                     LogoUrl = from.LogoUrl,
                     IsSupportsTips = from.IsSupportsTips,
@@ -52,7 +63,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantDBE()
                 {
-                    MerchantID = from.MerchantID,
+                    MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
                     LogoUrl = from.LogoUrl,
                     IsSupportsTips = from.IsSupportsTips,

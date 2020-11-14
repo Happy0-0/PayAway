@@ -33,7 +33,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
-            SQLiteDBContext.ResetDB(isPreloadEnabled);
+           SQLiteDBContext.ResetDB(isPreloadEnabled);
 
             return NoContent();
         }
@@ -69,29 +69,29 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Gets merchant information and associated customers using a GUID.
         /// </summary>
-        /// <param name="merchantID">The unique identifier of the merchant to retrieve.</param>>
+        /// <param name="merchantGuid">The unique identifier of the merchant to retrieve.</param>>
         /// <returns></returns>
         /// <remarks>Requires a merchantID</remarks>
-        [HttpGet("merchants/{merchantID:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant(Guid merchantID)
+        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);;
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);;
 
             // if we did not find a matching merchant
             if(dbMerchant == null)
             {
-                return NotFound($"MerchantID: [{merchantID}] not found");
+                return NotFound($"MerchantGuid: [{merchantGuid}] not found");
             }
 
             // convert DB entity to the public entity type
             var merchant = (MerchantMBE)dbMerchant;
 
             // query for the associated customers (child collection)
-            var dbCustomers = SQLiteDBContext.GetCustomers(merchantID);
+            var dbCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
 
             // create an empty working object
             var customers = new List<CustomerMBE>();
@@ -119,7 +119,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantMBE> AddMerchant(NewMerchantMBE newMerchant)
+        public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
             //trims merchant name so that it doesn't have trailing characters
             newMerchant.MerchantName = newMerchant.MerchantName.Trim();
@@ -139,7 +139,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 var merchant = (MerchantMBE)dbMerchant;
 
                 // return the response
-                return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID }, merchant);
+                return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid }, merchant);
             }
             catch (Exception ex)
             {
@@ -148,17 +148,17 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Updates merchants using merchantID
+        /// Updates merchant
         /// </summary>
-        /// <param name="merchantID">The unique identifier of the merchant to update.</param>
-        /// <param name="merchant">object containing information about merchants</param>
+        /// <param name="merchantGuid">The unique identifier of the merchant to update.</param>
+        /// <param name="merchant">object containing updated merchant information</param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantID:guid}")]
+        [HttpPut("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantGuid, NewMerchantMBE merchant)
         {
             //trims merchant name so that it doesn't have trailing characters
             merchant.MerchantName = merchant.MerchantName.Trim();
@@ -170,12 +170,12 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return NotFound($"MerchantID: [{merchantID}] not found");
+                return NotFound($"MerchantGuid: [{merchantGuid}] not found");
             }
 
             string exisitingDBMerchantName = dbMerchant.MerchantName;
@@ -197,88 +197,89 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Deletes merchant by merchantID
+        /// Deletes merchant
         /// </summary>
-        /// <param name="merchantID">The unique identifier of the merchant to delete.</param>
+        /// <param name="merchantGuid">The unique identifier of the merchant to delete.</param>
         /// <returns></returns>
-        [HttpDelete("merchants/{merchantID:guid}")]
+        [HttpDelete("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteMerchantByID(Guid merchantID)
+        public ActionResult DeleteMerchant(Guid merchantGuid)
         {
-            bool isValidMerchant = false;
+            // query the DB
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
-            try
+            if (dbMerchant == null)
             {
-                //Delete merchant using the merchantID
-                isValidMerchant = SQLiteDBContext.DeleteMerchantAndCustomers(merchantID);
-            }
-            catch (Exception ex)
-            {
-                // this could be from an invalid MerchantID
-                return BadRequest(ex);
+                return NotFound($"MerchantGuid: [{merchantGuid}] is not valid");
             }
 
-            //If the merchant is valid return no content, return not found
-            if (isValidMerchant)
-            {
-                return NoContent();
-            }
-            else
-            {
-                return NotFound($"MerchantID : [{merchantID}] is not valid");
-            }
+            SQLiteDBContext.PurgeMerchant(dbMerchant.MerchantId);
+
+            return NoContent();
         }
 
         /// <summary>
         /// Makes selected merchant active and all other merchants inactive.
         /// </summary>
-        /// <param name="merchantID">Unique identifier for merchant</param>
+        /// <param name="merchantGuid">Unique identifier for merchant</param>
         /// <returns></returns>
-        [HttpPost("merchants/{merchantID:guid}/setactive")]
+        [HttpPost("merchants/{merchantGuid:guid}/setactive")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
+        public ActionResult<MerchantMBE> SetActiveMerchantForDemo(Guid merchantGuid)
         {
             // query the DB
-            var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantID);
+            var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (merchantToMakeActive == null)
             {
-                return NotFound($"MerchantID: [{merchantID}] not found");
+                return NotFound($"MerchantID: [{merchantGuid}] not found");
             }
 
             //update merchant in the db
-            SQLiteDBContext.SetActiveMerchant(merchantID);
+            SQLiteDBContext.SetActiveMerchantForDemo(merchantToMakeActive.MerchantId);
 
             return NoContent();
         }
 
         #endregion
 
-        #region === Customer Methods ================================
+        #region === Demo Customer Methods ================================
 
         /// <summary>
-        /// Gets a specific customer by merchantID and customerID
+        /// Gets a specific demo customer by merchantGuid and customerGuid
         /// </summary>
-        /// <param name="merchantID">The unique identifier of the merchant the customer belongs to.</param>
-        /// <param name="customerID">The unique identifier for the customer.</param>
+        /// <param name="merchantGuid">The unique identifier of the merchant the customer belongs to.</param>
+        /// <param name="customerGuid">The unique identifier for the customer.</param>
         /// <returns>a specified customer</returns>  
-        [HttpGet("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}/customers/{customerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerMBE> GetCustomer(Guid merchantID, Guid customerID)
+        public ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid customerGuid)
         {
-            //query DB for a collection of customers from a specific merchant.
-            var dbCustomer = SQLiteDBContext.GetCustomers(merchantID).Where(c => c.CustomerID == customerID).FirstOrDefault();
+            // query the DB
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+            }
+
+            //query DB for a collection of customers from a specific merchant.
+            var dbCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId)
+                                            .Where(dc => dc.DemoCustomerGuid == customerGuid).FirstOrDefault();
+
+            // if we did not find a matching demo customer
             if (dbCustomer == null)
             {
-                return NotFound($"CustomerID: [{customerID}] on MerchantID: [{merchantID}] not found");
+                return NotFound($"CustomerGuid: [{customerGuid}] on MerchantGuid: [{merchantGuid}] not found");
             }
 
             var customer = (CustomerMBE)dbCustomer;
@@ -287,16 +288,16 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Adds a new customer to a merchant
+        /// Adds a new demo customer to a merchant
         /// </summary>
-        /// <param name="merchantID">The unique identifier for the merchant</param>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="newCustomer">object containing information about customers</param>
         /// <returns></returns>
-        [HttpPost("merchants/{merchantID:guid}/customers")]
+        [HttpPost("merchants/{merchantGuid:guid}/customers")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<CustomerMBE> AddNewCustomer(Guid merchantID, NewCustomerMBE newCustomer)
+        public ActionResult<CustomerMBE> AddNewDemoCustomer(Guid merchantGuid, NewCustomerMBE newCustomer)
         {
             //trims Customer name so that it doesn't have trailing characters
             newCustomer.CustomerName = newCustomer.CustomerName.Trim();
@@ -311,47 +312,56 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentNullException(nameof(newCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
             }
 
-            //query the db
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantID);
+            //query the db for the merchant
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantID), $"MerchantID: [{merchantID}] not found"));
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
             }
 
             try
             {
                 //Store the new customer
-                var dbCustomer = SQLiteDBContext.InsertCustomer(merchantID, newCustomer);
+                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(dbMerchant.MerchantId, newCustomer);
 
                 // convert DB entity to the public entity type
                 var customer = (CustomerMBE)dbCustomer;
 
                 // return the response
-                return CreatedAtAction(nameof(GetCustomer), new { merchantID = merchantID, customerID = customer.CustomerID }, customer);
+                return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid }, customer);
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{newCustomer.CustomerPhoneNo}] to merchant: [{merchantID}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{newCustomer.CustomerPhoneNo}] to merchant: [{merchantGuid}]"));
             }
         }
 
         /// <summary>
-        /// Updates customer using merchantID and customerID
+        /// Updates demo customer using merchantGuid and customerGuid
         /// </summary>
-        /// <param name="merchantID">The unique indentifier for the merchant</param>
-        /// <param name="customerID">The unique idnentifier for the customer</param>
+        /// <param name="merchantGuid">The unique indentifier for the merchant</param>
+        /// <param name="demoCustomerGuid">The unique idnentifier for the customer</param>
         /// <param name="customer">object that contains information about the customer</param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        [HttpPut("merchants/{merchantGuid:guid}/customers/{customerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
+        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, NewCustomerMBE customer)
         {
-            //trims Customer name so that it doesn't have trailing characters
+            // query the db for the merchant
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+            }
+
+            // trims Customer name so that it doesn't have trailing characters
             customer.CustomerName = customer.CustomerName.Trim();
 
             // validate the input params
@@ -360,27 +370,28 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(customer.CustomerName), @"The customer name cannot be blank."));
             }
 
-            //query DB for a collection of customers from a specific merchant.
-            var dbCustomer = SQLiteDBContext.GetCustomers(merchantID).Where(c => c.CustomerID == customerID).FirstOrDefault();
+            // get the existing demo customer
+            var dbDemoCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
-            if (dbCustomer == null)
+            if (dbDemoCustomer == null)
             {
-                return NotFound($"CustomerID: [{customerID}] on MerchantID: [{merchantID}] not found");
+                return NotFound($"CustomerID: [{demoCustomerGuid}] on MerchantID: [{merchantGuid}] not found");
             }
 
-            string existingCustomerPhoneNo = dbCustomer.CustomerPhoneNo;
+            // grab the current phoen no
+            string existingCustomerPhoneNo = dbDemoCustomer.CustomerPhoneNo;
 
             try
             {
                 //Save the updated customer
-                dbCustomer.CustomerName = customer.CustomerName;
-                dbCustomer.CustomerPhoneNo = customer.CustomerPhoneNo;
+                dbDemoCustomer.CustomerName = customer.CustomerName;
+                dbDemoCustomer.CustomerPhoneNo = customer.CustomerPhoneNo;
 
-                SQLiteDBContext.UpdateCustomer(merchantID, dbCustomer);
+                SQLiteDBContext.UpdateDemoCustomer(dbDemoCustomer);
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{existingCustomerPhoneNo}] to merchant: [{merchantID}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{existingCustomerPhoneNo}] to merchant: [{merchantGuid}]"));
             }
 
             return NoContent();
@@ -389,36 +400,35 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Delete a customer on a merchant
         /// </summary>
-        /// <param name="merchantID"></param>
-        /// <param name="customerID"></param>
-        [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        /// <param name="merchantGuid"></param>
+        /// <param name="demoCustomerGuid"></param>
+        [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteCustomer(Guid merchantID, Guid customerID)
+        public ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
-            bool isValidCustomer = false;
+            // query the db for the merchant
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
-            try
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
             {
-                //Delete cutomser 
-                isValidCustomer = SQLiteDBContext.DeleteCustomer(merchantID, customerID);
-            }
-            catch (Exception ex)
-            {
-                // this could be from an invalid Customer
-                return BadRequest(ex);
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
             }
 
-            //If the merchant is not valid return no content, return not found
-            if (isValidCustomer)
+            // get the existing demo customer
+            var dbDemoCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+
+            if (dbDemoCustomer == null)
             {
-                return NoContent();
+                return NotFound($"CustomerID: [{demoCustomerGuid}] on MerchantID: [{merchantGuid}] not found");
             }
-            else
-            {
-                return NotFound($"CustomerID: [{customerID}] on Merchant : [{merchantID}] is not valid");
-            }
+
+            SQLiteDBContext.DeleteDemoCustomer(dbDemoCustomer.DemoCustomerId);
+
+            return NoContent();
         }
         #endregion
     }

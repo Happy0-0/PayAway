@@ -18,11 +18,9 @@ namespace PayAway.WebAPI.Migrations
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.CatalogItemDBE", b =>
                 {
-                    b.Property<Guid>("MerchantID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CatalogItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -31,21 +29,22 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<decimal>("ItemUnitPrice")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("MerchantID", "ItemGuid");
+                    b.Property<int>("MerchantId")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("MerchantID", "ItemName")
+                    b.HasKey("CatalogItemId");
+
+                    b.HasIndex("MerchantId", "ItemName")
                         .IsUnique();
 
                     b.ToTable("CatalogItems");
                 });
 
-            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.CustomerDBE", b =>
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.DemoCustomerDBE", b =>
                 {
-                    b.Property<Guid>("MerchantID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("CustomerID")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("DemoCustomerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
@@ -55,19 +54,28 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("MerchantID", "CustomerID");
+                    b.Property<Guid>("DemoCustomerGuid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("MerchantID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("DemoCustomerId");
 
                     b.HasIndex("MerchantID", "CustomerPhoneNo")
                         .IsUnique();
 
-                    b.ToTable("Customers");
+                    b.HasIndex("MerchantID", "DemoCustomerGuid")
+                        .IsUnique();
+
+                    b.ToTable("DemoCustomers");
                 });
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.MerchantDBE", b =>
                 {
-                    b.Property<Guid>("MerchantID")
+                    b.Property<int>("MerchantId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
@@ -78,11 +86,17 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<string>("LogoUrl")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("MerchantGuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("MerchantName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("MerchantID");
+                    b.HasKey("MerchantId");
+
+                    b.HasIndex("MerchantGuid")
+                        .IsUnique();
 
                     b.HasIndex("MerchantName")
                         .IsUnique();
@@ -92,9 +106,9 @@ namespace PayAway.WebAPI.Migrations
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderDBE", b =>
                 {
-                    b.Property<Guid>("OrderGuid")
+                    b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AuthCode")
                         .HasColumnType("TEXT");
@@ -106,10 +120,13 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("MerchantID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("OrderDateTimeUTC")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("OrderNumber")
+                    b.Property<Guid>("OrderGuid")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PhoneNumber")
@@ -120,21 +137,19 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("Total")
-                        .HasColumnType("TEXT");
+                    b.HasKey("OrderId");
 
-                    b.HasKey("OrderGuid");
+                    b.HasIndex("OrderGuid")
+                        .IsUnique();
 
                     b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderEventDBE", b =>
                 {
-                    b.Property<Guid>("OrderGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("EventGuid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("OrderEventId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("EventDateTimeUTC")
                         .HasColumnType("TEXT");
@@ -143,22 +158,25 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("OrderGuid", "EventGuid");
+                    b.HasKey("OrderEventId");
+
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderEvents");
                 });
 
-            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderItemDBE", b =>
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderLineItemDBE", b =>
                 {
-                    b.Property<Guid>("OrderGuid")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ItemGuid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("OrderLineItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ItemName")
                         .IsRequired()
@@ -167,9 +185,15 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<decimal>("ItemUnitPrice")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("OrderGuid", "ItemGuid");
+                    b.Property<int>("OrderID")
+                        .HasColumnType("INTEGER");
 
-                    b.ToTable("OrderItems");
+                    b.HasKey("OrderLineItemId");
+
+                    b.HasIndex("OrderID", "ItemName")
+                        .IsUnique();
+
+                    b.ToTable("OrderLineItems");
                 });
 #pragma warning restore 612, 618
         }

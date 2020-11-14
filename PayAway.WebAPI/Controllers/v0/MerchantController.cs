@@ -40,19 +40,19 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
+                        ItemGuid = Guid.NewGuid(),
                         ItemName = "Product/Service 1",
                         ItemUnitPrice = 10.51M
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
+                        ItemGuid = Guid.NewGuid(),
                         ItemName = "Product/Service 2",
                         ItemUnitPrice = 20.52M
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid(),
+                        ItemGuid = Guid.NewGuid(),
                         ItemName = "Product/Service 3",
                         ItemUnitPrice = 15.92M
                     }
@@ -122,12 +122,12 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid()
+                        ItemGuid = Guid.NewGuid()
                         
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid()
+                        ItemGuid = Guid.NewGuid()
                         
                     }
                 },
@@ -178,11 +178,11 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid()
+                        ItemGuid = Guid.NewGuid()
                     },
                     new CatalogItemMBE
                     {
-                        ItemID = Guid.NewGuid()
+                        ItemGuid = Guid.NewGuid()
                     }
                 },
                 OrderEvents = new List<OrderEventsMBE>
