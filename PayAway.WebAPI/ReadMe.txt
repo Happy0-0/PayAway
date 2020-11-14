@@ -8,3 +8,13 @@ dotnet ef database update
 
 DB Browser for SQLite
 	https://sqlitebrowser.org/
+
+------------------------------------------
+Tech Debt Items
+------------------------------------------
+1.	Chg JsonAttribute of *Id properties in MBEs to *Guid
+2.	Validate phone nos on the way in, store normalized format in the db, convert to std US format on the way out
+3.	Convert DT DB values in GNT to local timezone on the way out
+4.	Update from .net 5 rc2 to rtm
+5.	Update nuget packages
+6.	Update Publish to Azure App Service to remove Self-Contained

@@ -256,7 +256,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="demoCustomerGuid">The unique identifier for the demo customer.</param>
         /// <returns>a specified customer</returns>
-        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
@@ -294,7 +294,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="newDemoCustomer">Object containing information about the new demo customer</param>
         /// <returns></returns>
-        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpPost("merchants/{merchantGuid:guid}/customers")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status201Created)]
@@ -347,7 +347,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="demoCustomerGuid">The unique identifier for the demo customer</param>
         /// <param name="updatedDemoCustomer">Object that contains updated information about the demo customer</param>
         /// <returns></returns>
-        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpPut("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -405,7 +405,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="demoCustomerGuid">The unique identifier for the demo customer</param>
-        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
