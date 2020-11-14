@@ -5,21 +5,13 @@ using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
+using PayAway.WebAPI.Controllers.v0;
 using PayAway.WebAPI.Entities.v1;
 
 namespace PayAway.WebAPI.DB
 {
-    public static class ModelBuilderExtensions
+    public static class SeedData
     {
-
-        // demo ids
-        static Guid merchant_1_guid = new Guid(@"f8c6f5b6-533e-455f-87a1-ced552898e1d");
-        static Guid merchant_1_logo_guid = new Guid(@"4670e0dc-0335-4370-a3b1-24d9fa1dfdbf");
-        static Guid merchant_1_customer_1_guid = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21");
-        static Guid merchant_1_customer_2_guid = new Guid("8b9b276a-cf81-47bf-97dc-3977cd464787");
-        static Guid merchant_2_guid = new Guid(@"5d590431-95d2-4f8a-b2d9-6eb4d8cabc89");
-        static Guid merchant_2_logo_guid = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
-
         public static List<MerchantDBE> GetSeedMerchants()
         {
             var seedMerchants = new List<MerchantDBE>()
@@ -27,18 +19,18 @@ namespace PayAway.WebAPI.DB
                 new MerchantDBE
                 {
                     MerchantId = 1,
-                    MerchantGuid = merchant_1_guid,
+                    MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Test Merchant #1",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_guid}.png",
+                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
                     IsSupportsTips = true,
                     IsActive = true
                 },
                 new MerchantDBE
                 {
                     MerchantId = 2,
-                    MerchantGuid = merchant_2_guid,
+                    MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Test Merchant #2",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_2_logo_guid}.png",
+                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_2_LOGO_GUID}.png",
                     IsSupportsTips = true,
                     IsActive = false
                 }
@@ -55,7 +47,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantID = 1,
                     DemoCustomerId = 1,
-                    DemoCustomerGuid = merchant_1_customer_1_guid,
+                    DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
                     CustomerName = @"Test Customer 1",
                     CustomerPhoneNo = @"(513) 498-6016"
                 },
@@ -63,7 +55,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantID = 1,
                     DemoCustomerId = 2,
-                    DemoCustomerGuid = merchant_1_customer_2_guid,
+                    DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
                     CustomerName = @"Test Customer 2",
                     CustomerPhoneNo = @"(513) 791-9800"
                 }

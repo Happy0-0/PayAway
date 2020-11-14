@@ -198,7 +198,7 @@ namespace PayAway.WebAPI.DB
             if (isPreloadEnabled)
             {
                 #region === Step 2.1: Reload the Merchants ===========================
-                var seedMerchants = ModelBuilderExtensions.GetSeedMerchants();
+                var seedMerchants = SeedData.GetSeedMerchants();
                 foreach (var seedMerchant in seedMerchants)
                 {
                     SQLiteDBContext.InsertMerchant(seedMerchant);
@@ -206,7 +206,7 @@ namespace PayAway.WebAPI.DB
                 #endregion
 
                 #region === Step 2.2: Reload the DemoCustomers ===========================
-                var seedDemoCustomers = ModelBuilderExtensions.GetSeedDemoCustomers();
+                var seedDemoCustomers = SeedData.GetSeedDemoCustomers();
                 foreach(var seedDemoCustomer in seedDemoCustomers)
                 {
                     SQLiteDBContext.InsertDemoCustomer(seedDemoCustomer);
@@ -214,7 +214,7 @@ namespace PayAway.WebAPI.DB
                 #endregion
 
                 #region === Step 2.3: Reload the Catalog Items ===========================
-                var seedCatalogItems = ModelBuilderExtensions.GetSeedCatalogueItems();
+                var seedCatalogItems = SeedData.GetSeedCatalogueItems();
                 foreach (var seedCatalogItem in seedCatalogItems)
                 {
                     SQLiteDBContext.InsertCatalogItem(seedCatalogItem);

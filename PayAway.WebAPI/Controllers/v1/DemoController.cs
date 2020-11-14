@@ -29,6 +29,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// Resets Database
         /// </summary>
         /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
+        /// <remarks>You can choose to preload a set of default data</remarks>
         [HttpPost("reset")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase(bool isPreloadEnabled)
@@ -67,11 +68,10 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Gets merchant information and associated customers using a GUID.
+        /// Gets a merchant and associated demo customers
         /// </summary>
-        /// <param name="merchantGuid">The unique identifier of the merchant to retrieve.</param>>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
-        /// <remarks>Requires a merchantID</remarks>
         [HttpGet("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
@@ -113,7 +113,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Adds a new merchant
         /// </summary>
-        /// <param name="newMerchant">The new merchant</param>
+        /// <param name="newMerchant">object containing information about the new merchant</param>
         /// <returns>newMerchant</returns>
         [HttpPost("merchants")]
         [Produces("application/json")]
@@ -148,25 +148,25 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Updates merchant
+        /// Updates a merchant
         /// </summary>
-        /// <param name="merchantGuid">The unique identifier of the merchant to update.</param>
-        /// <param name="merchant">object containing updated merchant information</param>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
+        /// <param name="updatedMerchant">object containing updated merchant information</param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantGuid, NewMerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             //trims merchant name so that it doesn't have trailing characters
-            merchant.MerchantName = merchant.MerchantName.Trim();
+            updatedMerchant.MerchantName = updatedMerchant.MerchantName.Trim();
 
             // validate the input params
-            if (string.IsNullOrEmpty(merchant.MerchantName))
+            if (string.IsNullOrEmpty(updatedMerchant.MerchantName))
             {
-                return BadRequest(new ArgumentException(nameof(merchant.MerchantName), @"The merchant name cannot be blank."));
+                return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantName), @"The merchant name cannot be blank."));
             }
 
             // query the DB
@@ -183,8 +183,8 @@ namespace PayAway.WebAPI.Controllers.v1
             try 
             {
                 // save the updated merchant
-                dbMerchant.MerchantName = merchant.MerchantName;
-                dbMerchant.IsSupportsTips = merchant.IsSupportsTips;
+                dbMerchant.MerchantName = updatedMerchant.MerchantName;
+                dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
 
                 SQLiteDBContext.UpdateMerchant(dbMerchant);
             }
@@ -197,9 +197,9 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Deletes merchant
+        /// Deletes a merchant
         /// </summary>
-        /// <param name="merchantGuid">The unique identifier of the merchant to delete.</param>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
         [HttpDelete("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
@@ -221,9 +221,9 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Makes selected merchant active and all other merchants inactive.
+        /// Makes selected merchant active
         /// </summary>
-        /// <param name="merchantGuid">Unique identifier for merchant</param>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
         [HttpPost("merchants/{merchantGuid:guid}/setactive")]
         [Produces("application/json")]
@@ -251,17 +251,18 @@ namespace PayAway.WebAPI.Controllers.v1
         #region === Demo Customer Methods ================================
 
         /// <summary>
-        /// Gets a specific demo customer by merchantGuid and customerGuid
+        /// Gets a specific demo customer
         /// </summary>
-        /// <param name="merchantGuid">The unique identifier of the merchant the customer belongs to.</param>
-        /// <param name="customerGuid">The unique identifier for the customer.</param>
-        /// <returns>a specified customer</returns>  
-        [HttpGet("merchants/{merchantGuid:guid}/customers/{customerGuid:guid}")]
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
+        /// <param name="demoCustomerGuid">The unique identifier for the demo customer.</param>
+        /// <returns>a specified customer</returns>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid customerGuid)
+        public ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -274,12 +275,12 @@ namespace PayAway.WebAPI.Controllers.v1
 
             //query DB for a collection of customers from a specific merchant.
             var dbCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId)
-                                            .Where(dc => dc.DemoCustomerGuid == customerGuid).FirstOrDefault();
+                                            .Where(dc => dc.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             // if we did not find a matching demo customer
             if (dbCustomer == null)
             {
-                return NotFound($"CustomerGuid: [{customerGuid}] on MerchantGuid: [{merchantGuid}] not found");
+                return NotFound($"CustomerGuid: [{demoCustomerGuid}] on MerchantGuid: [{merchantGuid}] not found");
             }
 
             var customer = (CustomerMBE)dbCustomer;
@@ -291,25 +292,26 @@ namespace PayAway.WebAPI.Controllers.v1
         /// Adds a new demo customer to a merchant
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
-        /// <param name="newCustomer">object containing information about customers</param>
+        /// <param name="newDemoCustomer">Object containing information about the new demo customer</param>
         /// <returns></returns>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
         [HttpPost("merchants/{merchantGuid:guid}/customers")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<CustomerMBE> AddNewDemoCustomer(Guid merchantGuid, NewCustomerMBE newCustomer)
+        public ActionResult<CustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewCustomerMBE newDemoCustomer)
         {
             //trims Customer name so that it doesn't have trailing characters
-            newCustomer.CustomerName = newCustomer.CustomerName.Trim();
+            newDemoCustomer.CustomerName = newDemoCustomer.CustomerName.Trim();
 
             // validate request data
-            if (string.IsNullOrEmpty(newCustomer.CustomerName))
+            if (string.IsNullOrEmpty(newDemoCustomer.CustomerName))
             {
-                return BadRequest(new ArgumentNullException(nameof(newCustomer.CustomerName), @"You must supply a non blank value for the Customer Name."));
+                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerName), @"You must supply a non blank value for the Customer Name."));
             }
-            else if (string.IsNullOrEmpty(newCustomer.CustomerPhoneNo))
+            else if (string.IsNullOrEmpty(newDemoCustomer.CustomerPhoneNo))
             {
-                return BadRequest(new ArgumentNullException(nameof(newCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
+                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
             }
 
             //query the db for the merchant
@@ -324,7 +326,7 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 //Store the new customer
-                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(dbMerchant.MerchantId, newCustomer);
+                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(dbMerchant.MerchantId, newDemoCustomer);
 
                 // convert DB entity to the public entity type
                 var customer = (CustomerMBE)dbCustomer;
@@ -334,23 +336,24 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{newCustomer.CustomerPhoneNo}] to merchant: [{merchantGuid}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add Phone No: [{newDemoCustomer.CustomerPhoneNo}] to merchant: [{merchantGuid}]"));
             }
         }
 
         /// <summary>
-        /// Updates demo customer using merchantGuid and customerGuid
+        /// Updates a demo customer on a merchant
         /// </summary>
         /// <param name="merchantGuid">The unique indentifier for the merchant</param>
-        /// <param name="demoCustomerGuid">The unique idnentifier for the customer</param>
-        /// <param name="customer">object that contains information about the customer</param>
+        /// <param name="demoCustomerGuid">The unique identifier for the demo customer</param>
+        /// <param name="updatedDemoCustomer">Object that contains updated information about the demo customer</param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantGuid:guid}/customers/{customerGuid:guid}")]
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
+        [HttpPut("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, NewCustomerMBE customer)
+        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewCustomerMBE updatedDemoCustomer)
         {
             // query the db for the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -362,12 +365,12 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // trims Customer name so that it doesn't have trailing characters
-            customer.CustomerName = customer.CustomerName.Trim();
+            updatedDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName.Trim();
 
             // validate the input params
-            if (string.IsNullOrEmpty(customer.CustomerName))
+            if (string.IsNullOrEmpty(updatedDemoCustomer.CustomerName))
             {
-                return BadRequest(new ArgumentException(nameof(customer.CustomerName), @"The customer name cannot be blank."));
+                return BadRequest(new ArgumentException(nameof(updatedDemoCustomer.CustomerName), @"The customer name cannot be blank."));
             }
 
             // get the existing demo customer
@@ -384,8 +387,8 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 //Save the updated customer
-                dbDemoCustomer.CustomerName = customer.CustomerName;
-                dbDemoCustomer.CustomerPhoneNo = customer.CustomerPhoneNo;
+                dbDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName;
+                dbDemoCustomer.CustomerPhoneNo = updatedDemoCustomer.CustomerPhoneNo;
 
                 SQLiteDBContext.UpdateDemoCustomer(dbDemoCustomer);
             }
@@ -398,10 +401,11 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Delete a customer on a merchant
+        /// Delete a demo customer on a merchant
         /// </summary>
-        /// <param name="merchantGuid"></param>
-        /// <param name="demoCustomerGuid"></param>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
+        /// <param name="demoCustomerGuid">The unique identifier for the demo customer</param>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer on the order</remarks>
         [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
