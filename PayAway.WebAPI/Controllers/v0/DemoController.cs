@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
+using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Entities.v0;
 
 namespace PayAway.WebAPI.Controllers.v0
@@ -15,11 +16,11 @@ namespace PayAway.WebAPI.Controllers.v0
     /// This is v0 for the Demo Controller.
     /// </summary>
     /// <remarks>
-    /// This version is for the front-end team to have data to develop on until further development.
+    /// This version is for the front-end team to have data to develop on until the working WebAPI is available
     /// </remarks>
     [Route("api/[controller]/v0")]
     [ApiController]
-    public class DemoController : ControllerBase
+    public class DemoController : ControllerBase, IDemoController
     {
         #region === Overall Demo Methods ================================
 
@@ -44,9 +45,9 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<List<MerchantMBE>> GetAllMerchants()
+        public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
         {
-            return Ok( new List<MerchantMBE>
+            return Ok(new List<MerchantMBE>
             {
                 new MerchantMBE
                 {
@@ -77,9 +78,9 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)       
+        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
-            if(merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
@@ -120,27 +121,28 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
-            var merchant = new MerchantMBE{ 
+            var merchant = new MerchantMBE
+            {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = newMerchant.MerchantName,
                 IsSupportsTips = newMerchant.IsSupportsTips
             };
 
-            return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid}, merchant);
+            return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid }, merchant);
         }
 
         /// <summary>
         /// Updates merchants using merchantID
         /// </summary>
         /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="merchant"></param>
+        /// <param name="updatedMerchant"></param>
         /// <returns></returns>
         [HttpPut("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
@@ -191,7 +193,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 IsActive = true,
             };
 
-            return NoContent();            
+            return NoContent();
 
         }
 
@@ -206,7 +208,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants/{merchantGuid:guid}/customers")]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<CustomerMBE>> GetCustomers(Guid merchantGuid)
+        public ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid)
         {
             if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
@@ -256,7 +258,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(513) 456-7890"
             };
-            
+
         }
 
         /// <summary>
@@ -284,7 +286,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
             };
 
-            return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid}, customer);
+            return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid }, customer);
         }
 
         /// <summary>

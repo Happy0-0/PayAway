@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Interfaces;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
     /// <summary>
-    /// This is v0 of the MerchantController.
+    /// This is v0 of the Merchant Controller.
     /// </summary>
     /// <remarks>
-    /// This version is for the front-end team to have data to develop on until further development.
+    /// This version is for the front-end team to have data to develop on until the working WebAPI is available
     /// </remarks>
     [Route("api/[controller]/v0")]
     [ApiController]
-    public class MerchantController : ControllerBase
+    public class MerchantController : ControllerBase, IMerchantController
     {
         /// <summary>
         /// Gets the active merchant
@@ -105,7 +107,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
 
-            return Ok(new MerchantOrderMBE 
+            return Ok(new MerchantOrderMBE
             {
                 OrderGuid = orderGuid,
                 OrderNumber = "1234",
@@ -118,12 +120,12 @@ namespace PayAway.WebAPI.Controllers.v0
                     new CatalogItemMBE
                     {
                         ItemGuid = Guid.NewGuid()
-                        
+
                     },
                     new CatalogItemMBE
                     {
                         ItemGuid = Guid.NewGuid()
-                        
+
                     }
                 },
                 OrderEvents = new List<OrderEventsMBE>
@@ -190,7 +192,7 @@ namespace PayAway.WebAPI.Controllers.v0
                     }
                 }
             };
-            
+
             return CreatedAtAction(nameof(GetMerchantOrder), new { orderID = merchantOrder.OrderGuid }, merchantOrder);
         }
 
@@ -215,14 +217,14 @@ namespace PayAway.WebAPI.Controllers.v0
         }
 
         /// <summary>
-        /// Sends a payment link to the customer.
+        /// Sends a payment request to the customer.
         /// </summary>
         /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <returns></returns>
         [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult SendOrder(Guid orderGuid)
+        public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {

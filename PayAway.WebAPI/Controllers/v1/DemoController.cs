@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Interfaces;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -22,7 +23,7 @@ namespace PayAway.WebAPI.Controllers.v1
     /// </remarks>
     [Route("api/[controller]/v1")]
     [ApiController]
-    public class DemoController : ControllerBase
+    public class DemoController : ControllerBase, IDemoController
     {
         #region === Overall Demo Methods ================================
         /// <summary>
@@ -249,6 +250,40 @@ namespace PayAway.WebAPI.Controllers.v1
         #endregion
 
         #region === Demo Customer Methods ================================
+
+        /// <summary>
+        /// Gets list of all customers that belong to a specific merchant
+        /// </summary>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <returns>list of customers</returns>
+        [HttpGet("merchants/{merchantGuid:guid}/customers")]
+        [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid)
+        {
+            // query the DB
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+            }
+
+            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
+
+            // if no results from DB, return an empty list
+            if (dbDemoCustomers == null)
+            {
+                return Ok(new List<CustomerMBE>());
+            }
+
+            // convert DB entities to the public entity types
+            var demoCustomers = dbDemoCustomers.ConvertAll(dbDC => (CustomerMBE)dbDC);
+
+            // return the response
+            return Ok(demoCustomers);
+        }
 
         /// <summary>
         /// Gets a specific demo customer
