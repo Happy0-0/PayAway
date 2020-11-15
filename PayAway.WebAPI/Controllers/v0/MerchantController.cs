@@ -120,12 +120,10 @@ namespace PayAway.WebAPI.Controllers.v0
                     new CatalogItemMBE
                     {
                         ItemGuid = Guid.NewGuid()
-
                     },
                     new CatalogItemMBE
                     {
                         ItemGuid = Guid.NewGuid()
-
                     }
                 },
                 OrderEvents = new List<OrderEventsMBE>

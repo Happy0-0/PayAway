@@ -31,7 +31,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
         /// <remarks>You can choose to preload a set of default data</remarks>
-        [HttpPost("reset")]
+        [HttpPost("reset", Name = nameof(ResetDatabase))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
@@ -47,7 +47,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// Gets all merchants
         /// </summary>
         /// <returns>all merchants</returns>
-        [HttpGet("merchants")]
+        [HttpGet("merchants", Name = nameof(GetAllMerchants))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
@@ -73,7 +73,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
-        [HttpGet("merchants/{merchantGuid:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}", Name = nameof(GetMerchant))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -116,7 +116,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="newMerchant">object containing information about the new merchant</param>
         /// <returns>newMerchant</returns>
-        [HttpPost("merchants")]
+        [HttpPost("merchants", Name = nameof(AddMerchant))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -154,7 +154,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="updatedMerchant">object containing updated merchant information</param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantGuid:guid}")]
+        [HttpPut("merchants/{merchantGuid:guid}", Name = nameof(UpdateMerchant))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -202,7 +202,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
-        [HttpDelete("merchants/{merchantGuid:guid}")]
+        [HttpDelete("merchants/{merchantGuid:guid}", Name = nameof(DeleteMerchant))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -226,7 +226,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
-        [HttpPost("merchants/{merchantGuid:guid}/setactive")]
+        [HttpPost("merchants/{merchantGuid:guid}/setactive", Name = nameof(SetActiveMerchantForDemo))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -256,7 +256,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns>list of customers</returns>
-        [HttpGet("merchants/{merchantGuid:guid}/customers")]
+        [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid)
@@ -292,7 +292,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="demoCustomerGuid">The unique identifier for the demo customer.</param>
         /// <returns>a specified customer</returns>
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
-        [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}", Name = nameof(GetDemoCustomer))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -330,7 +330,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="newDemoCustomer">Object containing information about the new demo customer</param>
         /// <returns></returns>
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
-        [HttpPost("merchants/{merchantGuid:guid}/customers")]
+        [HttpPost("merchants/{merchantGuid:guid}/customers", Name = nameof(AddDemoCustomer))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -383,7 +383,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="updatedDemoCustomer">Object that contains updated information about the demo customer</param>
         /// <returns></returns>
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
-        [HttpPut("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
+        [HttpPut("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}", Name = nameof(UpdateDemoCustomer))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -441,7 +441,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="demoCustomerGuid">The unique identifier for the demo customer</param>
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
-        [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
+        [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}", Name = nameof(DeleteDemoCustomer))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
