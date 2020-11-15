@@ -68,60 +68,60 @@ namespace PayAway.WebAPI.DB
             #region === Merchants =========================================================
             modelBuilder.Entity<MerchantDBE>().ToTable("Merchants");
             modelBuilder.Entity<MerchantDBE>()
-                .HasKey(m => new { m.MerchantId });         // <== auto generated value
+                .HasKey(m => new { m.MerchantId });         // <== auto generated value in DB
             modelBuilder.Entity<MerchantDBE>()
                 .HasIndex(m => new { m.MerchantGuid })
                 .IsUnique();
             modelBuilder.Entity<MerchantDBE>()
-                .HasIndex(m => new { m.MerchantName })
+                .HasIndex(m => new { m.MerchantName })      // you can have dup merchant names
                 .IsUnique();
             modelBuilder.Entity<MerchantDBE>()
                 .Property(m => m.MerchantGuid)
-                .HasValueGenerator<GuidValueGenerator>();
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
             #endregion
 
             #region === DemoCustomers =========================================================
             modelBuilder.Entity<DemoCustomerDBE>().ToTable("DemoCustomers");
             modelBuilder.Entity<DemoCustomerDBE>()
-                .HasKey(dc => new { dc.DemoCustomerId });     // <== auto generated value
+                .HasKey(dc => new { dc.DemoCustomerId });     // <== auto generated value in DB
             modelBuilder.Entity<DemoCustomerDBE>()
-                .HasIndex(dc => new { dc.MerchantID, dc.DemoCustomerGuid })
+                .HasIndex(dc => new { dc.DemoCustomerGuid })
                 .IsUnique();
-            modelBuilder.Entity<DemoCustomerDBE>()
-                .HasIndex(dc => new { dc.MerchantID, dc.CustomerPhoneNo })
+            modelBuilder.Entity<DemoCustomerDBE>()  
+                .HasIndex(dc => new { dc.MerchantID, dc.CustomerPhoneNo })  // cannot have dup customer phone nos
                 .IsUnique();
             modelBuilder.Entity<DemoCustomerDBE>()
                 .Property(dc => dc.DemoCustomerGuid)
-                .HasValueGenerator<GuidValueGenerator>();
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
             #endregion
 
             #region === CatalogItems =========================================================
             modelBuilder.Entity<CatalogItemDBE>().ToTable("CatalogItems");
             modelBuilder.Entity<CatalogItemDBE>()
-                .HasKey(c => new { c.CatalogItemId });      // <== auto generated value
+                .HasKey(c => new { c.CatalogItemId });      // <== auto generated value in DB
             modelBuilder.Entity<CatalogItemDBE>()
-                .HasIndex(c => new { c.MerchantId, c.ItemName })
+                .HasIndex(c => new { c.MerchantId, c.ItemName })    // cannot have dump Item names on the same merchant
                 .IsUnique();
             #endregion
 
             #region === Orders =========================================================
             modelBuilder.Entity<OrderDBE>().ToTable("Orders");
             modelBuilder.Entity<OrderDBE>()
-                .HasKey(o => new { o.OrderId });            // <== auto generated value
+                .HasKey(o => new { o.OrderId });            // <== auto generated value in DB
             modelBuilder.Entity<OrderDBE>()
                 .HasIndex(o => new { o.OrderGuid})
                 .IsUnique();
             modelBuilder.Entity<OrderDBE>()
                 .Property(o => o.OrderGuid)
-                .HasValueGenerator<GuidValueGenerator>();
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
             #endregion
 
             #region === OrderLineItems =========================================================
             modelBuilder.Entity<OrderLineItemDBE>().ToTable("OrderLineItems");
             modelBuilder.Entity<OrderLineItemDBE>()
-                .HasKey(oli => new { oli.OrderLineItemId});  // <== auto generated value
+                .HasKey(oli => new { oli.OrderLineItemId});  // <== auto generated value in DB
             modelBuilder.Entity<OrderLineItemDBE>()
-                .HasIndex(oli => new { oli.OrderID, oli.ItemName })
+                .HasIndex(oli => new { oli.OrderID, oli.ItemName })  // cannot have dump Item names on the same order
                 .IsUnique();
             #endregion
 
@@ -130,7 +130,7 @@ namespace PayAway.WebAPI.DB
             modelBuilder.Entity<OrderEventDBE>()
                 .HasKey(oe => new { oe.OrderEventId});       // <== auto generated value
             modelBuilder.Entity<OrderEventDBE>()
-                .HasIndex(oe => new { oe.OrderId });        // <= not unqiue key for retrieval
+                .HasIndex(oe => new { oe.OrderId });        // <= not unqiue key, used for faster retrieval
             #endregion
         }
 
