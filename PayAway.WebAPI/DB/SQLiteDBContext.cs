@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.Extensions.DependencyInjection;
+
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 
@@ -88,7 +89,7 @@ namespace PayAway.WebAPI.DB
                 .HasIndex(dc => new { dc.DemoCustomerGuid })
                 .IsUnique();
             modelBuilder.Entity<DemoCustomerDBE>()  
-                .HasIndex(dc => new { dc.MerchantID, dc.CustomerPhoneNo })  // cannot have dup customer phone nos
+                .HasIndex(dc => new { dc.MerchantId, dc.CustomerPhoneNo })  // cannot have dup customer phone nos
                 .IsUnique();
             modelBuilder.Entity<DemoCustomerDBE>()
                 .Property(dc => dc.DemoCustomerGuid)
@@ -98,10 +99,16 @@ namespace PayAway.WebAPI.DB
             #region === CatalogItems =========================================================
             modelBuilder.Entity<CatalogItemDBE>().ToTable("CatalogItems");
             modelBuilder.Entity<CatalogItemDBE>()
-                .HasKey(c => new { c.CatalogItemId });      // <== auto generated value in DB
+                .HasKey(ci => new { ci.CatalogItemId });      // <== auto generated value in DB
             modelBuilder.Entity<CatalogItemDBE>()
-                .HasIndex(c => new { c.MerchantId, c.ItemName })    // cannot have dump Item names on the same merchant
+                .HasIndex(ci => new { ci.MerchantId, ci.ItemName })    // cannot have dump Item names on the same merchant
                 .IsUnique();
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasIndex(ci => new { ci.CatalogItemGuid })
+                .IsUnique();
+            modelBuilder.Entity<CatalogItemDBE>()
+                .Property(ci => ci.CatalogItemGuid)
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
             #endregion
 
             #region === Orders =========================================================
@@ -156,12 +163,12 @@ namespace PayAway.WebAPI.DB
             foreach (var existingMerchant in existingMerchants)
             {
                 #region === Step 1.1: Demo Customers ======================================
-                var existingDemoCustomers = SQLiteDBContext.GetDemoCustomers(existingMerchant.MerchantId);
+                //var existingDemoCustomers = SQLiteDBContext.GetDemoCustomers(existingMerchant.MerchantId);
 
-                foreach (var existingDemoCustomer in existingDemoCustomers)
-                {
-                    SQLiteDBContext.DeleteDemoCustomer(existingDemoCustomer.DemoCustomerId);
-                }
+                //foreach (var existingDemoCustomer in existingDemoCustomers)
+                //{
+                //    SQLiteDBContext.DeleteDemoCustomer(existingDemoCustomer.DemoCustomerId);
+                //}
                 #endregion
 
                 #region === Step 1.2: OrderEvents ======================================
@@ -247,8 +254,25 @@ namespace PayAway.WebAPI.DB
         internal static MerchantDBE GetMerchant(Guid merchantGuid)
         {
             using (var context = new SQLiteDBContext())
-            { 
+            {
                 var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantGuid == merchantGuid);
+
+                return dbMerchant;
+            }
+        }
+
+        /// <summary>
+        /// Gets the merchant and any related demo customers.
+        /// </summary>
+        /// <param name="merchantGuid">The merchant unique identifier.</param>
+        /// <returns>MerchantDBE.</returns>
+        /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
+        internal static MerchantDBE GetMerchantAndDemoCustomers(Guid merchantGuid)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbMerchant = context.Merchants.Include(m => m.DemoCustomers)
+                                        .FirstOrDefault(m => m.MerchantGuid == merchantGuid);
 
                 return dbMerchant;
             }
@@ -478,7 +502,7 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
-                var dbDemoCustomers = context.DemoCustomers.Where(m => m.MerchantID == merchantId).ToList();
+                var dbDemoCustomers = context.DemoCustomers.Where(m => m.MerchantId == merchantId).ToList();
 
                 return dbDemoCustomers;
             }
@@ -500,7 +524,7 @@ namespace PayAway.WebAPI.DB
                 // make the db entity
                 var dbCustomer = new DemoCustomerDBE
                 {
-                    MerchantID = merchantID,
+                    MerchantId = merchantID,
                     CustomerName = newCustomer.CustomerName,
                     CustomerPhoneNo = newCustomer.CustomerPhoneNo
                 };
@@ -629,7 +653,7 @@ namespace PayAway.WebAPI.DB
                 }
                 else
                 {
-                    throw new ApplicationException($"Customer: [{demoCustomer.DemoCustomerId}] is not valid on MerchantID: [{demoCustomer.MerchantID}]");
+                    throw new ApplicationException($"Customer: [{demoCustomer.DemoCustomerId}] is not valid on MerchantID: [{demoCustomer.MerchantId}]");
                 }
             }
         }

@@ -80,7 +80,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);;
+            var dbMerchant = SQLiteDBContext.GetMerchantAndDemoCustomers(merchantGuid);;
 
             // if we did not find a matching merchant
             if(dbMerchant == null)
@@ -91,21 +91,18 @@ namespace PayAway.WebAPI.Controllers.v1
             // convert DB entity to the public entity type
             var merchant = (MerchantMBE)dbMerchant;
 
-            // query for the associated customers (child collection)
-            var dbCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
-
             // create an empty working object
-            var customers = new List<CustomerMBE>();
+            var demoCustomers = new List<CustomerMBE>();
 
             // optionally convert DB entities to the public entity type
-            if (dbCustomers != null)
+            if (dbMerchant.DemoCustomers != null)
             {
                 // convert DB entities to the public entity types
-                customers = dbCustomers.ConvertAll(dbC => (CustomerMBE)dbC);
+                demoCustomers = dbMerchant.DemoCustomers.ConvertAll(dbC => (CustomerMBE)dbC);
             }
 
             // set the value of the property collection on the parent object
-            merchant.Customers = customers;
+            merchant.DemoCustomers = demoCustomers;
 
             // return the response
             return Ok(merchant);

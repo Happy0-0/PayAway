@@ -92,7 +92,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
                 IsSupportsTips = true,
                 IsActive = true,
-                Customers = new List<CustomerMBE>()
+                DemoCustomers = new List<CustomerMBE>()
                 {
                     new CustomerMBE
                     {

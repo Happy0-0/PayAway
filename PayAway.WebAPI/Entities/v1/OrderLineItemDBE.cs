@@ -28,5 +28,8 @@ namespace PayAway.WebAPI.Entities.v1
 
         [Required]
         public decimal ItemUnitPrice { get; set; }
+
+        // Navigation Property
+        public OrderDBE Order { get; set; }
     }
 }

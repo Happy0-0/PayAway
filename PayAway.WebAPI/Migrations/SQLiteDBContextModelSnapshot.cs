@@ -22,6 +22,9 @@ namespace PayAway.WebAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("CatalogItemGuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -33,6 +36,9 @@ namespace PayAway.WebAPI.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("CatalogItemId");
+
+                    b.HasIndex("CatalogItemGuid")
+                        .IsUnique();
 
                     b.HasIndex("MerchantId", "ItemName")
                         .IsUnique();
@@ -57,7 +63,7 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<Guid>("DemoCustomerGuid")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("MerchantID")
+                    b.Property<int>("MerchantId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("DemoCustomerId");
@@ -65,7 +71,7 @@ namespace PayAway.WebAPI.Migrations
                     b.HasIndex("DemoCustomerGuid")
                         .IsUnique();
 
-                    b.HasIndex("MerchantID", "CustomerPhoneNo")
+                    b.HasIndex("MerchantId", "CustomerPhoneNo")
                         .IsUnique();
 
                     b.ToTable("DemoCustomers");
@@ -120,7 +126,10 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("MerchantID")
+                    b.Property<int?>("MerchantDBEMerchantId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MerchantId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("OrderDateTimeUTC")
@@ -138,6 +147,8 @@ namespace PayAway.WebAPI.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("OrderId");
+
+                    b.HasIndex("MerchantDBEMerchantId");
 
                     b.HasIndex("OrderGuid")
                         .IsUnique();
@@ -194,6 +205,60 @@ namespace PayAway.WebAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("OrderLineItems");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.DemoCustomerDBE", b =>
+                {
+                    b.HasOne("PayAway.WebAPI.Entities.v1.MerchantDBE", "Merchant")
+                        .WithMany("DemoCustomers")
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Merchant");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderDBE", b =>
+                {
+                    b.HasOne("PayAway.WebAPI.Entities.v1.MerchantDBE", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("MerchantDBEMerchantId");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderEventDBE", b =>
+                {
+                    b.HasOne("PayAway.WebAPI.Entities.v1.OrderDBE", "Order")
+                        .WithMany("OrderEvents")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderLineItemDBE", b =>
+                {
+                    b.HasOne("PayAway.WebAPI.Entities.v1.OrderDBE", "Order")
+                        .WithMany("OrderLineItems")
+                        .HasForeignKey("OrderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.MerchantDBE", b =>
+                {
+                    b.Navigation("DemoCustomers");
+
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderDBE", b =>
+                {
+                    b.Navigation("OrderEvents");
+
+                    b.Navigation("OrderLineItems");
                 });
 #pragma warning restore 612, 618
         }

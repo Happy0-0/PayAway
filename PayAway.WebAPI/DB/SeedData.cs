@@ -45,7 +45,7 @@ namespace PayAway.WebAPI.DB
             {
                 new DemoCustomerDBE()
                 {
-                    MerchantID = 1,
+                    MerchantId = 1,
                     DemoCustomerId = 1,
                     DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
                     CustomerName = @"Test Customer 1",
@@ -53,7 +53,7 @@ namespace PayAway.WebAPI.DB
                 },
                 new DemoCustomerDBE()
                 {
-                    MerchantID = 1,
+                    MerchantId = 1,
                     DemoCustomerId = 2,
                     DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
                     CustomerName = @"Test Customer 2",

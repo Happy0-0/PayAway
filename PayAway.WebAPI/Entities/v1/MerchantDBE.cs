@@ -36,6 +36,12 @@ namespace PayAway.WebAPI.Entities.v1
         [Required]
         public bool IsSupportsTips { get; set; }
 
+        // Navigation Property
+        public List<DemoCustomerDBE> DemoCustomers { get; set; }
+
+        // Navigation Property
+        public List<OrderDBE> Orders { get; set; }
+
         public static explicit operator MerchantMBE(MerchantDBE from)
         {
             MerchantMBE to = null;

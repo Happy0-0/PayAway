@@ -1,4 +1,9 @@
-﻿------------------------------------------
+﻿List current global tools
+dotnet tool list -g
+
+Install VS Extension "EF Power Tools"
+
+------------------------------------------
 Entity FRamework Reference
 ------------------------------------------
 dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
@@ -20,7 +25,7 @@ https://www.sqlite.org/autoinc.html
 ------------------------------------------
 Tech Debt Items
 ------------------------------------------
-1.	Chg JsonAttribute of *Id properties in MBEs to *Guid	<===== WIll require Front End refactoring
+1.	Chg JsonAttribute of *Id properties in MBEs to *Guid	<===== Will require Front End refactoring
 2.	Validate phone nos on the way in, store normalized format in the db, convert to std US format on the way out
 3.	Convert DT DB values to GMT to local timezone on the way out
 4.	Update from .net 5 rc2 to rtm

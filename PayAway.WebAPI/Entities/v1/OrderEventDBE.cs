@@ -31,5 +31,8 @@ namespace PayAway.WebAPI.Entities.v1
 
         [Required]
         public string EventDescription { get; set; }
+
+        // Navigation Property
+        public OrderDBE Order { get; set; }
     }
 }

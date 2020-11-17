@@ -36,9 +36,9 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>number of customers</value>
         [JsonPropertyName("numberOfCustomers")]
-        public int? NumberOfCustomers 
+        public int? NumberOfDemoCustomers 
         {
-            get { return Customers != null ? Customers.Count : null; }
+            get { return DemoCustomers != null ? DemoCustomers.Count : null; }
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <returns>a list of customers</returns>
         [JsonPropertyName("customers")]
-        public List<CustomerMBE> Customers { get; set; }
+        public List<CustomerMBE> DemoCustomers { get; set; }
 
     }
 }

@@ -28,7 +28,7 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The merchant identifier.</value>
         [Required]
-        public int MerchantID { get; set; }
+        public int MerchantId { get; set; }
 
         [Required]
         public DateTime OrderDateTimeUTC { get; set; }
@@ -45,5 +45,12 @@ namespace PayAway.WebAPI.Entities.v1
         public string CreditCardNumber { get; set; }
 
         public string AuthCode { get; set; }
+
+        // Navigation Property
+        public List<OrderEventDBE> OrderEvents { get; set; }
+
+        // Navigation Property
+        public List<OrderLineItemDBE> OrderLineItems { get; set; }
+
     }
 }

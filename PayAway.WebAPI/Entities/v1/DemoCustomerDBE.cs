@@ -33,13 +33,16 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The merchant identifier.</value>
         [Required]
-        public int MerchantID { get; set; }
+        public int MerchantId { get; set; }
 
         [Required]
         public string CustomerName { get; set; }
 
         [Required]
         public string CustomerPhoneNo { get; set; }
+
+        // Navigation Property
+        public MerchantDBE Merchant { get; set; }
 
         public static explicit operator CustomerMBE(DemoCustomerDBE from)
         {
