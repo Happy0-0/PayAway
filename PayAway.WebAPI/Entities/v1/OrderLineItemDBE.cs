@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,7 +22,8 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The order identifier.</value>
         [Required]
-        public int OrderID { get; set; }
+        [Column("OrderID")]
+        public int OrderId { get; set; }
 
         [Required]
         public string ItemName { get; set; }

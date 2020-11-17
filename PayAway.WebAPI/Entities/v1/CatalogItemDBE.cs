@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PayAway.WebAPI.Entities.v0;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -28,5 +29,23 @@ namespace PayAway.WebAPI.Entities.v1
 
         [Required]
         public decimal ItemUnitPrice { get; set; }
+
+        public static explicit operator CatalogItemMBE(CatalogItemDBE from)
+        {
+            CatalogItemMBE to = null;
+
+            if (from != null)
+            {
+                to = new CatalogItemMBE()
+                {
+                   ItemGuid = Guid.NewGuid(),
+                   ItemName = from.ItemName,
+                   ItemUnitPrice = from.ItemUnitPrice
+
+                };
+            }
+
+            return to;
+        }
     }
 }
