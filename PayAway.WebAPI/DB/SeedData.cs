@@ -102,7 +102,7 @@ namespace PayAway.WebAPI.DB
                 {
                     OrderId = 1,
                     OrderGuid = Constants.ORDER_1_GUID,
-                    MerchantID = 0,
+                    MerchantID = 1,
                     OrderDateTimeUTC = new DateTime(2020,11,16,12,00,00),
                     Status = "SMS Sent",
                     CustomerName = "Joe Smith",

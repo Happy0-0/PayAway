@@ -80,7 +80,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);;
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if(dbMerchant == null)

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.BouncyCastle.Crypto.Tls;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 
@@ -169,7 +173,6 @@ namespace PayAway.WebAPI.DB
 
                 foreach (var exisitingOrder in existingMerchantOrders)
                 {
-
                     #region === Step 1.2: OrderEvents ======================================
 
                     SQLiteDBContext.DeleteOrderEvents(exisitingOrder.OrderId);
@@ -393,17 +396,26 @@ namespace PayAway.WebAPI.DB
                     }
                 }
 
-                // purge any exisiting Order Events
-                // TODO: Gabe implement this!
+                //purging any exisiting order
+                var existingMerchantOrders = SQLiteDBContext.GetOrders(merchant.MerchantId);
+                
+                if(existingMerchantOrders != null)
+                {
+                    foreach (var exisitingOrder in existingMerchantOrders)
+                    {
+                        SQLiteDBContext.DeleteOrderEvents(exisitingOrder.OrderId);
+                        SQLiteDBContext.DeleteOrderLineItems(exisitingOrder.OrderId);
+                        SQLiteDBContext.DeleteOrder(exisitingOrder.OrderId);
+                    }
+                }
 
-                // purge any exisiting Order Items
-                // TODO: Gabe implement this!
+                //purging any exisiting catalogue items
+                var existingCatalogItems = SQLiteDBContext.GetCatalogItems(merchant.MerchantId);
 
-                // purge any exisiting Orders
-                // TODO: Gabe implement this!
-
-                // purge any exisiting Catalog Items
-                // TODO: Gabe implement this!
+                foreach (var existingCatalogItem in existingCatalogItems)
+                {
+                    SQLiteDBContext.DeleteCatalogItem(existingCatalogItem.CatalogItemId);
+                }
 
                 SQLiteDBContext.DeleteMerchant(merchant.MerchantId);
             }
@@ -702,6 +714,11 @@ namespace PayAway.WebAPI.DB
             using (var context = new SQLiteDBContext())
             {
                 var dbCatalogItems = context.CatalogItems.Where(ci => ci.MerchantId == merchantId).ToList();
+                if (dbCatalogItems.Count == 0)
+                {
+                    dbCatalogItems = context.CatalogItems.Where(ci => ci.MerchantId == 0).ToList();
+                }
+                
 
                 return dbCatalogItems;
             }
@@ -776,13 +793,13 @@ namespace PayAway.WebAPI.DB
         /// <summary>
         /// Gets the order events
         /// </summary>
-        /// <param name="orderID">The order identifier.</param>
+        /// <param name="orderId">The order identifier.</param>
         /// <returns></returns>
-        internal static List<OrderEventDBE> GetOrderEvents(int orderID)
+        internal static List<OrderEventDBE> GetOrderEvents(int orderId)
         {
             using (var context = new SQLiteDBContext())
             {
-                var dbOrderEvents = context.OrderEvents.Where(oe => oe.OrderId == orderID).ToList();
+                var dbOrderEvents = context.OrderEvents.Where(oe => oe.OrderId == orderId).ToList();
 
                 return dbOrderEvents;
             }
@@ -833,16 +850,38 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
-                var orderEvents = context.OrderEvents.Where(a => a.OrderId == orderId); 
-                context.Remove(orderEvents); 
-                context.SaveChanges();
+                var orderEvents = context.OrderEvents.Where(a => a.OrderId == orderId).ToList();
+
+                foreach(var orderEvent in orderEvents)
+                {
+                    context.Remove(orderEvent);
+                    context.SaveChanges();
+                }
+
+               
+                
                 
             }
         }
 
         #endregion
 
-        #region ==== OrderItem Methods =======
+        #region ==== OrderLineItem Methods =======
+
+        /// <summary>
+        /// Gets a list of Order line items
+        /// </summary>
+        /// <param name="orderId">the order identifier</param>
+        /// <returns>list of order line items</returns>
+        internal static List<OrderLineItemDBE> GetOrderLineItems(int orderId)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbOrderLineItems = context.OrderLineItems.Where(oi => oi.OrderId == orderId).ToList();
+
+                return dbOrderLineItems;
+            }
+        }
 
         /// <summary>
         /// Inserts new line items
@@ -889,9 +928,12 @@ namespace PayAway.WebAPI.DB
             using (var context = new SQLiteDBContext())
             {
                 var orderLineItems = context.OrderLineItems.Where(a => a.OrderId == orderId);
-                context.Remove(orderLineItems);
-                context.SaveChanges();
 
+                foreach(var orderLineItem in orderLineItems)
+                {
+                    context.Remove(orderLineItem);
+                    context.SaveChanges();
+                }
             }
         }
 
@@ -911,6 +953,22 @@ namespace PayAway.WebAPI.DB
                 var dbOrders = context.Orders.Where(o => o.MerchantID == merchantID).ToList();
 
                 return dbOrders;
+            }
+
+        }
+
+        /// <summary>
+        /// Get a specific order by orderGuid
+        /// </summary>
+        /// <param name="orderGuid">order Unique Indentifier.</param>
+        /// <returns>a specific order</returns>
+        internal static OrderDBE GetOrder(Guid orderGuid)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == orderGuid);
+
+                return dbOrder;
             }
 
         }
@@ -1020,6 +1078,44 @@ namespace PayAway.WebAPI.DB
                 {
                     // returns false if the order did not exist
                     return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates an order
+        /// </summary>
+        /// <param name="order">The order</param>
+        /// <exception cref="ApplicationException">Order: [{order.OrderGuid}] is not valid</exception>
+        internal static void UpdateOrder(OrderDBE order)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var currentOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
+
+                if (currentOrder == null)
+                {
+                    throw new ApplicationException($"Order: [{order.OrderGuid}] is not valid");
+                }
+
+                context.Update(order);
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateException ex)
+                {
+                    // exception was raised by the db (ex: UK violation)
+                    var sqlException = ex.InnerException;
+
+                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                    throw new ApplicationException(sqlException.Message);
+                }
+                catch (Exception)
+                {
+                    // rethrow exception
+                    throw;
                 }
             }
         }

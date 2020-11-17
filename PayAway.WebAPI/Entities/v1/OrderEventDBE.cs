@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PayAway.WebAPI.Entities.v0;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -31,5 +32,22 @@ namespace PayAway.WebAPI.Entities.v1
 
         [Required]
         public string EventDescription { get; set; }
+
+        public static explicit operator OrderEventsMBE(OrderEventDBE from)
+        {
+            OrderEventsMBE to = null;
+
+            if(from != null)
+            {
+                to = new OrderEventsMBE()
+                {
+                    EventDate = from.EventDateTimeUTC,
+                    EventStatus = from.OrderStatus,
+                    EventDescription = from.EventDescription
+                };
+            }
+
+            return to;
+        }
     }
 }

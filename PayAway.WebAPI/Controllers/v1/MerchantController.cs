@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -20,8 +21,6 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class MerchantController : ControllerBase, IMerchantController
     {
-        
-
         /// <summary>
         /// Gets the active merchant
         /// </summary>
@@ -57,15 +56,56 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Gets merchant order
         /// </summary>
-        /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
+        /// <param name="orderGuid">The unique identifier for the merchant</param>
         /// <returns>merchant Order</returns>
-        [HttpGet("orders/{orderGuid:Guid}")]
+        [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetMerchantOrder))]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<MerchantOrderMBE> GetMerchantOrder(Guid orderGuid)
         {
-            throw new NotImplementedException();
+            //query the db
+            var dbMerchantOrder = SQLiteDBContext.GetOrder(orderGuid);
+
+            // if we did not find a matching merchant order
+            if (dbMerchantOrder == null)
+            {
+                return NotFound($"Merchant order: [{orderGuid}] not found");
+            }
+
+            // convert DB entity to the public entity type
+            var merchantOrder = (MerchantOrderMBE)dbMerchantOrder;
+
+            var dbMerchant = SQLiteDBContext.GetMerchant(dbMerchantOrder.MerchantID);
+            merchantOrder.MerchantGuid = merchantOrder.MerchantGuid;
+
+            //query for the associated order items
+            var dbCatalogItems = SQLiteDBContext.GetCatalogItems(dbMerchantOrder.MerchantID);
+            var dbOrderEvents = SQLiteDBContext.GetOrderEvents(dbMerchantOrder.OrderId);
+
+            //create an empty working object
+            var catalogItems = new List<CatalogItemMBE>();
+            var orderEvents = new List<OrderEventsMBE>();
+
+            // optionally convert DB entities to the public entity type
+            if (dbCatalogItems != null)
+            {
+                // convert DB entities to the public entity types
+                catalogItems = dbCatalogItems.ConvertAll(dbI => (CatalogItemMBE)dbI);
+            }
+            if (dbOrderEvents != null)
+            {
+                // convert DB entities to the public entity types
+                orderEvents = dbOrderEvents.ConvertAll(dbE => (OrderEventsMBE)dbE);
+            }
+
+            // set the value of the property collection on the parent object
+            merchantOrder.OrderItems = catalogItems;
+            merchantOrder.OrderEvents = orderEvents;
+
+            //Return the response
+            return Ok(merchantOrder);
+
         }
 
         /// <summary>
