@@ -98,16 +98,16 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <returns>merchant Order</returns>
         [HttpGet("orders/{orderGuid:Guid}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> GetMerchantOrder(Guid orderGuid)
+        public ActionResult<OrderMBE> GetMerchantOrder(Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
 
-            return Ok(new MerchantOrderMBE
+            return Ok(new OrderMBE
             {
                 OrderGuid = orderGuid,
                 OrderNumber = "1234",
@@ -115,7 +115,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
                 Status = "Paid",
-                OrderItems = new List<CatalogItemMBE>
+                OrderLineItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE
                     {
@@ -126,21 +126,21 @@ namespace PayAway.WebAPI.Controllers.v0
                         ItemGuid = Guid.NewGuid()
                     }
                 },
-                OrderEvents = new List<OrderEventsMBE>
+                OrderEvents = new List<OrderEventMBE>
                 {
-                    new OrderEventsMBE
+                    new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,08,00,00),
                         EventStatus = "Paid",
                         EventDescription = "Payment has been recieved for order."
                     },
-                     new OrderEventsMBE
+                     new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,59,00),
                         EventStatus = "SMS Sent",
                         EventDescription = "SMS Sent to Customer: (333) 333-3333"
                     },
-                      new OrderEventsMBE
+                      new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,58,00),
                         EventStatus = "New Order",
@@ -157,11 +157,11 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <returns></returns>
         [HttpPost("orders")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantOrderMBE> CreateMerchantOrder([FromBody] NewMerchantOrderMBE newMerchantOrder)
+        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder)
         {
-            var merchantOrder = new MerchantOrderMBE
+            var merchantOrder = new OrderMBE
             {
                 OrderGuid = Constants.ORDER_1_GUID,
                 OrderNumber = "1234",
@@ -169,7 +169,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
                 Status = "New",
-                OrderItems = new List<CatalogItemMBE>
+                OrderLineItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE
                     {
@@ -180,9 +180,9 @@ namespace PayAway.WebAPI.Controllers.v0
                         ItemGuid = Guid.NewGuid()
                     }
                 },
-                OrderEvents = new List<OrderEventsMBE>
+                OrderEvents = new List<OrderEventMBE>
                 {
-                      new OrderEventsMBE
+                      new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,58,00),
                         EventStatus = "New Order",
@@ -204,7 +204,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewMerchantOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {

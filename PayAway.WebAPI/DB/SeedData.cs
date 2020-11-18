@@ -72,6 +72,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 1,
+                    CatalogItemGuid = Constants.CATALOG_ITEM_1_GUID,
                     ItemName = "Product/Service 1",
                     ItemUnitPrice = 10.51M
                 },
@@ -79,6 +80,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 2,
+                    CatalogItemGuid = Constants.CATALOG_ITEM_2_GUID,
                     ItemName = "Product/Service 2",
                     ItemUnitPrice = 20.52M
                 },
@@ -86,6 +88,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 3,
+                    CatalogItemGuid = Constants.CATALOG_ITEM_3_GUID,
                     ItemName = "Product/Service 3",
                     ItemUnitPrice = 15.92M
                 },
@@ -94,21 +97,33 @@ namespace PayAway.WebAPI.DB
             return seedCatalogueData;
         }
 
-        public static List<OrderDBE> GetOrders()
+        public static List<OrderDBE> GetSeedOrders()
         {
             var seedOrders = new List<OrderDBE>()
-            { 
+            {
                 new OrderDBE
                 {
                     OrderId = 1,
                     OrderGuid = Constants.ORDER_1_GUID,
-                    MerchantID = 1,
-                    OrderDateTimeUTC = new DateTime(2020,11,16,12,00,00),
-                    Status = "SMS Sent",
-                    CustomerName = "Joe Smith",
-                    PhoneNumber = "(555) 555-5555",
-                    CreditCardNumber = "1234-5678-9101-1121",
-                    AuthCode = "506"
+                    MerchantId = 1,
+                    OrderDateTimeUTC = DateTime.Now.AddMinutes(-10),
+                    Status = @"Paid",
+                    CustomerName = @"Joe Smith",
+                    PhoneNumber = @"(555) 555-5555",
+                    CreditCardNumber = @"1234-5678-9101-1121",
+                    AuthCode = @"506"
+                },
+                new OrderDBE
+                {
+                    OrderId = 2,
+                    OrderGuid = Constants.ORDER_2_GUID,
+                    MerchantId = 1,
+                    OrderDateTimeUTC = DateTime.Now.AddMinutes(-5),
+                    Status = @"Order Entered",
+                    CustomerName = @"Jane Doe",
+                    PhoneNumber = @"(444) 444-4444",
+                    CreditCardNumber = @"9876-5432-1098-7654",
+                    AuthCode = string.Empty
                 }
             };
 
@@ -122,26 +137,31 @@ namespace PayAway.WebAPI.DB
                 new OrderEventDBE
                 {
                     OrderId = 1,
-                    OrderEventId = 3,
-                    EventDateTimeUTC = new DateTime(20,11,11,08,00,00),
-                    OrderStatus = "Paid",
-                    EventDescription = "Payment has been recieved for order."
+                    EventDateTimeUTC = DateTime.Now.AddMinutes(-10),
+                    OrderStatus = @"New Order",
+                    EventDescription = @"Order entered."
                 },
                 new OrderEventDBE
                 {
                     OrderId = 1,
-                    OrderEventId = 2,
-                    EventDateTimeUTC = new DateTime(20,11,11,07,59,00),
-                    OrderStatus = "SMS Sent",
-                    EventDescription = "SMS Sent to Customer: (333) 333-3333"
+                    EventDateTimeUTC = DateTime.Now.AddMinutes(-9),
+                    OrderStatus = @"SMS Sent",
+                    EventDescription = @"SMS Sent to (555) 555-5555"
                 },
                 new OrderEventDBE
                 {
                     OrderId = 1,
-                    OrderEventId = 1,
-                    EventDateTimeUTC = new DateTime(20,11,11,07,58,00),
-                    OrderStatus = "New Order",
-                    EventDescription = "A new order has been created."
+                    EventDateTimeUTC = DateTime.Now.AddMinutes(-8),
+                    OrderStatus = @"Paid",
+                    EventDescription = @"Payment has been received for order."
+                },
+
+                new OrderEventDBE
+                {
+                    OrderId = 2,
+                    EventDateTimeUTC = DateTime.Now.AddMinutes(-10),
+                    OrderStatus = @"Order Entered",
+                    EventDescription = @"Order entered."
                 }
             };
 
@@ -154,23 +174,23 @@ namespace PayAway.WebAPI.DB
             {
                 new OrderLineItemDBE
                 {
-                    OrderLineItemId = 1,
                     OrderId = 1,
-                    ItemName = "Product/Service 1",
+                    CatalogItemGuid = Constants.CATALOG_ITEM_1_GUID,
+                    ItemName = @"Product/Service 1",
                     ItemUnitPrice = 10.51M
                 },
                 new OrderLineItemDBE
                 {
-                    OrderLineItemId = 2,
                     OrderId = 1,
-                    ItemName = "Product/Service 2",
+                    CatalogItemGuid = Constants.CATALOG_ITEM_2_GUID,
+                    ItemName = @"Product/Service 2",
                     ItemUnitPrice = 20.52M
                 },
                 new OrderLineItemDBE
                 {
-                    OrderLineItemId = 3,
                     OrderId = 1,
-                    ItemName = "Product/Service 3",
+                    CatalogItemGuid = Constants.CATALOG_ITEM_3_GUID,
+                    ItemName = @"Product/Service 3",
                     ItemUnitPrice = 15.92M
                 }
             };

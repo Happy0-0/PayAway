@@ -9,7 +9,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// This class contains information about order events
     /// </summary>
-    public class OrderEventsMBE
+    public class OrderEventMBE
     {
         [JsonPropertyName("eventDate")]
         public DateTime EventDate { get; set; }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
@@ -31,9 +32,9 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<ActiveMerchantMBE> GetActiveMerchant()
         {
             //Query the db
-            var merchant = SQLiteDBContext.GetActiveMerchant();
+            var dbMerchant = SQLiteDBContext.GetActiveMerchant();
 
-            if (merchant == null)
+            if (dbMerchant == null)
             {
                 return NotFound($"Active merchant not found");
             }
@@ -43,9 +44,9 @@ namespace PayAway.WebAPI.Controllers.v1
 
             var activeMerchant = new ActiveMerchantMBE
             {
-                MerchantGuid = merchant.MerchantGuid,
-                MerchantName = merchant.MerchantName,
-                LogoUrl = merchant.LogoUrl,
+                MerchantGuid = dbMerchant.MerchantGuid,
+                MerchantName = dbMerchant.MerchantName,
+                LogoUrl = dbMerchant.LogoUrl,
                 CatalogItems = dbCatalogueItems.ConvertAll(dbCI => (CatalogItemMBE)dbCI)
             };
 
@@ -60,12 +61,12 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns>merchant Order</returns>
         [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetMerchantOrder))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> GetMerchantOrder(Guid orderGuid)
+        public ActionResult<OrderMBE> GetMerchantOrder(Guid orderGuid)
         {
             //query the db
-            var dbMerchantOrder = SQLiteDBContext.GetOrder(orderGuid);
+            var dbMerchantOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
 
             // if we did not find a matching merchant order
             if (dbMerchantOrder == null)
@@ -74,33 +75,28 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // convert DB entity to the public entity type
-            var merchantOrder = (MerchantOrderMBE)dbMerchantOrder;
+            var merchantOrder = (OrderMBE)dbMerchantOrder;
 
-            var dbMerchant = SQLiteDBContext.GetMerchant(dbMerchantOrder.MerchantID);
-            merchantOrder.MerchantGuid = merchantOrder.MerchantGuid;
-
-            //query for the associated order items
-            var dbCatalogItems = SQLiteDBContext.GetCatalogItems(dbMerchantOrder.MerchantID);
-            var dbOrderEvents = SQLiteDBContext.GetOrderEvents(dbMerchantOrder.OrderId);
+            merchantOrder.MerchantGuid = dbMerchantOrder.Merchant.MerchantGuid;
 
             //create an empty working object
             var catalogItems = new List<CatalogItemMBE>();
-            var orderEvents = new List<OrderEventsMBE>();
+            var orderEvents = new List<OrderEventMBE>();
 
             // optionally convert DB entities to the public entity type
-            if (dbCatalogItems != null)
+            if (dbMerchantOrder.OrderLineItems != null)
             {
                 // convert DB entities to the public entity types
-                catalogItems = dbCatalogItems.ConvertAll(dbI => (CatalogItemMBE)dbI);
+                catalogItems = dbMerchantOrder.OrderLineItems.ConvertAll(oli => (CatalogItemMBE)oli);
             }
-            if (dbOrderEvents != null)
+            if (dbMerchantOrder.OrderEvents != null)
             {
                 // convert DB entities to the public entity types
-                orderEvents = dbOrderEvents.ConvertAll(dbE => (OrderEventsMBE)dbE);
+                orderEvents = dbMerchantOrder.OrderEvents.ConvertAll(dbE => (OrderEventMBE)dbE);
             }
 
             // set the value of the property collection on the parent object
-            merchantOrder.OrderItems = catalogItems;
+            merchantOrder.OrderLineItems = catalogItems;
             merchantOrder.OrderEvents = orderEvents;
 
             //Return the response
@@ -117,7 +113,44 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(OrderQueueMBE), StatusCodes.Status200OK)]
         public ActionResult<OrderQueueMBE> GetOrderQueue()
         {
-            throw new NotImplementedException();
+            //Query the db
+            var dbMerchant = SQLiteDBContext.GetActiveMerchant();
+
+            if (dbMerchant == null)
+            {
+                return NotFound($"Active merchant not found");
+            }
+
+            // create the empty return object
+            OrderQueueMBE orderQueue = new OrderQueueMBE()
+            {
+                Orders = new List<OrderHeaderMBE>()
+            };
+
+            // get the list of current orders
+            var dbOrders = SQLiteDBContext.GetOrders(dbMerchant.MerchantId);
+
+            if(dbOrders != null && dbOrders.Count > 0)
+            {
+                foreach(var dbOrder in dbOrders)
+                {
+                    // get the exploded order w/ the line items
+                    var dbOrderExploded = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+
+                    // convert to the MBE 
+                    var orderHeader = (OrderHeaderMBE)dbOrderExploded;
+
+                    // add the l/i subtotal
+                    orderHeader.Total = (dbOrderExploded.OrderLineItems != null) 
+                                            ? dbOrderExploded.OrderLineItems.Sum(oli => oli.ItemUnitPrice) 
+                                            : 0.0M;
+
+                    // add to the results collection
+                    orderQueue.Orders.Add(orderHeader);
+                }
+            }
+
+            return Ok(orderQueue);
         }
 
         /// <summary>
@@ -127,9 +160,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns></returns>
         [HttpPost("orders")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantOrderMBE> CreateMerchantOrder([FromBody] NewMerchantOrderMBE newMerchantOrder)
+        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder)
         {
             throw new NotImplementedException();
         }
@@ -157,7 +190,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewMerchantOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
         {
             throw new NotImplementedException();
         }

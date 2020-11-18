@@ -9,7 +9,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class used when a method needs to get merchant order information
     /// </summary>
-    public class NewMerchantOrderMBE
+    public class NewOrderMBE
     {
         /// <summary>
         /// Gets or sets the orders customer name
@@ -28,6 +28,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets a list of items
         /// </summary>
         [JsonPropertyName("orderItems")]
-        public List<CatalogItemMBE> OrderItems { get; set; }
+        public List<CatalogItemMBE> OrderLineItems { get; set; }
     }
 }

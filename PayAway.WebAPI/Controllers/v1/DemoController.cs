@@ -213,7 +213,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return NotFound($"MerchantGuid: [{merchantGuid}] is not valid");
             }
 
-            SQLiteDBContext.PurgeMerchant(dbMerchant.MerchantId);
+            SQLiteDBContext.DeleteMerchant(dbMerchant.MerchantId);
 
             return NoContent();
         }

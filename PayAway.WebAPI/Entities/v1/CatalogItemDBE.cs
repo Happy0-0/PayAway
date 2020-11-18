@@ -37,6 +37,9 @@ namespace PayAway.WebAPI.Entities.v1
         [Required]
         public decimal ItemUnitPrice { get; set; }
 
+        // Navigation Property (we dop not add this because of the "default" items stored on merchantId 0
+        //public MerchantDBE Merchant { get; set; }
+
         public static explicit operator CatalogItemMBE(CatalogItemDBE from)
         {
             CatalogItemMBE to = null;

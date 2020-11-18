@@ -126,9 +126,6 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("MerchantDBEMerchantId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("MerchantId")
                         .HasColumnType("INTEGER");
 
@@ -148,7 +145,7 @@ namespace PayAway.WebAPI.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.HasIndex("MerchantDBEMerchantId");
+                    b.HasIndex("MerchantId");
 
                     b.HasIndex("OrderGuid")
                         .IsUnique();
@@ -189,6 +186,9 @@ namespace PayAway.WebAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("CatalogItemGuid")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ItemName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -196,12 +196,12 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<decimal>("ItemUnitPrice")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("OrderID")
+                    b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("OrderLineItemId");
 
-                    b.HasIndex("OrderID", "ItemName")
+                    b.HasIndex("OrderId", "ItemName")
                         .IsUnique();
 
                     b.ToTable("OrderLineItems");
@@ -220,9 +220,13 @@ namespace PayAway.WebAPI.Migrations
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderDBE", b =>
                 {
-                    b.HasOne("PayAway.WebAPI.Entities.v1.MerchantDBE", null)
+                    b.HasOne("PayAway.WebAPI.Entities.v1.MerchantDBE", "Merchant")
                         .WithMany("Orders")
-                        .HasForeignKey("MerchantDBEMerchantId");
+                        .HasForeignKey("MerchantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Merchant");
                 });
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.OrderEventDBE", b =>
@@ -240,7 +244,7 @@ namespace PayAway.WebAPI.Migrations
                 {
                     b.HasOne("PayAway.WebAPI.Entities.v1.OrderDBE", "Order")
                         .WithMany("OrderLineItems")
-                        .HasForeignKey("OrderID")
+                        .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

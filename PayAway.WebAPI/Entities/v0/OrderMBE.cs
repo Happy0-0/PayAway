@@ -10,7 +10,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class used when a method needs to get merchant order information
     /// </summary>
-    public class MerchantOrderMBE : NewMerchantOrderMBE
+    public class OrderMBE : NewOrderMBE
     {
         /// <summary>
         /// Gets or sets order guid
@@ -44,18 +44,18 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets a list of order events
         /// </summary>
         [JsonPropertyName("orderEvents")]
-        public List<OrderEventsMBE> OrderEvents { get; set; }
+        public List<OrderEventMBE> OrderEvents { get; set; }
 
         /// <summary>
         /// Gets or sets the order total
         /// </summary>
         /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
-        public decimal OrderTotal 
+        public decimal? OrderTotal 
         {
             get
             {
-                return this.OrderItems.Sum(oli => oli.ItemUnitPrice);
+                return this.OrderLineItems != null ? this.OrderLineItems.Sum(oli => oli.ItemUnitPrice) : null;
             }
 
         }

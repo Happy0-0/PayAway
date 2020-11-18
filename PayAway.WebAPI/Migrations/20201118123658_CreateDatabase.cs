@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PayAway.WebAPI.Migrations
 {
-    public partial class Create_DB : Migration
+    public partial class CreateDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -75,18 +75,17 @@ namespace PayAway.WebAPI.Migrations
                     CustomerName = table.Column<string>(type: "TEXT", nullable: false),
                     PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
                     CreditCardNumber = table.Column<string>(type: "TEXT", nullable: true),
-                    AuthCode = table.Column<string>(type: "TEXT", nullable: true),
-                    MerchantDBEMerchantId = table.Column<int>(type: "INTEGER", nullable: true)
+                    AuthCode = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Orders", x => x.OrderId);
                     table.ForeignKey(
-                        name: "FK_Orders_Merchants_MerchantDBEMerchantId",
-                        column: x => x.MerchantDBEMerchantId,
+                        name: "FK_Orders_Merchants_MerchantId",
+                        column: x => x.MerchantId,
                         principalTable: "Merchants",
                         principalColumn: "MerchantId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,7 +116,8 @@ namespace PayAway.WebAPI.Migrations
                 {
                     OrderLineItemId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    OrderID = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CatalogItemGuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     ItemName = table.Column<string>(type: "TEXT", nullable: false),
                     ItemUnitPrice = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
@@ -125,8 +125,8 @@ namespace PayAway.WebAPI.Migrations
                 {
                     table.PrimaryKey("PK_OrderLineItems", x => x.OrderLineItemId);
                     table.ForeignKey(
-                        name: "FK_OrderLineItems_Orders_OrderID",
-                        column: x => x.OrderID,
+                        name: "FK_OrderLineItems_Orders_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
@@ -174,15 +174,15 @@ namespace PayAway.WebAPI.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderLineItems_OrderID_ItemName",
+                name: "IX_OrderLineItems_OrderId_ItemName",
                 table: "OrderLineItems",
-                columns: new[] { "OrderID", "ItemName" },
+                columns: new[] { "OrderId", "ItemName" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_MerchantDBEMerchantId",
+                name: "IX_Orders_MerchantId",
                 table: "Orders",
-                column: "MerchantDBEMerchantId");
+                column: "MerchantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_OrderGuid",

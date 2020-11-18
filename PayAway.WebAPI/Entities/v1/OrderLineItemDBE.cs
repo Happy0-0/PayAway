@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
+using PayAway.WebAPI.Entities.v0;
+
 namespace PayAway.WebAPI.Entities.v1
 {
     public class OrderLineItemDBE
@@ -22,8 +24,10 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The order identifier.</value>
         [Required]
-        [Column("OrderID")]
         public int OrderId { get; set; }
+
+        [Required]
+        public Guid CatalogItemGuid { get; set; }
 
         [Required]
         public string ItemName { get; set; }
@@ -33,5 +37,23 @@ namespace PayAway.WebAPI.Entities.v1
 
         // Navigation Property
         public OrderDBE Order { get; set; }
+
+
+        public static explicit operator CatalogItemMBE(OrderLineItemDBE from)
+        {
+            CatalogItemMBE to = null;
+
+            if (from != null)
+            {
+                to = new CatalogItemMBE()
+                {
+                    ItemGuid = from.CatalogItemGuid,
+                    ItemName = from.ItemName,
+                    ItemUnitPrice = from.ItemUnitPrice
+
+                };
+            }
+            return to;
+        }
     }
 }

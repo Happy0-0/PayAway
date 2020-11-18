@@ -48,24 +48,46 @@ namespace PayAway.WebAPI.Entities.v1
         public string AuthCode { get; set; }
 
         // Navigation Property
+        public MerchantDBE Merchant { get; set; }
+
+        // Navigation Property
         public List<OrderEventDBE> OrderEvents { get; set; }
 
         // Navigation Property
         public List<OrderLineItemDBE> OrderLineItems { get; set; }
 
 
-        public static explicit operator MerchantOrderMBE(OrderDBE from)
+        public static explicit operator OrderMBE(OrderDBE from)
         {
-            MerchantOrderMBE to = null;
+            OrderMBE to = null;
 
             if (from != null)
             {
-                to = new MerchantOrderMBE()
+                to = new OrderMBE()
                 {
                     OrderGuid = from.OrderGuid,
                     Status = from.Status,
                     PhoneNumber = from.PhoneNumber,
                     Name = from.CustomerName
+                };
+            }
+            return to;
+        }
+
+        public static explicit operator OrderHeaderMBE(OrderDBE from)
+        {
+            OrderHeaderMBE to = null;
+
+            if (from != null)
+            {
+                to = new OrderHeaderMBE()
+                {
+                    OrderGuid = from.OrderGuid,
+                    Status = from.Status,
+                    PhoneNumber = from.PhoneNumber,
+                    CustomerName = from.CustomerName,
+                    OrderNumber = from.OrderId.ToString("0000"),        // zaro fill
+                    OrderDate = from.OrderDateTimeUTC
                 };
             }
             return to;

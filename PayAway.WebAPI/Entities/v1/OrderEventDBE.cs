@@ -36,13 +36,13 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public OrderDBE Order { get; set; }
 
-        public static explicit operator OrderEventsMBE(OrderEventDBE from)
+        public static explicit operator OrderEventMBE(OrderEventDBE from)
         {
-            OrderEventsMBE to = null;
+            OrderEventMBE to = null;
 
             if(from != null)
             {
-                to = new OrderEventsMBE()
+                to = new OrderEventMBE()
                 {
                     EventDate = from.EventDateTimeUTC,
                     EventStatus = from.OrderStatus,

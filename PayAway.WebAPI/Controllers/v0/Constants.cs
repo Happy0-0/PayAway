@@ -16,5 +16,10 @@ namespace PayAway.WebAPI.Controllers.v0
         internal static Guid MERCHANT_2_LOGO_GUID = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
 
         internal static Guid ORDER_1_GUID = new Guid(@"43e351fe-3cbc-4e36-b94a-9befe28637b3");
+        internal static Guid ORDER_2_GUID = new Guid(@"fd07b84b-852e-47c9-b6d6-d248bd9e6bed");
+
+        internal static Guid CATALOG_ITEM_1_GUID = new Guid(@"6b95573c-fbe5-4560-93c9-23c6a9baa500");
+        internal static Guid CATALOG_ITEM_2_GUID = new Guid(@"f6a1e3a5-c563-48d0-9a15-f7a23c5ab688");
+        internal static Guid CATALOG_ITEM_3_GUID = new Guid(@"51d06775-0be8-4dc9-9c25-2146f6a91fef");
     }
 }
