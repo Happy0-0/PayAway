@@ -159,7 +159,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder)
+        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newMerchantOrder)
         {
             var merchantOrder = new OrderMBE
             {

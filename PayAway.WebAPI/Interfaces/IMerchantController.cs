@@ -11,7 +11,7 @@ namespace PayAway.WebAPI.Interfaces
         ActionResult<OrderQueueMBE> GetOrderQueue();
 
 
-        ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder);
+        ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newMerchantOrder);
 
         ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder);
 

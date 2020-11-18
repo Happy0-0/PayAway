@@ -162,7 +162,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newOrder)
+        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
             //trims customer name so that it doesn't have trailing characters
             newOrder.Name = newOrder.Name.Trim();
