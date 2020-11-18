@@ -204,7 +204,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {

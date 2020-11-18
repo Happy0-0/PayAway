@@ -115,41 +115,19 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<OrderMBE> GetOrder(Guid orderGuid)
         {
             //query the db
-            var dbMerchantOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+            var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
 
             // if we did not find a matching merchant order
-            if (dbMerchantOrder == null)
+            if (dbExplodedOrder == null)
             {
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
 
-            // convert DB entity to the public entity type
-            var merchantOrder = (OrderMBE)dbMerchantOrder;
-
-            merchantOrder.MerchantGuid = dbMerchantOrder.Merchant.MerchantGuid;
-
-            //create an empty working object
-            var catalogItems = new List<CatalogItemMBE>();
-            var orderEvents = new List<OrderEventMBE>();
-
-            // optionally convert DB entities to the public entity type
-            if (dbMerchantOrder.OrderLineItems != null)
-            {
-                // convert DB entities to the public entity types
-                catalogItems = dbMerchantOrder.OrderLineItems.ConvertAll(oli => (CatalogItemMBE)oli);
-            }
-            if (dbMerchantOrder.OrderEvents != null)
-            {
-                // convert DB entities to the public entity types
-                orderEvents = dbMerchantOrder.OrderEvents.ConvertAll(dbE => (OrderEventMBE)dbE);
-            }
-
-            // set the value of the property collection on the parent object
-            merchantOrder.OrderLineItems = catalogItems;
-            merchantOrder.OrderEvents = orderEvents;
+            // convert this to the public mbe
+            var order = BuildExplodedOrder(dbExplodedOrder);
 
             //Return the response
-            return Ok(merchantOrder);
+            return Ok(order);
 
         }
 
@@ -211,24 +189,22 @@ namespace PayAway.WebAPI.Controllers.v1
                 }
 
                 //convert dbOrder to public entity.
-                var order = (OrderMBE)dbOrder;
-
+                var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+                var explodedOrder = BuildExplodedOrder(dbExplodedOrder);
 
                 // return the response
-                return CreatedAtAction(nameof(GetOrder), new { orderGuid = order.OrderGuid }, order);
+                return CreatedAtAction(nameof(GetOrder), new { orderGuid = explodedOrder.OrderGuid }, explodedOrder);
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant order."));
             }
-
-
         }
 
         /// <summary>
         /// Sends a payment request to the customer.
         /// </summary>
-        /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
+        /// <param name="orderGuid">the unique id for the order</param>
         /// <returns></returns>
         [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -241,16 +217,46 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Updates a merchant order by merchant ID.
         /// </summary>
-        /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
+        /// <param name="orderGuid">the unique id for the order</param>
         /// <param name="updatedMerchantOrder"></param>
         /// <returns>updated merchant order</returns>
         [HttpPut("orders/{orderGuid:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
         {
             throw new NotImplementedException();
+        }
+                
+        private OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
+        {
+            // convert DB entity to the public entity type
+            var order = (OrderMBE)dbExplodedOrder;
+
+            order.MerchantGuid = dbExplodedOrder.Merchant.MerchantGuid;
+
+            //create an empty working object
+            var catalogItems = new List<CatalogItemMBE>();
+            var orderEvents = new List<OrderEventMBE>();
+
+            // optionally convert DB entities to the public entity type
+            if (dbExplodedOrder.OrderLineItems != null)
+            {
+                // convert DB entities to the public entity types
+                catalogItems = dbExplodedOrder.OrderLineItems.ConvertAll(oli => (CatalogItemMBE)oli);
+            }
+            if (dbExplodedOrder.OrderEvents != null)
+            {
+                // convert DB entities to the public entity types
+                orderEvents = dbExplodedOrder.OrderEvents.ConvertAll(dbE => (OrderEventMBE)dbE);
+            }
+
+            // set the value of the property collection on the parent object
+            order.OrderLineItems = catalogItems;
+            order.OrderEvents = orderEvents;
+
+            return order;
         }
     }
 }
