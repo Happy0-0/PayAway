@@ -64,7 +64,7 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/11</td>
                                     <td>v0.3</td>
-                                    <td>Added methods GetMerchantOrder, CreateMerchantOrder, and UpdateMerchantOrder.
+                                    <td>Added methods GetOrder, CreateOrder, and UpdateMerchantOrder.
                                     </td>
                                 </tr>
                                 <tr>
@@ -162,9 +162,15 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/18</td>
+                                    <td>v1.22</td>
+                                    <td>Implemented CreateOrder method.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/17</td>
                                     <td>v1.21</td>
-                                    <td>Implemented GetMerchantOrder method and other DBContext Methods.
+                                    <td>Implemented GetOrder method and other DBContext Methods.
                                     </td>
                                 </tr>
                                 <tr>

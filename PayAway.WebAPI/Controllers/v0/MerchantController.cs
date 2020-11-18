@@ -100,7 +100,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<OrderMBE> GetMerchantOrder(Guid orderGuid)
+        public ActionResult<OrderMBE> GetOrder(Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
@@ -159,7 +159,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder)
+        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newMerchantOrder)
         {
             var merchantOrder = new OrderMBE
             {
@@ -191,7 +191,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 }
             };
 
-            return CreatedAtAction(nameof(GetMerchantOrder), new { orderID = merchantOrder.OrderGuid }, merchantOrder);
+            return CreatedAtAction(nameof(GetOrder), new { orderID = merchantOrder.OrderGuid }, merchantOrder);
         }
 
         /// <summary>

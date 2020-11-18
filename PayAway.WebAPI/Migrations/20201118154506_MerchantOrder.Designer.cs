@@ -9,8 +9,8 @@ using PayAway.WebAPI.DB;
 namespace PayAway.WebAPI.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    [Migration("20201118123658_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20201118154506_MerchantOrder")]
+    partial class MerchantOrder
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
