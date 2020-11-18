@@ -12,13 +12,13 @@ namespace PayAway.WebAPI.Entities.v0
     public class NewMerchantOrderMBE
     {
         /// <summary>
-        /// Gets or sets the order name
+        /// Gets or sets the orders customer name
         /// </summary>
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the order phone number
+        /// Gets or sets the orders customers phone number
         /// </summary>
         /// <value>phone number</value>
         [JsonPropertyName("phoneNumber")]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PayAway.WebAPI.Entities.v0;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -52,5 +53,22 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public List<OrderLineItemDBE> OrderLineItems { get; set; }
 
+
+        public static explicit operator MerchantOrderMBE(OrderDBE from)
+        {
+            MerchantOrderMBE to = null;
+
+            if (from != null)
+            {
+                to = new MerchantOrderMBE()
+                {
+                    OrderGuid = from.OrderGuid,
+                    Status = from.Status,
+                    PhoneNumber = from.PhoneNumber,
+                    Name = from.CustomerName
+                };
+            }
+            return to;
+        }
     }
 }

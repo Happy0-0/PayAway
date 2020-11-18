@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PayAway.WebAPI.Entities.v1;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -52,9 +53,12 @@ namespace PayAway.WebAPI.Entities.v0
         [JsonPropertyName("orderTotal")]
         public decimal OrderTotal 
         {
-            get { return OrderItems != null ? 10.0M : 0.0M; } //TODO: implement calculation
+            get
+            {
+                return this.OrderItems.Sum(oli => oli.ItemUnitPrice);
+            }
 
         }
-
+                
     }
 }
