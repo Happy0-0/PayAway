@@ -65,6 +65,8 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new OrderMBE()
                 {
+                    OrderNumber = from.OrderId.ToString("0000"),
+                    OrderDate = from.OrderDateTimeUTC,
                     OrderGuid = from.OrderGuid,
                     Status = from.Status,
                     PhoneNumber = from.PhoneNumber,
@@ -86,7 +88,7 @@ namespace PayAway.WebAPI.Entities.v1
                     Status = from.Status,
                     PhoneNumber = from.PhoneNumber,
                     CustomerName = from.CustomerName,
-                    OrderNumber = from.OrderId.ToString("0000"),        // zaro fill
+                    OrderNumber = from.OrderId.ToString("0000"),        // zero fill
                     OrderDate = from.OrderDateTimeUTC
                 };
             }

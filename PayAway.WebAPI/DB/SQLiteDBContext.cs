@@ -234,7 +234,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrderLineItems = SeedData.GetOrderLineItems();
                 foreach(var seedOrderLineItem in seedOrderLineItems)
                 {
-                    SQLiteDBContext.InsertOrderLineItems(seedOrderLineItem);
+                    SQLiteDBContext.InsertOrderLineItem(seedOrderLineItem);
                 }
                 #endregion
             }
@@ -791,18 +791,18 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// used by the WebAPI controllers.
         /// </remarks>
-        internal static OrderDBE InsertOrder(int merchantId, OrderDBE newOrder)
+        internal static OrderDBE InsertOrder(int merchantId, NewOrderMBE newOrder)
         {
             using (var context = new SQLiteDBContext())
             {
                 // make the db entity
                 var dbOrder = new OrderDBE
                 {
+                    Status = @"New Order",
                     MerchantId = merchantId,
-                    CustomerName = newOrder.CustomerName,
+                    CustomerName = newOrder.Name,
                     PhoneNumber = newOrder.PhoneNumber,
-                    Status = newOrder.Status,
-                    OrderDateTimeUTC = newOrder.OrderDateTimeUTC
+                    OrderDateTimeUTC = DateTime.UtcNow
                 };
 
                 context.Orders.Add(dbOrder);
@@ -825,7 +825,7 @@ namespace PayAway.WebAPI.DB
                     throw;
                 }
 
-                return newOrder;
+                return dbOrder;
             }
         }
 
@@ -974,14 +974,14 @@ namespace PayAway.WebAPI.DB
         #region ==== OrderLineItem Methods =======
 
         /// <summary>
-        /// Inserts new line items
+        /// Inserts new line item
         /// </summary>
         /// <param name="newLineItem"></param>
         /// <returns></returns>
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static OrderLineItemDBE InsertOrderLineItems(OrderLineItemDBE newLineItem)
+        internal static OrderLineItemDBE InsertOrderLineItem(OrderLineItemDBE newLineItem)
         {
             using (var context = new SQLiteDBContext())
             {

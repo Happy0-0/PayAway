@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PayAway.WebAPI.Migrations
 {
-    public partial class CreateDatabase : Migration
+    public partial class MerchantOrder : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

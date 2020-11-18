@@ -53,57 +53,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // return the response
             return Ok(activeMerchant);
         }
-
-        /// <summary>
-        /// Gets merchant order
-        /// </summary>
-        /// <param name="orderGuid">The unique identifier for the merchant</param>
-        /// <returns>merchant Order</returns>
-        [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetMerchantOrder))]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<OrderMBE> GetMerchantOrder(Guid orderGuid)
-        {
-            //query the db
-            var dbMerchantOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
-
-            // if we did not find a matching merchant order
-            if (dbMerchantOrder == null)
-            {
-                return NotFound($"Merchant order: [{orderGuid}] not found");
-            }
-
-            // convert DB entity to the public entity type
-            var merchantOrder = (OrderMBE)dbMerchantOrder;
-
-            merchantOrder.MerchantGuid = dbMerchantOrder.Merchant.MerchantGuid;
-
-            //create an empty working object
-            var catalogItems = new List<CatalogItemMBE>();
-            var orderEvents = new List<OrderEventMBE>();
-
-            // optionally convert DB entities to the public entity type
-            if (dbMerchantOrder.OrderLineItems != null)
-            {
-                // convert DB entities to the public entity types
-                catalogItems = dbMerchantOrder.OrderLineItems.ConvertAll(oli => (CatalogItemMBE)oli);
-            }
-            if (dbMerchantOrder.OrderEvents != null)
-            {
-                // convert DB entities to the public entity types
-                orderEvents = dbMerchantOrder.OrderEvents.ConvertAll(dbE => (OrderEventMBE)dbE);
-            }
-
-            // set the value of the property collection on the parent object
-            merchantOrder.OrderLineItems = catalogItems;
-            merchantOrder.OrderEvents = orderEvents;
-
-            //Return the response
-            return Ok(merchantOrder);
-
-        }
-
+               
         /// <summary>
         /// Gets the order queue
         /// </summary>
@@ -154,17 +104,128 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
+        /// Gets merchant order
+        /// </summary>
+        /// <param name="orderGuid">The unique identifier for the merchant</param>
+        /// <returns>merchant Order</returns>
+        [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetOrder))]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<OrderMBE> GetOrder(Guid orderGuid)
+        {
+            //query the db
+            var dbMerchantOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+
+            // if we did not find a matching merchant order
+            if (dbMerchantOrder == null)
+            {
+                return NotFound($"Merchant order: [{orderGuid}] not found");
+            }
+
+            // convert DB entity to the public entity type
+            var merchantOrder = (OrderMBE)dbMerchantOrder;
+
+            merchantOrder.MerchantGuid = dbMerchantOrder.Merchant.MerchantGuid;
+
+            //create an empty working object
+            var catalogItems = new List<CatalogItemMBE>();
+            var orderEvents = new List<OrderEventMBE>();
+
+            // optionally convert DB entities to the public entity type
+            if (dbMerchantOrder.OrderLineItems != null)
+            {
+                // convert DB entities to the public entity types
+                catalogItems = dbMerchantOrder.OrderLineItems.ConvertAll(oli => (CatalogItemMBE)oli);
+            }
+            if (dbMerchantOrder.OrderEvents != null)
+            {
+                // convert DB entities to the public entity types
+                orderEvents = dbMerchantOrder.OrderEvents.ConvertAll(dbE => (OrderEventMBE)dbE);
+            }
+
+            // set the value of the property collection on the parent object
+            merchantOrder.OrderLineItems = catalogItems;
+            merchantOrder.OrderEvents = orderEvents;
+
+            //Return the response
+            return Ok(merchantOrder);
+
+        }
+
+        /// <summary>
         /// Creates a new merchant order
         /// </summary>
-        /// <param name="newMerchantOrder"></param>
-        /// <returns></returns>
+        /// <param name="newOrder">object containing information about the new merchant order</param>
+        /// <returns>newMerchantOrder</returns>
         [HttpPost("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newMerchantOrder)
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newOrder)
         {
-            throw new NotImplementedException();
+            //trims customer name so that it doesn't have trailing characters
+            newOrder.Name = newOrder.Name.Trim();
+
+            // validate request data
+            if (string.IsNullOrEmpty(newOrder.Name))
+            {
+                return BadRequest(new ArgumentNullException(nameof(newOrder.Name), @"You must supply a non blank value for the Order Name."));
+            }
+            else if (string.IsNullOrEmpty(newOrder.PhoneNumber))
+            {
+                return BadRequest(new ArgumentNullException(nameof(newOrder.PhoneNumber), @"You must supply a non blank value for the Order Phone No."));
+            }
+
+            //query the db for the active merchant
+            var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
+
+            try
+            {
+                //Store the new merchant Order
+                var dbOrder = SQLiteDBContext.InsertOrder(dbActiveMerchant.MerchantId, newOrder);
+
+
+
+                //create an empty working object
+                var dbOrderEvent = new OrderEventDBE()
+                {
+                    OrderId = dbOrder.OrderId,
+                    EventDateTimeUTC = DateTime.UtcNow,
+                    OrderStatus = "New Order",
+                    EventDescription = "A new order has been created."
+                };
+
+                //save order
+                SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
+                
+                //iterate through orderLineItems collection to save it in the db
+                foreach(var orderLineItem in newOrder.OrderLineItems)
+                {
+                    var dbOrderLineItem = new OrderLineItemDBE()
+                    {
+                        ItemName = orderLineItem.ItemName,
+                        ItemUnitPrice = orderLineItem.ItemUnitPrice,
+                        OrderId = dbOrder.OrderId,
+                        CatalogItemGuid = orderLineItem.ItemGuid
+                    };
+                    SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
+                }
+
+                //convert dbOrder to public entity.
+                var order = (OrderMBE)dbOrder;
+
+
+                // return the response
+                return CreatedAtAction(nameof(GetOrder), new { orderGuid = order.OrderGuid }, order);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant order: [{newOrder.Name}]"));
+            }
+
+
         }
 
         /// <summary>

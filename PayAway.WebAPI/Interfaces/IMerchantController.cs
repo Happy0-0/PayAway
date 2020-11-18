@@ -15,7 +15,7 @@ namespace PayAway.WebAPI.Interfaces
 
         ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder);
 
-        ActionResult<OrderMBE> GetMerchantOrder(Guid orderGuid);
+        ActionResult<OrderMBE> GetOrder(Guid orderGuid);
 
         ActionResult SendOrderPaymentRequest(Guid orderGuid);
 
