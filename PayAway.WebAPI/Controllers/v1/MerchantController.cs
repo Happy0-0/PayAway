@@ -162,7 +162,6 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<OrderMBE> CreateMerchantOrder([FromBody] NewOrderMBE newOrder)
         {
             //trims customer name so that it doesn't have trailing characters
@@ -185,8 +184,6 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 //Store the new merchant Order
                 var dbOrder = SQLiteDBContext.InsertOrder(dbActiveMerchant.MerchantId, newOrder);
-
-
 
                 //create an empty working object
                 var dbOrderEvent = new OrderEventDBE()
@@ -222,7 +219,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant order: [{newOrder.Name}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant order."));
             }
 
 
