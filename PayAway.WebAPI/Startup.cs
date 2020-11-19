@@ -1,3 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -8,13 +16,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+
+using PayAway.WebAPI.BizTier;
+using PayAway.WebAPI.Entities.Config;
 
 namespace PayAway.WebAPI
 {
@@ -31,6 +35,12 @@ namespace PayAway.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // load configuration
+            var smsServiceConfig = Configuration.GetSection("SMSConfig").Get<SMSServiceConfigBE>();
+
+            // Inject configuration class into static instance
+            services.AddSMSServiceConfig(smsServiceConfig);
+
             services.AddCors();
             services.AddControllers();
 

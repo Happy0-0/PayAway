@@ -262,27 +262,21 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     OrderId = dbOrder.OrderId,
                     EventDateTimeUTC = DateTime.UtcNow,
-                    OrderStatus = "Order Updated",
+                    OrderStatus = Enums.ORDER_STATUS.Updated,
                     EventDescription = "The Order has changed."
                 };
 
                 //save order event
                 SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
 
-                dbOrder.Status = "Order Updated";
+                dbOrder.Status = Enums.ORDER_STATUS.Updated;
                 //Update Order again
                 SQLiteDBContext.UpdateOrder(dbOrder);
-
-
-
-
-
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed to update merchant order."));
             }
-
 
             return NoContent();
             throw new NotImplementedException();
