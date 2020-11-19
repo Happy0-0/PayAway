@@ -671,6 +671,21 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
+        /// Gets a catalog item.
+        /// </summary>
+        /// <param name="catalogItemGuid">The unique catalog item identifier.</param>
+        /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
+        internal static CatalogItemDBE GetCatalogItem(Guid catalogItemGuid)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var dbCatalogItem = context.CatalogItems.FirstOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
+
+                return dbCatalogItem;
+            }
+        }
+
+        /// <summary>
         /// Inserts the catalog item.
         /// </summary>
         /// <param name="newCatalogItem">The new catalog item.</param>
@@ -906,6 +921,9 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
+                // turn off change tracking since we are going to overwite the entity
+                // Note: I would not do this if there was a db assigned unique id for the record
+                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
                 var currentOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
 

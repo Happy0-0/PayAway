@@ -49,7 +49,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new CatalogItemMBE()
                 {
-                   ItemGuid = Guid.NewGuid(),
+                   ItemGuid = from.CatalogItemGuid,
                    ItemName = from.ItemName,
                    ItemUnitPrice = from.ItemUnitPrice
 

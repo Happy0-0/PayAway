@@ -28,6 +28,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets a list of items
         /// </summary>
         [JsonPropertyName("orderItems")]
-        public List<CatalogItemMBE> OrderLineItems { get; set; }
+        public List<NewOrderLineItemMBE> OrderLineItems { get; set; }
     }
 }

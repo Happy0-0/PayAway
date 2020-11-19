@@ -10,7 +10,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class used when a method needs to get merchant order information
     /// </summary>
-    public class OrderMBE : NewOrderMBE
+    public class OrderMBE
     {
         /// <summary>
         /// Gets or sets order guid
@@ -34,6 +34,19 @@ namespace PayAway.WebAPI.Entities.v0
         public Enums.ORDER_STATUS OrderStatus { get; set; }
 
         /// <summary>
+        /// Gets or sets the orders customer name
+        /// </summary>
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the orders customers phone number
+        /// </summary>
+        /// <value>phone number</value>
+        [JsonPropertyName("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        /// <summary>
         /// Gets or sets merchantID guid
         /// </summary>
         /// <value>merchantID</value>
@@ -52,6 +65,12 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         [JsonPropertyName("orderEvents")]
         public List<OrderEventMBE> OrderEvents { get; set; }
+                
+        /// <summary>
+        /// Gets or sets a list of items
+        /// </summary>
+        [JsonPropertyName("orderItems")]
+        public List<CatalogItemMBE> OrderLineItems { get; set; }
 
         /// <summary>
         /// Gets or sets the order total

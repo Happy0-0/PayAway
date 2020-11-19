@@ -123,7 +123,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Gets merchant order
         /// </summary>
-        /// <param name="orderGuid">The unique identifier for the merchant</param>
+        /// <param name="orderGuid">The unique identifier for the order</param>
         /// <returns>merchant Order</returns>
         [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetOrder))]
         [Produces("application/json")]
@@ -171,9 +171,17 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ArgumentNullException(nameof(newOrder.PhoneNumber), @"You must supply a non blank value for the Order Phone No."));
             }
+            foreach (var orderLineItem in newOrder.OrderLineItems)
+            {
+                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                if(catalogItem == null)
+                {
+                    return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
+                }
+            }
 
-            //query the db for the active merchant
-            var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
+                //query the db for the active merchant
+                var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
 
             try
             {
@@ -195,10 +203,12 @@ namespace PayAway.WebAPI.Controllers.v1
                 //iterate through orderLineItems collection to save it in the db
                 foreach(var orderLineItem in newOrder.OrderLineItems)
                 {
+                    var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+
                     var dbOrderLineItem = new OrderLineItemDBE()
                     {
-                        ItemName = orderLineItem.ItemName,
-                        ItemUnitPrice = orderLineItem.ItemUnitPrice,
+                        ItemName = catalogItem.ItemName,
+                        ItemUnitPrice = catalogItem.ItemUnitPrice,
                         OrderId = dbOrder.OrderId,
                         CatalogItemGuid = orderLineItem.ItemGuid
                     };
@@ -214,7 +224,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant order."));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed trying to create merchant order."));
             }
         }
 
@@ -260,7 +270,32 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
             }
-                        
+
+            // validate the input params
+            if (string.IsNullOrEmpty(updatedOrder.Name))
+            {
+                return BadRequest(new ArgumentException(nameof(updatedOrder.Name), @"The order name cannot be blank."));
+            }
+            // validate the input params
+            if (string.IsNullOrEmpty(updatedOrder.PhoneNumber))
+            {
+                return BadRequest(new ArgumentException(nameof(updatedOrder.PhoneNumber), @"The order phone number cannot be blank."));
+            }
+            foreach (var orderLineItem in updatedOrder.OrderLineItems)
+            {
+                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                if (catalogItem == null)
+                {
+                    return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
+                }
+            }
+
+            //Can not change the order if it has already been paid for.
+            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
+            {
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
+            }
+
             try
             {
                 
@@ -273,10 +308,12 @@ namespace PayAway.WebAPI.Controllers.v1
                 //iterate through orderLineItems collection to save it in the db
                 foreach (var orderLineItem in updatedOrder.OrderLineItems)
                 {
+                    var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+
                     var dbOrderLineItem = new OrderLineItemDBE()
                     {
-                        ItemName = orderLineItem.ItemName,
-                        ItemUnitPrice = orderLineItem.ItemUnitPrice,
+                        ItemName = catalogItem.ItemName,
+                        ItemUnitPrice = catalogItem.ItemUnitPrice,
                         OrderId = dbOrder.OrderId,
                         CatalogItemGuid = orderLineItem.ItemGuid
                     };
@@ -298,14 +335,18 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
                 //Update Order again
                 SQLiteDBContext.UpdateOrder(dbOrder);
+
+                return NoContent();
+
+
+
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed to update merchant order."));
             }
 
-            return NoContent();
-            throw new NotImplementedException();
+            
         }
                 
         private OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
