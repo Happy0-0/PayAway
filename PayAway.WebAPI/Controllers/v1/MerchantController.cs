@@ -229,28 +229,6 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Sends a payment request to the customer.
-        /// </summary>
-        /// <param name="orderGuid">the unique id for the order</param>
-        /// <returns></returns>
-        [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult SendOrderPaymentRequest(Guid orderGuid)
-        {
-            throw new NotImplementedException();
-
-            //string payAwayURL = $"{_webUrlConfig.BlazorBaseUrl}/customerorder/{dbOrder.OrderGuid}";
-
-            //StringBuilder payAwayMsg = new StringBuilder();
-            //payAwayMsg.AppendLine($"Hello {order.CustomerName}");
-            //payAwayMsg.AppendLine($"{dbMerchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {order.MerchantOrderNo} for: {order.SaleAmount:C}");
-            //payAwayMsg.AppendLine($"{payAwayURL}");
-
-            //var msgSid = SMSController.SendSMSMessage(string.Empty, cellPhoneNo, payAwayMsg.ToString());
-        }
-
-        /// <summary>
         /// Updates an order by order guid.
         /// </summary>
         /// <param name="orderGuid"></param>
@@ -262,7 +240,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
-            //query the db
+            // get the existing order
             var dbOrder = SQLiteDBContext.GetOrder(orderGuid);
 
             // if we did not find a matching order
@@ -271,38 +249,44 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
             }
 
+            // Biz Logic: Cannot change the order if it has already been paid for.
+            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
+            {
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
+            }
+
             // validate the input params
             if (string.IsNullOrEmpty(updatedOrder.Name))
             {
                 return BadRequest(new ArgumentException(nameof(updatedOrder.Name), @"The order name cannot be blank."));
             }
-            // validate the input params
-            if (string.IsNullOrEmpty(updatedOrder.PhoneNumber))
+            else if (string.IsNullOrEmpty(updatedOrder.PhoneNumber))
             {
                 return BadRequest(new ArgumentException(nameof(updatedOrder.PhoneNumber), @"The order phone number cannot be blank."));
             }
+
+            // validate the catalog guids
             foreach (var orderLineItem in updatedOrder.OrderLineItems)
             {
+                // try to find the catalog item
                 var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+
+                // if it did not exist (ie: a invalid guid)
                 if (catalogItem == null)
                 {
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
                 }
             }
 
-            //Can not change the order if it has already been paid for.
-            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
-            {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
-            }
-
             try
             {
-                
+                // update the dbOrder with the values we just got
                 dbOrder.CustomerName = updatedOrder.Name;
                 dbOrder.PhoneNumber = updatedOrder.PhoneNumber;
+                dbOrder.Status = Enums.ORDER_STATUS.Updated;
                 SQLiteDBContext.UpdateOrder(dbOrder);
 
+                // in this demo code we are just going to delete and readd the order line items
                 SQLiteDBContext.DeleteOrderLineItems(dbOrder.OrderId);
 
                 //iterate through orderLineItems collection to save it in the db
@@ -317,38 +301,55 @@ namespace PayAway.WebAPI.Controllers.v1
                         OrderId = dbOrder.OrderId,
                         CatalogItemGuid = orderLineItem.ItemGuid
                     };
+
                     SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
                 }
 
-                //create the first event
+                // create an event
                 var dbOrderEvent = new OrderEventDBE()
                 {
                     OrderId = dbOrder.OrderId,
                     EventDateTimeUTC = DateTime.UtcNow,
                     OrderStatus = Enums.ORDER_STATUS.Updated,
-                    EventDescription = "The Order has changed."
+                    EventDescription = "Order was updated."
                 };
 
                 //save order event
                 SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
 
-                dbOrder.Status = Enums.ORDER_STATUS.Updated;
-                //Update Order again
-                SQLiteDBContext.UpdateOrder(dbOrder);
-
                 return NoContent();
-
-
-
             }
             catch (Exception ex)
             {
                 return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed to update merchant order."));
             }
-
-            
         }
-                
+
+        /// <summary>
+        /// Sends a payment request to the customer.
+        /// </summary>
+        /// <param name="orderGuid">the unique id for the order</param>
+        /// <returns></returns>
+        [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult SendOrderPaymentRequest(Guid orderGuid)
+        {
+            return Ok(_webUrlConfig.HPPBaseUrl);
+
+            throw new NotImplementedException();
+
+            //string payAwayURL = $"{_webUrlConfig.BlazorBaseUrl}/customerorder/{dbOrder.OrderGuid}";
+
+            //StringBuilder payAwayMsg = new StringBuilder();
+            //payAwayMsg.AppendLine($"Hello {order.CustomerName}");
+            //payAwayMsg.AppendLine($"{dbMerchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {order.MerchantOrderNo} for: {order.SaleAmount:C}");
+            //payAwayMsg.AppendLine($"{payAwayURL}");
+
+            //var msgSid = SMSController.SendSMSMessage(string.Empty, cellPhoneNo, payAwayMsg.ToString());
+        }
+
+        #region === Helper Methods =============================================
         private OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
         {
             // convert DB entity to the public entity type
@@ -378,5 +379,6 @@ namespace PayAway.WebAPI.Controllers.v1
 
             return order;
         }
+        #endregion
     }
 }

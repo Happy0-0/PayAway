@@ -40,8 +40,8 @@ namespace PayAway.WebAPI
             var webUrlConfig = Configuration.GetSection("WebURLConfig").Get<WebUrlConfigurationBE>();
 
             // Inject configuration class into static instance
-            services.AddSMSServiceConfig(smsServiceConfig);
-            services.AddSingleton(webUrlConfig);
+            services.AddSMSServiceConfig(smsServiceConfig ?? new SMSServiceConfigBE());
+            services.AddSingleton(webUrlConfig ?? new WebUrlConfigurationBE());
 
             services.AddCors();
             services.AddControllers();
