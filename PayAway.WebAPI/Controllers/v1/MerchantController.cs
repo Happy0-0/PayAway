@@ -1,14 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using PayAway.WebAPI.DB;
-using PayAway.WebAPI.Entities.v0;
-using PayAway.WebAPI.Entities.v1;
-using PayAway.WebAPI.Interfaces;
+using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using PayAway.WebAPI.DB;
+using PayAway.WebAPI.Entities.Config;
+using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Interfaces;
+
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -22,6 +27,18 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class MerchantController : ControllerBase, IMerchantController
     {
+        private readonly ILogger<MerchantController> logger;
+        private readonly WebUrlConfigurationBE _webUrlConfig;
+
+        /// <summary>Initializes a new instance of the <see cref="T:PrestoPayv3.Server.WebAPI.Controllers.v1.MerchantController" /> class.</summary>
+        /// <param name="webUrlConfig">The web URL configuration.</param>
+        /// <param name="logger">The logger.</param>
+        public MerchantController(WebUrlConfigurationBE webUrlConfig, ILogger<MerchantController> logger)
+        {
+            this._webUrlConfig = webUrlConfig;
+            this.logger = logger;
+        }
+
         /// <summary>
         /// Gets the active merchant
         /// </summary>

@@ -37,9 +37,11 @@ namespace PayAway.WebAPI
         {
             // load configuration
             var smsServiceConfig = Configuration.GetSection("SMSConfig").Get<SMSServiceConfigBE>();
+            var webUrlConfig = Configuration.GetSection("WebURLConfig").Get<WebUrlConfigurationBE>();
 
             // Inject configuration class into static instance
             services.AddSMSServiceConfig(smsServiceConfig);
+            services.AddSingleton(webUrlConfig);
 
             services.AddCors();
             services.AddControllers();
