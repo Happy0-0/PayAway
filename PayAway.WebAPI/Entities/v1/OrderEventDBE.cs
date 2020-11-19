@@ -28,7 +28,7 @@ namespace PayAway.WebAPI.Entities.v1
         public DateTime EventDateTimeUTC { get; set; }
 
         [Required]
-        public string OrderStatus { get; set; }
+        public Enums.ORDER_STATUS OrderStatus { get; set; }
 
         [Required]
         public string EventDescription { get; set; }
@@ -36,6 +36,7 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public OrderDBE Order { get; set; }
 
+        #region === Type Conversion Methods ================================
         public static explicit operator OrderEventMBE(OrderEventDBE from)
         {
             OrderEventMBE to = null;
@@ -45,12 +46,13 @@ namespace PayAway.WebAPI.Entities.v1
                 to = new OrderEventMBE()
                 {
                     EventDate = from.EventDateTimeUTC,
-                    EventStatus = from.OrderStatus,
+                    OrderStatus = from.OrderStatus,
                     EventDescription = from.EventDescription
                 };
             }
 
             return to;
         }
+        #endregion
     }
 }

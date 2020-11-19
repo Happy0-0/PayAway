@@ -40,6 +40,7 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property (we dop not add this because of the "default" items stored on merchantId 0
         //public MerchantDBE Merchant { get; set; }
 
+        #region === Type Conversion Methods ================================
         public static explicit operator CatalogItemMBE(CatalogItemDBE from)
         {
             CatalogItemMBE to = null;
@@ -56,5 +57,6 @@ namespace PayAway.WebAPI.Entities.v1
             }
             return to;
         }
+        #endregion
     }
 }

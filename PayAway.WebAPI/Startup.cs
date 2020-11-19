@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace PayAway.WebAPI
@@ -32,6 +33,14 @@ namespace PayAway.WebAPI
         {
             services.AddCors();
             services.AddControllers();
+
+            services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                // serialize enums as strings
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                options.JsonSerializerOptions.IgnoreNullValues = true;
+            });
 
             // routes and endpoints are discovered automatically
             services.AddMvc(c =>
@@ -243,20 +252,20 @@ namespace PayAway.WebAPI
                             <table>
                             ",
 
-                    TermsOfService = new Uri("https://example.com/terms"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Gabriel Levit",
-                        Email = @"gabriel.levit@fisglobal.com",
-                        Url = new Uri("https://twitter.com/demo"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "Use under LICX",
-                        Url = new Uri("https://example.com/license"),
+                        TermsOfService = new Uri("https://example.com/terms"),
+                        Contact = new OpenApiContact
+                        {
+                            Name = "Gabriel Levit",
+                            Email = @"gabriel.levit@fisglobal.com",
+                            Url = new Uri("https://twitter.com/demo"),
+                        },
+                        License = new OpenApiLicense
+                        {
+                            Name = "Use under LICX",
+                            Url = new Uri("https://example.com/license"),
+                        }
                     }
-                }
-);
+                );
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

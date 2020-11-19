@@ -44,6 +44,7 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public MerchantDBE Merchant { get; set; }
 
+        #region === Type Conversion Methods ================================
         public static explicit operator CustomerMBE(DemoCustomerDBE from)
         {
             CustomerMBE to = null;
@@ -78,6 +79,6 @@ namespace PayAway.WebAPI.Entities.v1
             return to;
         }
 
-        
+        #endregion
     }
 }
