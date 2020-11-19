@@ -13,7 +13,7 @@ using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
-
+using System.Text;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -229,6 +229,15 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
             throw new NotImplementedException();
+
+            //string payAwayURL = $"{_webUrlConfig.BlazorBaseUrl}/customerorder/{dbOrder.OrderGuid}";
+
+            //StringBuilder payAwayMsg = new StringBuilder();
+            //payAwayMsg.AppendLine($"Hello {order.CustomerName}");
+            //payAwayMsg.AppendLine($"{dbMerchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {order.MerchantOrderNo} for: {order.SaleAmount:C}");
+            //payAwayMsg.AppendLine($"{payAwayURL}");
+
+            //var msgSid = SMSController.SendSMSMessage(string.Empty, cellPhoneNo, payAwayMsg.ToString());
         }
 
         /// <summary>
