@@ -38,7 +38,7 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public OrderDBE Order { get; set; }
 
-
+        #region === Type Conversion Methods ================================
         public static explicit operator CatalogItemMBE(OrderLineItemDBE from)
         {
             CatalogItemMBE to = null;
@@ -55,5 +55,6 @@ namespace PayAway.WebAPI.Entities.v1
             }
             return to;
         }
+        #endregion
     }
 }

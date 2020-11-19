@@ -31,7 +31,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>order status</value>
         [JsonPropertyName("status")]
-        public string Status { get; set; }
+        public Enums.ORDER_STATUS OrderStatus { get; set; }
 
         /// <summary>
         /// Gets or sets merchantID guid

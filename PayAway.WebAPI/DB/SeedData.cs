@@ -107,7 +107,7 @@ namespace PayAway.WebAPI.DB
                     OrderGuid = Constants.ORDER_1_GUID,
                     MerchantId = 1,
                     OrderDateTimeUTC = DateTime.Now.AddMinutes(-10),
-                    Status = @"Paid",
+                    Status = Enums.ORDER_STATUS.Paid,
                     CustomerName = @"Joe Smith",
                     PhoneNumber = @"(555) 555-5555",
                     CreditCardNumber = @"1234-5678-9101-1121",
@@ -119,7 +119,7 @@ namespace PayAway.WebAPI.DB
                     OrderGuid = Constants.ORDER_2_GUID,
                     MerchantId = 1,
                     OrderDateTimeUTC = DateTime.Now.AddMinutes(-5),
-                    Status = @"Order Entered",
+                    Status = Enums.ORDER_STATUS.New,
                     CustomerName = @"Jane Doe",
                     PhoneNumber = @"(444) 444-4444",
                     CreditCardNumber = @"9876-5432-1098-7654",
@@ -138,21 +138,21 @@ namespace PayAway.WebAPI.DB
                 {
                     OrderId = 1,
                     EventDateTimeUTC = DateTime.Now.AddMinutes(-10),
-                    OrderStatus = @"New Order",
+                    OrderStatus = Enums.ORDER_STATUS.New,
                     EventDescription = @"Order entered."
                 },
                 new OrderEventDBE
                 {
                     OrderId = 1,
                     EventDateTimeUTC = DateTime.Now.AddMinutes(-9),
-                    OrderStatus = @"SMS Sent",
+                    OrderStatus =  Enums.ORDER_STATUS.SMS_Sent,
                     EventDescription = @"SMS Sent to (555) 555-5555"
                 },
                 new OrderEventDBE
                 {
                     OrderId = 1,
                     EventDateTimeUTC = DateTime.Now.AddMinutes(-8),
-                    OrderStatus = @"Paid",
+                    OrderStatus =  Enums.ORDER_STATUS.Paid,
                     EventDescription = @"Payment has been received for order."
                 },
 
@@ -160,7 +160,7 @@ namespace PayAway.WebAPI.DB
                 {
                     OrderId = 2,
                     EventDateTimeUTC = DateTime.Now.AddMinutes(-10),
-                    OrderStatus = @"Order Entered",
+                    OrderStatus =  Enums.ORDER_STATUS.New,
                     EventDescription = @"Order entered."
                 }
             };

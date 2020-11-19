@@ -124,6 +124,9 @@ namespace PayAway.WebAPI.DB
             modelBuilder.Entity<OrderDBE>()
                 .Property(o => o.OrderGuid)
                 .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
+            modelBuilder.Entity<OrderDBE>()
+                .Property(c => c.Status)
+                .HasConversion<int>();
             #endregion
 
             #region === OrderLineItems =========================================================
@@ -141,6 +144,9 @@ namespace PayAway.WebAPI.DB
                 .HasKey(oe => new { oe.OrderEventId});       // <== auto generated value
             modelBuilder.Entity<OrderEventDBE>()
                 .HasIndex(oe => new { oe.OrderId });        // <= not unqiue key, used for faster retrieval
+            modelBuilder.Entity<OrderEventDBE>()
+                .Property(c => c.OrderStatus)
+                .HasConversion<int>();
             #endregion
         }
 
@@ -798,7 +804,7 @@ namespace PayAway.WebAPI.DB
                 // make the db entity
                 var dbOrder = new OrderDBE
                 {
-                    Status = @"New Order",
+                    Status = Enums.ORDER_STATUS.New,
                     MerchantId = merchantId,
                     CustomerName = newOrder.Name,
                     PhoneNumber = newOrder.PhoneNumber,

@@ -7,8 +7,6 @@ namespace PayAway.WebAPI.Entities.v0
     /// </summary>
     public class NewMerchantMBE
     {
-
-
         /// <summary>
         /// Gets or sets the merchant name
         /// </summary>

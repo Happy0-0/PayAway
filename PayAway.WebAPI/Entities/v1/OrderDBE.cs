@@ -35,7 +35,7 @@ namespace PayAway.WebAPI.Entities.v1
         public DateTime OrderDateTimeUTC { get; set; }
 
         [Required]
-        public string Status { get; set; }
+        public Enums.ORDER_STATUS Status { get; set; }
 
         [Required]
         public string CustomerName { get; set; }
@@ -56,7 +56,7 @@ namespace PayAway.WebAPI.Entities.v1
         // Navigation Property
         public List<OrderLineItemDBE> OrderLineItems { get; set; }
 
-
+        #region === Type Conversion Methods ================================
         public static explicit operator OrderMBE(OrderDBE from)
         {
             OrderMBE to = null;
@@ -68,7 +68,7 @@ namespace PayAway.WebAPI.Entities.v1
                     OrderNumber = from.OrderId.ToString("0000"),
                     OrderDate = from.OrderDateTimeUTC,
                     OrderGuid = from.OrderGuid,
-                    Status = from.Status,
+                    OrderStatus = from.Status,
                     PhoneNumber = from.PhoneNumber,
                     Name = from.CustomerName
                 };
@@ -85,7 +85,7 @@ namespace PayAway.WebAPI.Entities.v1
                 to = new OrderHeaderMBE()
                 {
                     OrderGuid = from.OrderGuid,
-                    Status = from.Status,
+                    OrderStatus = from.Status,
                     PhoneNumber = from.PhoneNumber,
                     CustomerName = from.CustomerName,
                     OrderNumber = from.OrderId.ToString("0000"),        // zero fill
@@ -94,5 +94,6 @@ namespace PayAway.WebAPI.Entities.v1
             }
             return to;
         }
+        #endregion
     }
 }

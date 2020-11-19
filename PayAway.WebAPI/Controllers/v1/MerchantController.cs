@@ -135,7 +135,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// Creates a new merchant order
         /// </summary>
         /// <param name="newOrder">object containing information about the new merchant order</param>
-        /// <returns>newMerchantOrder</returns>
+        /// <returns>new Order</returns>
         [HttpPost("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
@@ -168,7 +168,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     OrderId = dbOrder.OrderId,
                     EventDateTimeUTC = DateTime.UtcNow,
-                    OrderStatus = "New Order",
+                    OrderStatus = Enums.ORDER_STATUS.New,
                     EventDescription = "A new order has been created."
                 };
 
@@ -218,13 +218,13 @@ namespace PayAway.WebAPI.Controllers.v1
         /// Updates a merchant order by merchant ID.
         /// </summary>
         /// <param name="orderGuid">the unique id for the order</param>
-        /// <param name="updatedMerchantOrder"></param>
+        /// <param name="updatedOrder"></param>
         /// <returns>updated merchant order</returns>
         [HttpPut("orders/{orderGuid:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             throw new NotImplementedException();
         }

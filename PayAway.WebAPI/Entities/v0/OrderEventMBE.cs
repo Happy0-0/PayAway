@@ -14,9 +14,13 @@ namespace PayAway.WebAPI.Entities.v0
         [JsonPropertyName("eventDate")]
         public DateTime EventDate { get; set; }
 
+        /// <summary>
+        /// Gets or sets order status
+        /// </summary>
+        /// <value>order status</value>
         [JsonPropertyName("eventStatus")]
-        public string EventStatus { get; set; }
-
+        public Enums.ORDER_STATUS OrderStatus { get; set; }
+        
         [JsonPropertyName("eventDescription")]
         public string EventDescription { get; set; }
     }

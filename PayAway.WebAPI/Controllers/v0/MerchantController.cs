@@ -74,7 +74,7 @@ namespace PayAway.WebAPI.Controllers.v0
                         OrderNumber = "1",
                         CustomerName = "Joe Smith",
                         PhoneNumber = "(555) 555-5555",
-                        Status = "SMS Sent",
+                        OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
                         Total = 30.00M,
                         OrderDate = new DateTime(2020,11,10,15,00,00)
                     },
@@ -84,7 +84,7 @@ namespace PayAway.WebAPI.Controllers.v0
                         OrderNumber = "2",
                         CustomerName = "Joanna Smith",
                         PhoneNumber = "(444) 444-4444",
-                        Status = "Paid",
+                        OrderStatus = Enums.ORDER_STATUS.Paid,
                         Total = 10.00M,
                         OrderDate = new DateTime(2020,11,10,12,00,00)
                     }
@@ -114,7 +114,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
-                Status = "Paid",
+                OrderStatus = Enums.ORDER_STATUS.Paid,
                 OrderLineItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE
@@ -131,19 +131,19 @@ namespace PayAway.WebAPI.Controllers.v0
                     new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,08,00,00),
-                        EventStatus = "Paid",
+                        OrderStatus = Enums.ORDER_STATUS.Paid,
                         EventDescription = "Payment has been recieved for order."
                     },
                      new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,59,00),
-                        EventStatus = "SMS Sent",
+                        OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
                         EventDescription = "SMS Sent to Customer: (333) 333-3333"
                     },
                       new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,58,00),
-                        EventStatus = "New Order",
+                        OrderStatus = Enums.ORDER_STATUS.New,
                         EventDescription = "A new order has been created."
                     }
                 }
@@ -153,22 +153,22 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Creates a new merchant order
         /// </summary>
-        /// <param name="newMerchantOrder"></param>
+        /// <param name="newOrder"></param>
         /// <returns></returns>
         [HttpPost("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newMerchantOrder)
+        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
-            var merchantOrder = new OrderMBE
+            var order = new OrderMBE
             {
                 OrderGuid = Constants.ORDER_1_GUID,
                 OrderNumber = "1234",
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
-                Status = "New",
+                OrderStatus = Enums.ORDER_STATUS.New,
                 OrderLineItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE
@@ -185,26 +185,26 @@ namespace PayAway.WebAPI.Controllers.v0
                       new OrderEventMBE
                     {
                         EventDate = new DateTime(20,11,11,07,58,00),
-                        EventStatus = "New Order",
+                        OrderStatus = Enums.ORDER_STATUS.New,
                         EventDescription = "A new order has been created."
                     }
                 }
             };
 
-            return CreatedAtAction(nameof(GetOrder), new { orderID = merchantOrder.OrderGuid }, merchantOrder);
+            return CreatedAtAction(nameof(GetOrder), new { orderID = order.OrderGuid }, order);
         }
 
         /// <summary>
         /// Updates a merchant order by merchant ID.
         /// </summary>
         /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
-        /// <param name="updatedMerchantOrder"></param>
+        /// <param name="updatedOrder"></param>
         /// <returns>updated merchant order</returns>
         [HttpPut("orders/{orderGuid:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
