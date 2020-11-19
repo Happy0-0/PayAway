@@ -185,7 +185,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 //Store the new merchant Order
                 var dbOrder = SQLiteDBContext.InsertOrder(dbActiveMerchant.MerchantId, newOrder);
 
-                //create an empty working object
+                //create the first event
                 var dbOrderEvent = new OrderEventDBE()
                 {
                     OrderId = dbOrder.OrderId,
@@ -194,7 +194,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     EventDescription = "A new order has been created."
                 };
 
-                //save order
+                //save order event
                 SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
                 
                 //iterate through orderLineItems collection to save it in the db
@@ -239,17 +239,76 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Updates a merchant order by merchant ID.
+        /// Updates an order by order guid.
         /// </summary>
-        /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
-        /// <param name="updatedMerchantOrder"></param>
+        /// <param name="orderGuid"></param>
+        /// <param name="updatedOrder"></param>
         /// <returns>updated merchant order</returns>
         [HttpPut("orders/{orderGuid:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
+            //query the db
+            var dbOrder = SQLiteDBContext.GetOrder(orderGuid);
+
+            // if we did not find a matching order
+            if (dbOrder == null)
+            {
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
+            }
+                        
+            try
+            {
+                
+                dbOrder.CustomerName = updatedOrder.Name;
+                dbOrder.PhoneNumber = updatedOrder.PhoneNumber;
+                SQLiteDBContext.UpdateOrder(dbOrder);
+
+                SQLiteDBContext.DeleteOrderLineItems(dbOrder.OrderId);
+
+                //iterate through orderLineItems collection to save it in the db
+                foreach (var orderLineItem in updatedOrder.OrderLineItems)
+                {
+                    var dbOrderLineItem = new OrderLineItemDBE()
+                    {
+                        ItemName = orderLineItem.ItemName,
+                        ItemUnitPrice = orderLineItem.ItemUnitPrice,
+                        OrderId = dbOrder.OrderId,
+                        CatalogItemGuid = orderLineItem.ItemGuid
+                    };
+                    SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
+                }
+
+                //create the first event
+                var dbOrderEvent = new OrderEventDBE()
+                {
+                    OrderId = dbOrder.OrderId,
+                    EventDateTimeUTC = DateTime.UtcNow,
+                    OrderStatus = "Order Updated",
+                    EventDescription = "The Order has changed."
+                };
+
+                //save order event
+                SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
+
+                dbOrder.Status = "Order Updated";
+                //Update Order again
+                SQLiteDBContext.UpdateOrder(dbOrder);
+
+
+
+
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed to update merchant order."));
+            }
+
+
+            return NoContent();
             throw new NotImplementedException();
         }
     }

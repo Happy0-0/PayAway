@@ -413,7 +413,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return NotFound($"CustomerID: [{demoCustomerGuid}] on MerchantID: [{merchantGuid}] not found");
             }
 
-            // grab the current phoen no
+            // grab the current phone no
             string existingCustomerPhoneNo = dbDemoCustomer.CustomerPhoneNo;
 
             try

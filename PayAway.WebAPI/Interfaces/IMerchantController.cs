@@ -13,7 +13,7 @@ namespace PayAway.WebAPI.Interfaces
 
         ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newMerchantOrder);
 
-        ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder);
+        ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder);
 
         ActionResult<OrderMBE> GetOrder(Guid orderGuid);
 

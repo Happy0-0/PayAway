@@ -195,7 +195,7 @@ namespace PayAway.WebAPI.Controllers.v0
         }
 
         /// <summary>
-        /// Updates a merchant order by merchant ID.
+        /// Updates a order by order guid.
         /// </summary>
         /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <param name="updatedMerchantOrder"></param>
@@ -204,7 +204,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchantOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
+        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedMerchantOrder)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {

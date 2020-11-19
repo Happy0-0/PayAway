@@ -900,6 +900,7 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
+
                 var currentOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
 
                 if (currentOrder == null)
@@ -1009,6 +1010,23 @@ namespace PayAway.WebAPI.DB
             }
         }
 
+        /// <summary>
+        /// Delete Order line items
+        /// </summary>
+        /// <param name="orderId"></param>
+        internal static void DeleteOrderLineItems(int orderId)
+        {
+            using (var context = new SQLiteDBContext())
+            {
+                var orderLineItems = context.OrderLineItems.Where(a => a.OrderId == orderId);
+                foreach(var orderLineItem in orderLineItems)
+                {
+                    context.Remove(orderLineItem);
+                    context.SaveChanges();
+                }
+                
+            }
+        }
         #endregion
 
     }
