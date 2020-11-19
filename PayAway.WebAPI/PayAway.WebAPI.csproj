@@ -20,12 +20,13 @@
     <PackageReference Include="MySql.Data" Version="8.0.22" />
     <PackageReference Include="SSH.NET" Version="2020.0.0-beta1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+    <PackageReference Include="Twilio" Version="5.50.0" />
   </ItemGroup>
 
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20324.1235</FileVersion>
+		<FileVersion>1.0.20324.1947</FileVersion>
 		<UserSecretsId>a99deb02-3b4c-4115-9777-c610d8a7d9cb</UserSecretsId>
 	</PropertyGroup>
 
