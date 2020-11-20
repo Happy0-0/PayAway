@@ -194,6 +194,15 @@ namespace PayAway.WebAPI.DB
             //         2.4     Orders
             //         2.5     OrderEvents
             //         2.6     OrderItems
+
+            #region === Step 2.3: Reload the Catalog Items ===========================
+            var seedCatalogItems = SeedData.GetSeedCatalogueItems();
+            foreach (var seedCatalogItem in seedCatalogItems)
+            {
+                SQLiteDBContext.InsertCatalogItem(seedCatalogItem);
+            }
+            #endregion
+
             if (isPreloadEnabled)
             {
                 #region === Step 2.1: Reload the Merchants ===============================
@@ -210,15 +219,7 @@ namespace PayAway.WebAPI.DB
                 {
                     SQLiteDBContext.InsertDemoCustomer(seedDemoCustomer);
                 }
-                #endregion
-
-                #region === Step 2.3: Reload the Catalog Items ===========================
-                var seedCatalogItems = SeedData.GetSeedCatalogueItems();
-                foreach (var seedCatalogItem in seedCatalogItems)
-                {
-                    SQLiteDBContext.InsertCatalogItem(seedCatalogItem);
-                }
-                #endregion
+                #endregion                
 
                 #region === Step 2.4: Reload the Orders ===========================
                 var seedOrders = SeedData.GetSeedOrders();

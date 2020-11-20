@@ -14,6 +14,9 @@ using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
 using System.Text;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Lookups.V1;
+using PayAway.WebAPI.BizTier;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -354,26 +357,56 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
-            throw new NotImplementedException();
+            
+            // query the db
+            var dbOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
 
-            // Step 1: Get the Order 
+            // if we did not find a matching order
+            if (dbOrder == null)
+            {
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
+            }
 
-            // Step 1.1 Validation
-            // throw 404 if not found
+            // Biz Logic: Cannot change the order if it has already been paid for.
+            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
+            {
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
+            }
 
-            // throw 400 if already paid
+            // get the exploded order w/ the line items
+            var dbOrderExploded = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+
+            // convert to the MBE 
+            var orderHeader = (OrderHeaderMBE)dbOrderExploded;
 
             // Step 2: Build the SMS Msg
-            //string payAwayURL = $"{_webUrlConfig.BlazorBaseUrl}/customerorder/{dbOrder.OrderGuid}";
-            // Hello <CustomerName>;
-            // <MerchantName> is sending you this link to a secure payment page to enter your payment info for your Order Number: <MerchantOrderNo> for: <SaleAmount>");
-            // payAwayURL
+            string payAwayURL = $"{_webUrlConfig.HPPBaseUrl}/customerorder/{dbOrder.OrderGuid}";
+            var messageBody = $"Hello {dbOrder.CustomerName}; {dbOrder.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrder.OrderId} for: {orderHeader.Total}.";
 
             // Step 3: Send the SMS msg
             // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
             // SendSMSMessage
+            var phoneNumber = PhoneNumberResource.Fetch(
+            countryCode: "US",
+            pathPhoneNumber: new Twilio.Types.PhoneNumber(dbOrder.PhoneNumber));
+            var formattedPhoneNumber = phoneNumber.ToString();
+
+            string v = SMSController.SendSMSMessage(String.Empty, formattedPhoneNumber, messageBody);
+
 
             // Step 3.1 Write the SMS event
+
+            // create an event
+            var dbOrderEvent = new OrderEventDBE()
+            {
+                OrderId = dbOrder.OrderId,
+                EventDateTimeUTC = DateTime.UtcNow,
+                OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
+                EventDescription = "SMS sent."
+            };
+
+            //save order event
+            SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
 
             #region (addl work for next sprint)
 
