@@ -385,7 +385,11 @@ namespace PayAway.WebAPI.Controllers.v1
 
             StringBuilder messageBody = new StringBuilder();
             messageBody.AppendLine($"Hello {dbOrderExploded.CustomerName}");
-            messageBody.AppendLine($"{dbOrderExploded.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrderExploded.OrderId.ToString("0000")} for: {orderTotal:C}");
+
+            // we do not know what culture the server is set for so we are explicit, we want to make it formats currency with a US $
+            var specificCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+            FormattableString formattableString = $"{dbOrderExploded.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrderExploded.OrderId.ToString("0000")} for: {orderTotal:C}";
+            messageBody.AppendLine(formattableString.ToString(specificCulture));
             messageBody.AppendLine($"{payAwayURL}");
 
             // Step 3: Send the SMS msg

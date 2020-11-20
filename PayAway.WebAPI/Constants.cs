@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Controllers.v0
+namespace PayAway.WebAPI
 {
     internal static class Constants
     {
@@ -21,5 +22,8 @@ namespace PayAway.WebAPI.Controllers.v0
         internal static Guid CATALOG_ITEM_1_GUID = new Guid(@"6b95573c-fbe5-4560-93c9-23c6a9baa500");
         internal static Guid CATALOG_ITEM_2_GUID = new Guid(@"f6a1e3a5-c563-48d0-9a15-f7a23c5ab688");
         internal static Guid CATALOG_ITEM_3_GUID = new Guid(@"51d06775-0be8-4dc9-9c25-2146f6a91fef");
+
+
+        internal static readonly CultureInfo UnitedStates = CultureInfo.GetCultureInfo("en-US");
     }
 }
