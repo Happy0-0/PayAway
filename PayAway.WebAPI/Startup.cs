@@ -185,7 +185,7 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/20</td>
                                     <td>v1.31</td>
-                                    <td>Implemented UpdateOrder method and changed UpdateOrder and CreateOrder method to only take in item guid for order items.
+                                    <td>Implemented SendOrderPaymentLink method. 
                                     </td>
                                 </tr>
                                 <tr>

@@ -413,7 +413,20 @@ namespace PayAway.WebAPI.Controllers.v1
             #region (addl work for next sprint)
 
             // Step 4:1 Get the merchant's demo customers
+            //query db
+            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbOrderExploded.MerchantId);
 
+
+            // Step 4:2 Loop for each demo customer
+            foreach (var demoCustomer in dbDemoCustomers)
+            {
+                var dbCustomer = new NewOrderMBE()
+                {
+                    CustomerName = demoCustomer.CustomerName,
+                    CustomerPhoneNo = dbOrderExploded.PhoneNumber,
+                    //Todo add orderLineItems.
+                };
+            }
             // Step 4:2 Loop for each demo customer
             //  Clone the order setting the customer on the order to be the demo customer
             // normalize the phone no
