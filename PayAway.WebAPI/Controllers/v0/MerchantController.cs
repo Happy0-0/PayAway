@@ -222,6 +222,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)

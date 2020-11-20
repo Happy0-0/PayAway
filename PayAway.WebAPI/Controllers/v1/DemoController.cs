@@ -346,6 +346,12 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
             }
 
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(newDemoCustomer.CustomerPhoneNo);
+            if (!isValidPhoneNo)
+            {
+                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), $"[{newDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));
+            }
+
             //query the db for the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
 
@@ -353,6 +359,10 @@ namespace PayAway.WebAPI.Controllers.v1
             if (dbMerchant == null)
             {
                 return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+            }
+            else
+            {
+                newDemoCustomer.CustomerPhoneNo = formatedPhoneNo;
             }
 
             try
@@ -364,7 +374,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 var customer = (CustomerMBE)dbCustomer;
 
                 // return the response
-                return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid }, customer);
+                return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, demoCustomerGuid = customer.CustomerGuid }, customer);
             }
             catch (Exception ex)
             {
@@ -405,6 +415,12 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(updatedDemoCustomer.CustomerName), @"The customer name cannot be blank."));
             }
 
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(updatedDemoCustomer.CustomerPhoneNo);
+            if (!isValidPhoneNo)
+            {
+                return BadRequest(new ArgumentNullException(nameof(updatedDemoCustomer.CustomerPhoneNo), $"[{updatedDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));
+            }
+
             // get the existing demo customer
             var dbDemoCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
@@ -420,7 +436,7 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 //Save the updated customer
                 dbDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName;
-                dbDemoCustomer.CustomerPhoneNo = updatedDemoCustomer.CustomerPhoneNo;
+                dbDemoCustomer.CustomerPhoneNo = formatedPhoneNo;
 
                 SQLiteDBContext.UpdateDemoCustomer(dbDemoCustomer);
             }

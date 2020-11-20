@@ -15,14 +15,14 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets the orders customer name
         /// </summary>
         [JsonPropertyName("name")]
-        public string Name { get; set; }
+        public string CustomerName { get; set; }
 
         /// <summary>
         /// Gets or sets the orders customers phone number
         /// </summary>
         /// <value>phone number</value>
         [JsonPropertyName("phoneNumber")]
-        public string PhoneNumber { get; set; }
+        public string CustomerPhoneNo { get; set; }
 
         /// <summary>
         /// Gets or sets a list of items

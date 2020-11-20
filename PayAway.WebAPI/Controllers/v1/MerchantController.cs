@@ -160,16 +160,16 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
             //trims customer name so that it doesn't have trailing characters
-            newOrder.Name = newOrder.Name.Trim();
+            newOrder.CustomerName = newOrder.CustomerName.Trim();
 
             // validate request data
-            if (string.IsNullOrEmpty(newOrder.Name))
+            if (string.IsNullOrEmpty(newOrder.CustomerName))
             {
-                return BadRequest(new ArgumentNullException(nameof(newOrder.Name), @"You must supply a non blank value for the Order Name."));
+                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerName), @"You must supply a non blank value for the Order Name."));
             }
-            else if (string.IsNullOrEmpty(newOrder.PhoneNumber))
+            else if (string.IsNullOrEmpty(newOrder.CustomerPhoneNo))
             {
-                return BadRequest(new ArgumentNullException(nameof(newOrder.PhoneNumber), @"You must supply a non blank value for the Order Phone No."));
+                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerPhoneNo), @"You must supply a non blank value for the Order Phone No."));
             }
             foreach (var orderLineItem in newOrder.OrderLineItems)
             {
@@ -179,9 +179,18 @@ namespace PayAway.WebAPI.Controllers.v1
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
                 }
             }
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(newOrder.CustomerPhoneNo);
+            if (!isValidPhoneNo)
+            {
+                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerPhoneNo), $"[{newOrder.CustomerPhoneNo}] is NOT a supported Phone No format."));
+            }
+            else
+            {
+                newOrder.CustomerPhoneNo = formatedPhoneNo;
+            }
 
-                //query the db for the active merchant
-                var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
+            //query the db for the active merchant
+            var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
 
             try
             {
@@ -256,13 +265,22 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // validate the input params
-            if (string.IsNullOrEmpty(updatedOrder.Name))
+            if (string.IsNullOrEmpty(updatedOrder.CustomerName))
             {
-                return BadRequest(new ArgumentException(nameof(updatedOrder.Name), @"The order name cannot be blank."));
+                return BadRequest(new ArgumentException(nameof(updatedOrder.CustomerName), @"The order name cannot be blank."));
             }
-            else if (string.IsNullOrEmpty(updatedOrder.PhoneNumber))
+            else if (string.IsNullOrEmpty(updatedOrder.CustomerPhoneNo))
             {
-                return BadRequest(new ArgumentException(nameof(updatedOrder.PhoneNumber), @"The order phone number cannot be blank."));
+                return BadRequest(new ArgumentException(nameof(updatedOrder.CustomerPhoneNo), @"The order phone number cannot be blank."));
+            }
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(updatedOrder.CustomerPhoneNo);
+            if (!isValidPhoneNo)
+            {
+                return BadRequest(new ArgumentNullException(nameof(updatedOrder.CustomerPhoneNo), $"[{updatedOrder.CustomerPhoneNo}] is NOT a supported Phone No format."));
+            }
+            else
+            {
+                updatedOrder.CustomerPhoneNo = formatedPhoneNo;
             }
 
             // validate the catalog guids
@@ -281,8 +299,8 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 // update the dbOrder with the values we just got
-                dbOrder.CustomerName = updatedOrder.Name;
-                dbOrder.PhoneNumber = updatedOrder.PhoneNumber;
+                dbOrder.CustomerName = updatedOrder.CustomerName;
+                dbOrder.PhoneNumber = updatedOrder.CustomerPhoneNo;
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
                 SQLiteDBContext.UpdateOrder(dbOrder);
 
@@ -333,20 +351,40 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
-            return Ok(_webUrlConfig.HPPBaseUrl);
-
             throw new NotImplementedException();
 
+            // Step 1: Get the Order 
+
+            // Step 1.1 Validation
+            // throw 404 if not found
+
+            // throw 400 if already paid
+
+            // Step 2: Build the SMS Msg
             //string payAwayURL = $"{_webUrlConfig.BlazorBaseUrl}/customerorder/{dbOrder.OrderGuid}";
+            // Hello <CustomerName>;
+            // <MerchantName> is sending you this link to a secure payment page to enter your payment info for your Order Number: <MerchantOrderNo> for: <SaleAmount>");
+            // payAwayURL
 
-            //StringBuilder payAwayMsg = new StringBuilder();
-            //payAwayMsg.AppendLine($"Hello {order.CustomerName}");
-            //payAwayMsg.AppendLine($"{dbMerchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {order.MerchantOrderNo} for: {order.SaleAmount:C}");
-            //payAwayMsg.AppendLine($"{payAwayURL}");
+            // Step 3: Send the SMS msg
+            // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
+            // SendSMSMessage
 
-            //var msgSid = SMSController.SendSMSMessage(string.Empty, cellPhoneNo, payAwayMsg.ToString());
+            // Step 3.1 Write the SMS event
+
+            #region (addl work for next sprint)
+
+            // Step 4:1 Get the merchant's demo customers
+
+            // Step 4:2 Loop for each demo customer
+            //  Clone the order setting the customer on the order to be the demo customer
+            // normalize the phone no
+            //  Send the SMS msg
+
+            #endregion
         }
 
         #region === Helper Methods =============================================

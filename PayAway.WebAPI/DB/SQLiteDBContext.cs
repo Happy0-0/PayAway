@@ -821,8 +821,8 @@ namespace PayAway.WebAPI.DB
                 {
                     Status = Enums.ORDER_STATUS.New,
                     MerchantId = merchantId,
-                    CustomerName = newOrder.Name,
-                    PhoneNumber = newOrder.PhoneNumber,
+                    CustomerName = newOrder.CustomerName,
+                    PhoneNumber = newOrder.CustomerPhoneNo,
                     OrderDateTimeUTC = DateTime.UtcNow
                 };
 
