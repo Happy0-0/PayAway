@@ -664,7 +664,10 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
-                var dbCatalogItems = context.CatalogItems.Where(ci => ci.MerchantId == merchantId).ToList();
+                var dbCatalogItems = context.CatalogItems
+                                                .Where(ci => ci.MerchantId == merchantId)
+                                                .OrderBy(ci => ci.CatalogItemId)
+                                                .ToList();
 
                 return dbCatalogItems;
             }
@@ -760,7 +763,10 @@ namespace PayAway.WebAPI.DB
         {
             using (var context = new SQLiteDBContext())
             {
-                var dbOrders = context.Orders.Where(o => o.MerchantId == merchantId).ToList();
+                var dbOrders = context.Orders
+                                        .Where(o => o.MerchantId == merchantId)
+                                        .OrderByDescending(o => o.OrderId)
+                                        .ToList();
 
                 return dbOrders;
             }
@@ -797,6 +803,9 @@ namespace PayAway.WebAPI.DB
                                         .Include(o => o.OrderEvents)
                                         .Include(o => o.OrderLineItems)
                                         .FirstOrDefault(o => o.OrderGuid == orderGuid);
+
+                // sort the order events descending by d/t in memory
+                dbOrder.OrderEvents = dbOrder.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC).ToList();
 
                 return dbOrder;
             }
