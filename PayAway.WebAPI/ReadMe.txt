@@ -27,7 +27,7 @@ Tech Debt Items
 ------------------------------------------
 1.	Chg JsonAttribute of *Id properties in MBEs to *Guid	<===== Will require Front End refactoring
 2.	**Validate phone nos on the way in, store normalized format in the db, convert to std US format on the way out
-3.	Convert DT DB values to GMT to local timezone on the way out
+3.	<comp> Convert DT DB values to GMT
 4.	**Update from .net 5 rc2 to rtm
 5.	**Update nuget packages
 6.	**Update Publish to Azure App Service to remove Self-Contained
@@ -35,5 +35,6 @@ Tech Debt Items
 8.	<comp> Add Table Relationships via navigation properties
 9.	Convert to use Record types?
 10. Refactor OrderHeaderMBE
-11. Implement SMS Send
+11. <wip> Implement SMS Send
 12. Implement Image Upload
+13. Refactor OrderNumber vs OrderId
