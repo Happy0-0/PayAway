@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+
+using Twilio.Rest.Api.V2010.Account;
 
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
-using System.Text;
-using Twilio.Rest.Api.V2010.Account;
-using Twilio.Rest.Lookups.V1;
 using PayAway.WebAPI.BizTier;
 
 namespace PayAway.WebAPI.Controllers.v1
@@ -267,6 +267,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
             }
 
+            #region === Validation =================================================
             // validate the input params
             if (string.IsNullOrEmpty(updatedOrder.CustomerName))
             {
@@ -298,6 +299,8 @@ namespace PayAway.WebAPI.Controllers.v1
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
                 }
             }
+
+            #endregion
 
             try
             {
@@ -357,52 +360,47 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
-            
-            // query the db
-            var dbOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+            // get the exploded order w/ the line items
+            var dbOrderExploded = SQLiteDBContext.GetOrderExploded(orderGuid);
 
             // if we did not find a matching order
-            if (dbOrder == null)
+            if (dbOrderExploded == null)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
+                return NotFound($"OrderGuid: [{orderGuid}] not found");
             }
 
             // Biz Logic: Cannot change the order if it has already been paid for.
-            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
+            if (dbOrderExploded.Status == Enums.ORDER_STATUS.Paid)
             {
                 return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
             }
 
-            // get the exploded order w/ the line items
-            var dbOrderExploded = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
-
-            // convert to the MBE 
-            var orderHeader = (OrderHeaderMBE)dbOrderExploded;
+            // calc the order total
+            decimal orderTotal = (dbOrderExploded.OrderLineItems != null)
+                                            ? dbOrderExploded.OrderLineItems.Sum(oli => oli.ItemUnitPrice)
+                                            : 0.0M;
 
             // Step 2: Build the SMS Msg
-            string payAwayURL = $"{_webUrlConfig.HPPBaseUrl}/customerorder/{dbOrder.OrderGuid}";
-            var messageBody = $"Hello {dbOrder.CustomerName}; {dbOrder.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrder.OrderId} for: {orderHeader.Total}.";
+            string payAwayURL = $"{_webUrlConfig.HPPBaseUrl}/customerorder/{dbOrderExploded.OrderGuid}";
+
+            StringBuilder messageBody = new StringBuilder();
+            messageBody.AppendLine($"Hello {dbOrderExploded.CustomerName}");
+            messageBody.AppendLine($"{dbOrderExploded.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrderExploded.OrderId.ToString("0000")} for: {orderTotal:C}");
+            messageBody.AppendLine($"{payAwayURL}");
 
             // Step 3: Send the SMS msg
             // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
             // SendSMSMessage
-            var phoneNumber = PhoneNumberResource.Fetch(
-            countryCode: "US",
-            pathPhoneNumber: new Twilio.Types.PhoneNumber(dbOrder.PhoneNumber));
-            var formattedPhoneNumber = phoneNumber.ToString();
-
-            string v = SMSController.SendSMSMessage(String.Empty, formattedPhoneNumber, messageBody);
-
+            (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
+            SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
 
             // Step 3.1 Write the SMS event
-
-            // create an event
             var dbOrderEvent = new OrderEventDBE()
             {
-                OrderId = dbOrder.OrderId,
+                OrderId = dbOrderExploded.OrderId,
                 EventDateTimeUTC = DateTime.UtcNow,
                 OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
-                EventDescription = "SMS sent."
+                EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
             };
 
             //save order event
@@ -418,6 +416,8 @@ namespace PayAway.WebAPI.Controllers.v1
             //  Send the SMS msg
 
             #endregion
+
+            return NoContent();
         }
 
         #region === Helper Methods =============================================
