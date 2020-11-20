@@ -35,5 +35,6 @@ Tech Debt Items
 8.	<comp> Add Table Relationships via navigation properties
 9.	Convert to use Record types?
 10. Refactor OrderHeaderMBE
-11. Implement SMS Send
+11. <wip> Implement SMS Send
 12. Implement Image Upload
+13. Refactor OrderNumber vs OrderId
