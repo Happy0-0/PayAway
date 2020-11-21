@@ -37,7 +37,7 @@ Tech Debt Items
 5.	<gabe> Update nuget packages
 7.	<gabe> Cleanup Code Analysis messages
 11. <gabe wip> Implement SMS Send
-14. <gabe> Always restore default order items
+14. <gabe> Always restore default catalog items
 -------------------------------------------------------------------------------
 2.	<comp> Validate phone nos on the way in, store normalized format in the db
 3.	<comp> Convert Datetime DB values to GMT
