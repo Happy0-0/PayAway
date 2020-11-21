@@ -246,6 +246,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="orderGuid"></param>
         /// <param name="updatedOrder"></param>
         /// <returns>updated merchant order</returns>
+        /// <remarks>This method is NOT avaialble if the order status is SMS_Sent or PAID</remarks>
         [HttpPut("orders/{orderGuid:Guid}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -262,9 +263,9 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // Biz Logic: Cannot change the order if it has already been paid for.
-            if (dbOrder.Status == Enums.ORDER_STATUS.Paid)
+            if (dbOrder.Status == Enums.ORDER_STATUS.SMS_Sent || dbOrder.Status == Enums.ORDER_STATUS.Paid)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"Changes are not allowed after the SMS has been sent or the order has been paid"));
             }
 
             #region === Validation =================================================
@@ -310,7 +311,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
                 SQLiteDBContext.UpdateOrder(dbOrder);
 
-                // in this demo code we are just going to delete and readd the order line items
+                // in this demo code we are just going to delete and re-add the order line items
                 SQLiteDBContext.DeleteOrderLineItems(dbOrder.OrderId);
 
                 //iterate through orderLineItems collection to save it in the db
@@ -354,6 +355,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// </summary>
         /// <param name="orderGuid">the unique id for the order</param>
         /// <returns></returns>
+        /// <remarks>This method is NOT avaialble if the order status is PAID</remarks>
         [HttpPost("orders/{orderGuid:Guid}/sendPaymentLink")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -372,7 +374,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // Biz Logic: Cannot change the order if it has already been paid for.
             if (dbOrderExploded.Status == Enums.ORDER_STATUS.Paid)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"Order status is Paid. Changes are not allowed."));
+                return BadRequest(new ArgumentException(nameof(orderGuid), $"You cannot send the Payment link AFTER the order is paid."));
             }
 
             // calc the order total

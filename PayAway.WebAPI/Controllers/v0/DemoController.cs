@@ -185,13 +185,6 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            var activeMerchant = new MerchantMBE
-            {
-                MerchantGuid = Constants.MERCHANT_1_GUID,
-                MerchantName = @"Domino's Pizza",
-                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
-                IsActive = true,
-            };
 
             return NoContent();
 
@@ -238,7 +231,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <param name="merchantGuid">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <param name="demoCustomerGuid">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
         /// <returns>customer</returns>
-        [HttpGet("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)

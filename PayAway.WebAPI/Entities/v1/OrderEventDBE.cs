@@ -45,7 +45,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new OrderEventMBE()
                 {
-                    EventDate = from.EventDateTimeUTC,
+                    EventDateTimeUTC = from.EventDateTimeUTC,
                     OrderStatus = from.OrderStatus,
                     EventDescription = from.EventDescription
                 };

@@ -18,13 +18,15 @@ namespace PayAway.WebAPI.Entities.v0
         /// <value>merchantID</value>
         [JsonPropertyName("orderID")]
         public Guid OrderGuid { get; set; }
-
         /// <summary>
         /// Gets or sets the order number
         /// </summary>
         /// <value>order number</value>
         [JsonPropertyName("orderNumber")]
-        public string OrderNumber { get; set; }
+        public string OrderNumber { get { return this.OrderId.ToString("0000"); } }
+
+        [JsonIgnore]
+        public int OrderId { get; set; }
 
         /// <summary>
         /// Gets or sets order status
@@ -58,7 +60,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>order date</value>
         [JsonPropertyName("orderDate")]
-        public DateTime OrderDate { get; set; }
+        public DateTime OrderDateTimeUTC { get; set; }
 
         /// <summary>
         /// Gets or sets a list of order events
@@ -73,15 +75,29 @@ namespace PayAway.WebAPI.Entities.v0
         public List<CatalogItemMBE> OrderLineItems { get; set; }
 
         /// <summary>
-        /// Gets or sets the order total
+        /// Indicates if Sending the payment link is available based on the current status of the order
         /// </summary>
+        [JsonPropertyName("isSendPaymentLinkAvailable")]
+        public bool IsSendPaymentLinkAvailable => this.OrderStatus != Enums.ORDER_STATUS.Paid;
+
+        /// <summary>
+        /// Indicates if updates are allowed based on the current status of the order
+        /// </summary>
+        public bool isUpdateAvailable
+        {
+            get { return (this.OrderStatus != Enums.ORDER_STATUS.SMS_Sent && this.OrderStatus != Enums.ORDER_STATUS.Paid); }
+        }
+
+        /// <summary>
+        /// Gets or sets the order total
+        /// </summary> 
         /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
         public decimal? OrderTotal 
         {
             get
             {
-                return this.OrderLineItems != null ? this.OrderLineItems.Sum(oli => oli.ItemUnitPrice) : null;
+                return this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
             }
 
         }

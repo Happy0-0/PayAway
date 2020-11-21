@@ -25,7 +25,10 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>order number</value>
         [JsonPropertyName("orderNumber")]
-        public string OrderNumber { get; set; }
+        public string OrderNumber { get { return this.OrderId.ToString("0000"); } }
+
+        [JsonIgnore]
+        public int OrderId { get; set; }
 
         /// <summary>
         /// Gets or sets customers name
@@ -66,6 +69,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>order date</value>
         [JsonPropertyName("orderDate")]
-        public DateTime OrderDate { get; set; }
+        public DateTime OrderDateTimeUTC { get; set; }
     }
 }

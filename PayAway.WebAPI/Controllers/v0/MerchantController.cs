@@ -71,22 +71,22 @@ namespace PayAway.WebAPI.Controllers.v0
                     new OrderHeaderMBE
                     {
                         OrderGuid = Constants.ORDER_1_GUID,
-                        OrderNumber = "1",
+                        OrderId = 1,
                         CustomerName = "Joe Smith",
                         PhoneNumber = "(555) 555-5555",
                         OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
                         Total = 30.00M,
-                        OrderDate = new DateTime(2020,11,10,15,00,00)
+                        OrderDateTimeUTC = new DateTime(2020,11,10,15,00,00)
                     },
                     new OrderHeaderMBE
                     {
                         OrderGuid = Constants.ORDER_1_GUID,
-                        OrderNumber = "2",
+                        OrderId = 2,
                         CustomerName = "Joanna Smith",
                         PhoneNumber = "(444) 444-4444",
                         OrderStatus = Enums.ORDER_STATUS.Paid,
                         Total = 10.00M,
-                        OrderDate = new DateTime(2020,11,10,12,00,00)
+                        OrderDateTimeUTC = new DateTime(2020,11,10,12,00,00)
                     }
                 });
         }
@@ -110,7 +110,7 @@ namespace PayAway.WebAPI.Controllers.v0
             return Ok(new OrderMBE
             {
                 OrderGuid = orderGuid,
-                OrderNumber = "1234",
+                OrderId = 1234,
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
@@ -130,19 +130,19 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new OrderEventMBE
                     {
-                        EventDate = new DateTime(20,11,11,08,00,00),
+                        EventDateTimeUTC = new DateTime(20,11,11,08,00,00),
                         OrderStatus = Enums.ORDER_STATUS.Paid,
                         EventDescription = "Payment has been recieved for order."
                     },
                      new OrderEventMBE
                     {
-                        EventDate = new DateTime(20,11,11,07,59,00),
+                        EventDateTimeUTC = new DateTime(20,11,11,07,59,00),
                         OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
                         EventDescription = "SMS Sent to Customer: (333) 333-3333"
                     },
                       new OrderEventMBE
                     {
-                        EventDate = new DateTime(20,11,11,07,58,00),
+                        EventDateTimeUTC = new DateTime(20,11,11,07,58,00),
                         OrderStatus = Enums.ORDER_STATUS.New,
                         EventDescription = "A new order has been created."
                     }
@@ -164,7 +164,7 @@ namespace PayAway.WebAPI.Controllers.v0
             var order = new OrderMBE
             {
                 OrderGuid = Constants.ORDER_1_GUID,
-                OrderNumber = "1234",
+                OrderId = 1234,
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
@@ -184,7 +184,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                       new OrderEventMBE
                     {
-                        EventDate = new DateTime(20,11,11,07,58,00),
+                        EventDateTimeUTC = new DateTime(20,11,11,07,58,00),
                         OrderStatus = Enums.ORDER_STATUS.New,
                         EventDescription = "A new order has been created."
                     }

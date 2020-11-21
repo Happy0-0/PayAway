@@ -25,17 +25,24 @@ https://www.sqlite.org/autoinc.html
 ------------------------------------------
 Tech Debt Items
 ------------------------------------------
-1.	Chg JsonAttribute of *Id properties in MBEs to *Guid	<===== Will require Front End refactoring
-2.	<comp> Validate phone nos on the way in, store normalized format in the db
-3.	<comp> Convert DT DB values to GMT
-4.	**Update from .net 5 rc2 to rtm
-5.	**Update nuget packages
-6.	**Update Publish to Azure App Service to remove Self-Contained
-7.	Cleanup Code Analysis messages
-8.	<comp> Add Table Relationships via navigation properties
+
 9.	Convert to use Record types?
 10. Refactor OrderHeaderMBE
-11. <wip> Implement SMS Send
 12. Implement Image Upload
+15. Correct issue with methods not returning ProblemDetails
+-------------------------------------------------------------------------------
+1.	<tom> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
+16. <tom wip> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
+-------------------------------------------------------------------------------
+5.	<gabe> Update nuget packages
+7.	<gabe> Cleanup Code Analysis messages
+11. <gabe wip> Implement SMS Send
+14. <gabe> Always restore default order items
+-------------------------------------------------------------------------------
+2.	<comp> Validate phone nos on the way in, store normalized format in the db
+3.	<comp> Convert Datetime DB values to GMT
+4.	<comp> Update from .net 5 rc2 to rtm
+6.	<comp> Update Publish to Azure App Service to remove Self-Contained
+8.	<comp> Add Table Relationships via navigation properties
 13. Refactor OrderNumber vs OrderId
-14. Always restore default order items
+17. <comp> Add flags to order												<===== Will need Front End changes
