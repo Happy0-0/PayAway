@@ -48,7 +48,7 @@ namespace PayAway.WebAPI.Utilities
         // systems. For more information, see the topic that accompanies this sample
         // app.
 
-        internal static (byte[] fileContents, string errorMessage) ProcessFormFile(IFormFile formFile, string[] permittedExtensions, long sizeLimit)
+        public static (byte[] fileContents, string errorMessage) ProcessFormFile(IFormFile formFile, string[] permittedExtensions, long sizeLimit)
         {
             var fieldDisplayName = string.Empty;
 

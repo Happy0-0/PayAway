@@ -33,7 +33,6 @@ Tech Debt Items
 
 9.	Convert to use Record types?
 10. Refactor OrderHeaderMBE
-12. Implement Image Upload
 15. Correct issue with methods not returning ProblemDetails
 -------------------------------------------------------------------------------
 1.	<tom> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
@@ -49,5 +48,6 @@ Tech Debt Items
 4.	<comp> Update from .net 5 rc2 to rtm
 6.	<comp> Update Publish to Azure App Service to remove Self-Contained
 8.	<comp> Add Table Relationships via navigation properties
-13. Refactor OrderNumber vs OrderId
+12. <comp> Implement Image Upload
+13. <comp> Refactor OrderNumber vs OrderId
 17. <comp> Add flags to order												<===== Will need Front End changes

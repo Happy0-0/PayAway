@@ -250,7 +250,8 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // optionally delete the logo image if it exists
-            if(!string.IsNullOrEmpty(dbMerchant.LogoFileName))
+            //  Note: All user uploaded image files have a -logo suffix added
+            if(!string.IsNullOrEmpty(dbMerchant.LogoFileName) && (dbMerchant.LogoFileName.IndexOf(@"-logo") > -1))
             {
                 var logoFilePathName = _environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}\\{dbMerchant.LogoFileName}";
                 System.IO.File.Delete(logoFilePathName);
