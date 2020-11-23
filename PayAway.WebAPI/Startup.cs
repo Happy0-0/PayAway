@@ -185,6 +185,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/22</td>
+                                    <td>v1.42</td>
+                                    <td>Implemented logo upload and retrieval
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/21</td>
                                     <td>v1.41</td>
                                     <td>Upgraded to .NET 5 RTM and deployed to a new URL
