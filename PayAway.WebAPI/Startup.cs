@@ -186,6 +186,12 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/22</td>
+                                    <td>v1.50</td>
+                                    <td>Implemented Date and ID property renaming
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/22</td>
                                     <td>v1.42</td>
                                     <td>Implemented logo upload and retrieval
                                     </td>
