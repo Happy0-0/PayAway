@@ -176,7 +176,7 @@ namespace PayAway.WebAPI
                 {
                     Title = "PayAway.WebAPI",
                     Version = "v1",
-                    Description = @"This is a functional implemention of v0. 
+                    Description = @"This WebAPI supports the three (3) UI components of the 2020 1819 Innovation Project (Demo Setup, Merchant Experience and Customer Experience) 
                             <table>
                                 <thead>
                                 <tr>
