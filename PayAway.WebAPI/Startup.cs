@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Hellang.Middleware.ProblemDetails;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +18,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+
+using Hellang.Middleware.ProblemDetails;
 
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Entities.Config;

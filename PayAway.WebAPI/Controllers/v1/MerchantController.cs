@@ -355,7 +355,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Sends a payment request to the customer.
+        /// Sends a payment request to the customer on the order (and all demo customers for this merchant).
         /// </summary>
         /// <param name="orderGuid">the unique id for the order</param>
         /// <returns></returns>
