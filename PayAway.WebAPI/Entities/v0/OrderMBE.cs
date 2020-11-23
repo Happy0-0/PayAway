@@ -16,7 +16,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets order guid
         /// </summary>
         /// <value>merchantID</value>
-        [JsonPropertyName("orderID")]
+        [JsonPropertyName("orderGuid")]
         public Guid OrderGuid { get; set; }
         /// <summary>
         /// Gets or sets the order number
@@ -52,14 +52,14 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets merchantID guid
         /// </summary>
         /// <value>merchantID</value>
-        [JsonPropertyName("merchantID")]
+        [JsonPropertyName("merchantGuid")]
         public Guid MerchantGuid { get; set; }
 
         /// <summary>
         /// Gets or sets the order date
         /// </summary>
         /// <value>order date</value>
-        [JsonPropertyName("orderDate")]
+        [JsonPropertyName("orderDateTimeUTC")]
         public DateTime OrderDateTimeUTC { get; set; }
 
         /// <summary>

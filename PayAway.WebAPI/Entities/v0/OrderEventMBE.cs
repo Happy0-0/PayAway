@@ -11,7 +11,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// </summary>
     public class OrderEventMBE
     {
-        [JsonPropertyName("eventDate")]
+        [JsonPropertyName("eventDateTimeUTC")]
         public DateTime EventDateTimeUTC { get; set; }
 
         /// <summary>

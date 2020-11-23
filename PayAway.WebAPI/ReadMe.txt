@@ -35,14 +35,14 @@ Tech Debt Items
 10. Refactor OrderHeaderMBE
 15. Correct issue with methods not returning ProblemDetails
 -------------------------------------------------------------------------------
-1.	<tom> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
-16. <tom wip> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
+    <tom>
 -------------------------------------------------------------------------------
 5.	<gabe> Update nuget packages
 7.	<gabe> Cleanup Code Analysis messages
 11. <gabe wip> Implement SMS Send
 14. <gabe> Always restore default catalog items
 -------------------------------------------------------------------------------
+1.	<comp> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
 2.	<comp> Validate phone nos on the way in, store normalized format in the db
 3.	<comp> Convert Datetime DB values to GMT
 4.	<comp> Update from .net 5 rc2 to rtm
@@ -50,4 +50,5 @@ Tech Debt Items
 8.	<comp> Add Table Relationships via navigation properties
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
+16. <comp> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
 17. <comp> Add flags to order												<===== Will need Front End changes

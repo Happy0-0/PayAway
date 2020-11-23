@@ -13,7 +13,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets the customerID
         /// </summary>
         /// <returns>customerID</returns>
-        [JsonPropertyName("customerID")]
+        [JsonPropertyName("customerGuid")]
         public Guid CustomerGuid { get; set; }
     }
 }

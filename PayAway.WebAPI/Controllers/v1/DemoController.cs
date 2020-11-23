@@ -343,7 +343,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <summary>
         /// Gets list of all customers that belong to a specific merchant
         /// </summary>
-        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantGuid">the unique identifier for the merhant</param>
         /// <returns>list of customers</returns>
         [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]

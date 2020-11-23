@@ -15,7 +15,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets merchantID guid
         /// </summary>
         /// <value>merchantID</value>
-        [JsonPropertyName("merchantID")]
+        [JsonPropertyName("merchantGuid")]
         public Guid MerchantGuid { get; set; }
 
         /// <summary>
