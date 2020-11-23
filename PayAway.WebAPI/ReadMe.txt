@@ -54,6 +54,6 @@ Tech Debt Items
 8.	<comp> Add Table Relationships via navigation properties
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
-15. Correct issue with methods not returning ProblemDetails
+15. <comp> Correct issue with methods not returning ProblemDetails
 16. <comp> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
 17. <comp> Add flags to order												<===== Will need Front End changes

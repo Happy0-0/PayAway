@@ -104,7 +104,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Gets a merchant and associated demo customers
+        /// Gets a specific merchant and it's associated demo customers
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
@@ -263,7 +263,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Makes selected merchant active
+        /// Makes a specific merchant active for the next demo
         /// </summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <returns></returns>
@@ -289,18 +289,19 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
 
-        /// <summary>Uploads the logo image.</summary>
-        /// <param name="merchantGuid">The merchant unique identifier.</param>
-        /// <param name="formFile">The form file.</param>
+        /// <summary>Uploads the logo image for a merchant.</summary>
+        /// <param name="merchantGuid">The unique identifier for the merchant</param>
+        /// <param name="imageFile">The file containing the logo in one of the supported formats.</param>
         /// <returns>ActionResult&lt;System.String&gt;.</returns>
         /// <remarks>
         /// Supported image formats are: bmp, png, jpg, jpeg
+        /// Max Image Size: 100KB
         /// </remarks>
         [HttpPost("merchants/{merchantGuid:guid}/uploadImage", Name = nameof(UploadLogoImage))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
+        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile imageFile)
         {
             // Step 1: Get the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -312,15 +313,15 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // Step 2: Validate supported image type and that image format in the file matches the extension
-            (byte[] fileContents, string errorMessage) = ImageFileHelpers.ProcessFormFile(formFile, _permittedExtensions, _fileSizeLimit);
+            (byte[] fileContents, string errorMessage) = ImageFileHelpers.ProcessFormFile(imageFile, _permittedExtensions, _fileSizeLimit);
 
             if (fileContents.Length == 0)
             {
-                return BadRequest(new ArgumentException(nameof(formFile), errorMessage));
+                return BadRequest(new ArgumentException(nameof(imageFile), errorMessage));
             }
 
             // Step 3: Store in local folder
-            string imageFileName = $"{merchantGuid}-logo{System.IO.Path.GetExtension(formFile.FileName)}";
+            string imageFileName = $"{merchantGuid}-logo{System.IO.Path.GetExtension(imageFile.FileName)}";
             using (var fileStream = System.IO.File.Create(_environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}\\" + imageFileName))
             {
                 fileStream.Write(fileContents);
@@ -338,13 +339,14 @@ namespace PayAway.WebAPI.Controllers.v1
         #endregion
 
 
-       #region === Demo Customer Methods ================================
+        #region === Demo Customer Methods ================================
 
         /// <summary>
-        /// Gets list of all customers that belong to a specific merchant
+        /// Gets list of all demo customers that belong to a specific merchant
         /// </summary>
         /// <param name="merchantGuid">the unique identifier for the merhant</param>
         /// <returns>list of customers</returns>
+        /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
         [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
