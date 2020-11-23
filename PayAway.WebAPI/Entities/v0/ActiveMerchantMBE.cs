@@ -30,7 +30,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>The logo url</value>
         [JsonPropertyName("logoUrl")]
-        public string LogoUrl { get; set; }
+        public Uri LogoUrl { get; set; }
 
         /// <summary>
         /// Gets or sets a list containing items

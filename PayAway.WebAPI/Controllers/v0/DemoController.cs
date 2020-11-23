@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Utilities;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -53,7 +54,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Domino's Pizza",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
+                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = true
                 },
@@ -61,7 +62,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Raising Cane's",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_2_LOGO_GUID}.png",
+                    LogoUrl =HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_2_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = false
                 }
@@ -89,7 +90,7 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
-                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                 IsSupportsTips = true,
                 IsActive = true,
                 DemoCustomers = new List<CustomerMBE>()
@@ -170,6 +171,7 @@ namespace PayAway.WebAPI.Controllers.v0
 
             return NoContent();
         }
+
         /// <summary>
         /// Makes selected merchant active and all other merchants inactive.
         /// </summary>
@@ -177,9 +179,9 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <returns></returns>
         [HttpPost("merchants/{merchantGuid:guid}/setactive")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> SetActiveMerchantForDemo(Guid merchantGuid)
+        public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
         {
             if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
@@ -188,6 +190,26 @@ namespace PayAway.WebAPI.Controllers.v0
 
             return NoContent();
 
+        }
+
+        /// <summary>
+        /// Uploads the logo image.
+        /// </summary>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="formFile">The form file.</param>
+        /// <returns>ActionResult&lt;System.String&gt;.</returns>
+        [HttpPost("merchants/{merchantGuid:guid}/uploadImage")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
+        {
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            {
+                return BadRequest($"Merchant with ID: {merchantGuid} not found");
+            }
+
+            return Ok();
         }
 
         #endregion

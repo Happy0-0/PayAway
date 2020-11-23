@@ -21,7 +21,7 @@ namespace PayAway.WebAPI.DB
                     MerchantId = 1,
                     MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Test Merchant #1",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
+                    LogoFileName = Constants.MERCHANT_1_LOGO_FILENAME,
                     IsSupportsTips = true,
                     IsActive = true
                 },
@@ -30,8 +30,8 @@ namespace PayAway.WebAPI.DB
                     MerchantId = 2,
                     MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Test Merchant #2",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_2_LOGO_GUID}.png",
-                    IsSupportsTips = true,
+                    LogoFileName = Constants.MERCHANT_2_LOGO_FILENAME,
+                    IsSupportsTips = false,
                     IsActive = false
                 }
             };
@@ -122,7 +122,7 @@ namespace PayAway.WebAPI.DB
                     Status = Enums.ORDER_STATUS.New,
                     CustomerName = @"Jane Doe",
                     PhoneNumber = @"(444) 444-4444",
-                    CreditCardNumber = @"9876-5432-1098-7654",
+                    CreditCardNumber = string.Empty,
                     AuthCode = string.Empty
                 }
             };

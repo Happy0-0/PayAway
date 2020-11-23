@@ -22,7 +22,10 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>The logo url</value>
         [JsonPropertyName("logoUrl")]
-        public string LogoUrl { get; set; }
+        public Uri LogoUrl { get; set; }
+
+        [JsonIgnore]
+        public string LogoFileName { get; set; }
 
         /// <summary>
         /// True if the merchant is active

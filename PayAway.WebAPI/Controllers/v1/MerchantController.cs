@@ -17,6 +17,10 @@ using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
+using PayAway.WebAPI.Utilities;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Net.Http.Headers;
+using System.Web;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -66,11 +70,11 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 MerchantGuid = dbMerchant.MerchantGuid,
                 MerchantName = dbMerchant.MerchantName,
-                LogoUrl = dbMerchant.LogoUrl,
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, dbMerchant.LogoFileName),
                 CatalogItems = dbCatalogueItems.ConvertAll(dbCI => (CatalogItemMBE)dbCI)
             };
 
-            // return the response
+            // return the response,
             return Ok(activeMerchant);
         }
                
@@ -182,7 +186,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
                 }
             }
-            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(newOrder.CustomerPhoneNo);
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(newOrder.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
                 return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerPhoneNo), $"[{newOrder.CustomerPhoneNo}] is NOT a supported Phone No format."));
@@ -265,7 +269,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // Biz Logic: Cannot change the order if it has already been paid for.
             if (dbOrder.Status == Enums.ORDER_STATUS.SMS_Sent || dbOrder.Status == Enums.ORDER_STATUS.Paid)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"Changes are not allowed after the SMS has been sent or the order has been paid"));
+                return BadRequest(new ArgumentException($"Changes are not allowed after the SMS has been sent or the order has been paid", nameof(orderGuid)));
             }
 
             #region === Validation =================================================
@@ -278,7 +282,7 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ArgumentException(nameof(updatedOrder.CustomerPhoneNo), @"The order phone number cannot be blank."));
             }
-            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(updatedOrder.CustomerPhoneNo);
+            (bool isValidPhoneNo, string formatedPhoneNo, _) = PhoneNoHelpers.NormalizePhoneNo(updatedOrder.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
                 return BadRequest(new ArgumentNullException(nameof(updatedOrder.CustomerPhoneNo), $"[{updatedOrder.CustomerPhoneNo}] is NOT a supported Phone No format."));
@@ -397,7 +401,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // Step 3: Send the SMS msg
             // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
             // SendSMSMessage
-            (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
+            (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
             SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
 
             // Step 3.1 Write the SMS event
@@ -469,6 +473,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             return order;
         }
-        #endregion
-    }
+
+    #endregion
+}
 }

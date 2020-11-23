@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Interfaces;
+using PayAway.WebAPI.Utilities;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -32,7 +34,7 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
-                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{Constants.MERCHANT_1_LOGO_GUID}.png",
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                 CatalogItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE

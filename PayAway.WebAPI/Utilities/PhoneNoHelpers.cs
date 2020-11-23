@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 using PhoneNumbers;
 
-namespace PayAway.WebAPI
+namespace PayAway.WebAPI.Utilities
 {
-    internal static class Utilities
+    internal static class PhoneNoHelpers
     {        
         internal static (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) NormalizePhoneNo(string rawPhoneNo, string regionCode = @"US")
         {

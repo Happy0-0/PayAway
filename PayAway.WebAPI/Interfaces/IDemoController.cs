@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PayAway.WebAPI.Entities.v0;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,9 @@ namespace PayAway.WebAPI.Interfaces
 
         ActionResult DeleteMerchant(Guid merchantGuid);
 
-        ActionResult<MerchantMBE> SetActiveMerchantForDemo(Guid merchantGuid);
+        ActionResult SetActiveMerchantForDemo(Guid merchantGuid);
+
+        ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile);
 
 
         ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid);

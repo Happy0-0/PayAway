@@ -25,7 +25,7 @@ namespace PayAway.WebAPI.Entities.v1
         [Required]
         public Guid MerchantGuid { get; set; }
 
-        public string LogoUrl { get; set; }
+        public string LogoFileName { get; set; }
 
         [Required]
         public string MerchantName { get; set; }
@@ -53,7 +53,7 @@ namespace PayAway.WebAPI.Entities.v1
                 {
                     MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
-                    LogoUrl = from.LogoUrl,
+                    LogoFileName = from.LogoFileName,
                     IsSupportsTips = from.IsSupportsTips,
                     IsActive = from.IsActive,
                 };
@@ -72,7 +72,7 @@ namespace PayAway.WebAPI.Entities.v1
                 {
                     MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
-                    LogoUrl = from.LogoUrl,
+                    LogoFileName = from.LogoFileName,
                     IsSupportsTips = from.IsSupportsTips,
                     IsActive = from.IsActive,
                 };

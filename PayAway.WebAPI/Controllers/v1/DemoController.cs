@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
-
+using Org.BouncyCastle.Bcpg.OpenPgp;
+using PayAway.WebAPI;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Interfaces;
+using PayAway.WebAPI.Utilities;
+using Twilio.Rest.Studio.V1.Flow;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -25,6 +30,16 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class DemoController : ControllerBase, IDemoController
     {
+        private readonly long _fileSizeLimit = 100000;
+        private readonly string[] _permittedExtensions = { ".bmp", ".png", ".jpeg", ".jpg" };
+
+        public static IWebHostEnvironment _environment;
+
+        public DemoController(IWebHostEnvironment environment)
+        {
+            _environment = environment;
+        }
+
         #region === Overall Demo Methods ================================
         /// <summary>
         /// Resets Database
@@ -35,7 +50,22 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase(bool isPreloadEnabled)
         {
-           SQLiteDBContext.ResetDB(isPreloadEnabled);
+            SQLiteDBContext.ResetDB(isPreloadEnabled);
+
+            // purge all uploaded logo files except the demo ones
+            var logoFolderName = _environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}";
+            var logoFileNames = Directory.GetFiles(logoFolderName).ToList();
+
+            var exclusionList = new List<string> 
+            { 
+                $"{logoFolderName}\\{Constants.MERCHANT_1_LOGO_FILENAME}",
+                $"{logoFolderName}\\{Constants.MERCHANT_2_LOGO_FILENAME}",
+            };
+
+            foreach(var logoFileName in logoFileNames.Except(exclusionList))
+            {
+                System.IO.File.Delete(logoFileName);
+            }
 
             return NoContent();
         }
@@ -44,7 +74,7 @@ namespace PayAway.WebAPI.Controllers.v1
         #region === Merchant Methods ================================
 
         /// <summary>
-        /// Gets all merchants
+        /// Get all merchants
         /// </summary>
         /// <returns>all merchants</returns>
         [HttpGet("merchants", Name = nameof(GetAllMerchants))]
@@ -63,6 +93,11 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // convert DB entities to the public entity types
             var merchants = dbMerchants.ConvertAll(dbM => (MerchantMBE)dbM);
+
+            foreach(var merchant in merchants)
+            {
+                merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
+            }
 
             // return the response
             return Ok(merchants);
@@ -90,6 +125,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // convert DB entity to the public entity type
             var merchant = (MerchantMBE)dbMerchant;
+            merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
 
             // create an empty working object
             var demoCustomers = new List<CustomerMBE>();
@@ -109,7 +145,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Adds a new merchant
+        /// Add a new merchant
         /// </summary>
         /// <param name="newMerchant">object containing information about the new merchant</param>
         /// <returns>newMerchant</returns>
@@ -213,6 +249,13 @@ namespace PayAway.WebAPI.Controllers.v1
                 return NotFound($"MerchantGuid: [{merchantGuid}] is not valid");
             }
 
+            // optionally delete the logo image if it exists
+            if(!string.IsNullOrEmpty(dbMerchant.LogoFileName))
+            {
+                var logoFilePathName = _environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}\\{dbMerchant.LogoFileName}";
+                System.IO.File.Delete(logoFilePathName);
+            }
+
             SQLiteDBContext.DeleteMerchant(dbMerchant.MerchantId);
 
             return NoContent();
@@ -225,9 +268,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns></returns>
         [HttpPost("merchants/{merchantGuid:guid}/setactive", Name = nameof(SetActiveMerchantForDemo))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> SetActiveMerchantForDemo(Guid merchantGuid)
+        public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
         {
             // query the DB
             var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -244,9 +287,57 @@ namespace PayAway.WebAPI.Controllers.v1
             return NoContent();
         }
 
+
+        /// <summary>Uploads the logo image.</summary>
+        /// <param name="merchantGuid">The merchant unique identifier.</param>
+        /// <param name="formFile">The form file.</param>
+        /// <returns>ActionResult&lt;System.String&gt;.</returns>
+        /// <remarks>
+        /// Supported image formats are: bmp, png, jpg, jpeg
+        /// </remarks>
+        [HttpPost("merchants/{merchantGuid:guid}/uploadImage", Name = nameof(UploadLogoImage))]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
+        {
+            // Step 1: Get the merchant
+            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+
+            // if we did not find a matching merchant
+            if (dbMerchant == null)
+            {
+                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantID: [{merchantGuid}] not found"));
+            }
+
+            // Step 2: Validate supported image type and that image format in the file matches the extension
+            (byte[] fileContents, string errorMessage) = ImageFileHelpers.ProcessFormFile(formFile, _permittedExtensions, _fileSizeLimit);
+
+            if (fileContents.Length == 0)
+            {
+                return BadRequest(new ArgumentException(nameof(formFile), errorMessage));
+            }
+
+            // Step 3: Store in local folder
+            string imageFileName = $"{merchantGuid}-logo{System.IO.Path.GetExtension(formFile.FileName)}";
+            using (var fileStream = System.IO.File.Create(_environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}\\" + imageFileName))
+            {
+                fileStream.Write(fileContents);
+            }
+
+            // Step 4: Update the merchant
+            dbMerchant.LogoFileName = imageFileName;
+            SQLiteDBContext.UpdateMerchant(dbMerchant);
+
+            // Step 5: Return results        https://localhost:44318/LogoImages/f8c6f5b6-533e-455f-87a1-ced552898e1d.png
+            var imageUri = HttpHelpers.BuildFullURL(this.Request, imageFileName);
+            return Ok(imageUri);
+        }
+
         #endregion
 
-        #region === Demo Customer Methods ================================
+
+       #region === Demo Customer Methods ================================
 
         /// <summary>
         /// Gets list of all customers that belong to a specific merchant
@@ -346,7 +437,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
             }
 
-            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(newDemoCustomer.CustomerPhoneNo);
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(newDemoCustomer.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
                 return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), $"[{newDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));
@@ -415,7 +506,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(updatedDemoCustomer.CustomerName), @"The customer name cannot be blank."));
             }
 
-            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.NormalizePhoneNo(updatedDemoCustomer.CustomerPhoneNo);
+            (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(updatedDemoCustomer.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
                 return BadRequest(new ArgumentNullException(nameof(updatedDemoCustomer.CustomerPhoneNo), $"[{updatedDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));

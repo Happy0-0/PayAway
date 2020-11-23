@@ -27,7 +27,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20326.1409</FileVersion>
+		<FileVersion>1.0.20328.0046</FileVersion>
 		<UserSecretsId>a99deb02-3b4c-4115-9777-c610d8a7d9cb</UserSecretsId>
 	</PropertyGroup>
 
@@ -40,6 +40,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Migrations\" />
+	  <Folder Include="UploadedImageFiles\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="PrestoPayv2.db">

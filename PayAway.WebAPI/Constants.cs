@@ -10,11 +10,12 @@ namespace PayAway.WebAPI
     {
         // demo ids
         internal static Guid MERCHANT_1_GUID = new Guid(@"f8c6f5b6-533e-455f-87a1-ced552898e1d");
-        internal static Guid MERCHANT_1_LOGO_GUID = new Guid(@"4670e0dc-0335-4370-a3b1-24d9fa1dfdbf");
+        internal static string MERCHANT_1_LOGO_FILENAME = $"{MERCHANT_1_GUID}.jpg";
         internal static Guid MERCHANT_1_CUSTOMER_1_GUID = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21");
         internal static Guid MERCHANT_1_CUSTOMER_2_GUID = new Guid("8b9b276a-cf81-47bf-97dc-3977cd464787");
+
         internal static Guid MERCHANT_2_GUID = new Guid(@"5d590431-95d2-4f8a-b2d9-6eb4d8cabc89");
-        internal static Guid MERCHANT_2_LOGO_GUID = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
+        internal static string MERCHANT_2_LOGO_FILENAME = $"{MERCHANT_2_GUID}.jpg";
 
         internal static Guid ORDER_1_GUID = new Guid(@"43e351fe-3cbc-4e36-b94a-9befe28637b3");
         internal static Guid ORDER_2_GUID = new Guid(@"fd07b84b-852e-47c9-b6d6-d248bd9e6bed");
@@ -25,5 +26,8 @@ namespace PayAway.WebAPI
 
 
         internal static readonly CultureInfo UnitedStates = CultureInfo.GetCultureInfo("en-US");
+
+        internal static readonly string LOGO_IMAGES_FOLDER_NAME = @"UploadedImageFiles";
+        internal static readonly string LOGO_IMAGES_URI_FOLDER = @"LogoImages";
     }
 }
