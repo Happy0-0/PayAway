@@ -30,7 +30,7 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class DemoController : ControllerBase, IDemoController
     {
-        private readonly long _fileSizeLimit = 100000;
+        private readonly long _fileSizeLimit = 100000;  // .1 MB
         private readonly string[] _permittedExtensions = { ".bmp", ".png", ".jpeg", ".jpg" };
 
         public static IWebHostEnvironment _environment;

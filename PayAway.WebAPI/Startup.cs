@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -47,6 +47,8 @@ namespace PayAway.WebAPI
 
             services.AddCors();
             services.AddControllers();
+
+            services.AddProblemDetails(); // Add the required services
 
             services.AddControllers()
             .AddJsonOptions(options =>
@@ -326,6 +328,8 @@ namespace PayAway.WebAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseProblemDetails(); // Add the middleware
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

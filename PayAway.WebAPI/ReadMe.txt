@@ -9,6 +9,11 @@ HTTP Status Codes
 https://www.restapitutorial.com/httpstatuscodes.html
 
 ------------------------------------------
+Problem Details
+------------------------------------------
+https://andrewlock.net/handling-web-api-exceptions-with-problemdetails-middleware/
+
+------------------------------------------
 Entity Framework Reference
 ------------------------------------------
 dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
@@ -33,7 +38,6 @@ Tech Debt Items
 
 9.	Convert to use Record types?
 10. Refactor OrderHeaderMBE
-15. Correct issue with methods not returning ProblemDetails
 -------------------------------------------------------------------------------
     <tom>
 -------------------------------------------------------------------------------
@@ -50,5 +54,6 @@ Tech Debt Items
 8.	<comp> Add Table Relationships via navigation properties
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
+15. Correct issue with methods not returning ProblemDetails
 16. <comp> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
 17. <comp> Add flags to order												<===== Will need Front End changes

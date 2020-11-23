@@ -65,9 +65,10 @@ namespace PayAway.WebAPI.Utilities
 
             if (formFile.Length > sizeLimit)
             {
-                var megabyteSizeLimit = sizeLimit / 1048576;
+                var megabyteSizeLimit = sizeLimit / 1048576.0M;
+                var megabyteActualSize = formFile.Length / 1048576.0M;
 
-                return new (Array.Empty<byte>(), $"[{trustedFileNameForDisplay}] exceeds {megabyteSizeLimit:N1} MB.]");
+                return new (Array.Empty<byte>(), $"[{trustedFileNameForDisplay}] {megabyteActualSize:N3} MB exceeds {megabyteSizeLimit:N3} MB.]");
             }
 
             try
