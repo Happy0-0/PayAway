@@ -18,6 +18,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// <value>merchantID</value>
         [JsonPropertyName("orderGuid")]
         public Guid OrderGuid { get; init; }
+
         /// <summary>
         /// Gets or sets the order number
         /// </summary>
