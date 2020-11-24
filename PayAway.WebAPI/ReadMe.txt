@@ -44,20 +44,21 @@ Tech Debt Items
 -------------------------------------------------------------------------------
     <tom>
 -------------------------------------------------------------------------------
-5.	<gabe> Update nuget packages
-7.	<gabe> Cleanup Code Analysis messages
 11. <gabe wip> Implement SMS Send
-14. <gabe> Always restore default catalog items
+
 -------------------------------------------------------------------------------
 1.	<comp> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
 2.	<comp> Validate phone nos on the way in, store normalized format in the db
 3.	<comp> Convert Datetime DB values to GMT
 4.	<comp> Update from .net 5 rc2 to rtm
+5.	<comp> Update nuget packages
 6.	<comp> Update Publish to Azure App Service to remove Self-Contained
+7.	<comp> Cleanup Code Analysis messages
 8.	<comp> Add Table Relationships via navigation properties
 9.	<comp> Convert to use Record types <evaluated, no value in this scenario, chgd to use init only properties
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
+14. <comp> Always restore default catalog items
 15. <comp> Correct issue with methods not returning ProblemDetails
 16. <comp> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
 17. <comp> Add flags to order												<===== Will need Front End changes

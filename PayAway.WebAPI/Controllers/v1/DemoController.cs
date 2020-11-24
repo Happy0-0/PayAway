@@ -84,6 +84,7 @@ namespace PayAway.WebAPI.Controllers.v1
         {
             // query the DB
             var dbMerchants = SQLiteDBContext.GetAllMerchants();
+            
 
             // if no results from DB, return an empty list
             if (dbMerchants == null)
@@ -96,9 +97,11 @@ namespace PayAway.WebAPI.Controllers.v1
 
             foreach(var merchant in merchants)
             {
-                merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
+               merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
+               var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(merchant.MerchantId);
+               merchant.DemoCustomers = dbDemoCustomers.ConvertAll(dbDc => (DemoCustomerMBE)dbDc);
             }
-
+            
             // return the response
             return Ok(merchants);
         }
@@ -115,7 +118,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchantAndDemoCustomers(merchantGuid);;
+            var dbMerchant = SQLiteDBContext.GetMerchantAndDemoCustomers(merchantGuid);
 
             // if we did not find a matching merchant
             if(dbMerchant == null)

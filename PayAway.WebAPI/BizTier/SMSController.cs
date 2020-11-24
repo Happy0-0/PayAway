@@ -74,7 +74,7 @@ namespace PayAway.WebAPI.BizTier
             }
             catch (Exception ex)
             {
-                var lastRequest = restClient.HttpClient.LastRequest;
+                //var lastRequest = restClient.HttpClient.LastRequest;
                 throw new ApplicationException(ex.ToString());
             }
         }

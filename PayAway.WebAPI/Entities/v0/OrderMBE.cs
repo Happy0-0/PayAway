@@ -83,7 +83,8 @@ namespace PayAway.WebAPI.Entities.v0
         /// <summary>
         /// Indicates if updates are allowed based on the current status of the order
         /// </summary>
-        public bool isUpdateAvailable
+        [JsonPropertyName("isUpdateAvailable")]
+        public bool IsUpdateAvailable
         {
             get { return (this.OrderStatus != Enums.ORDER_STATUS.SMS_Sent && this.OrderStatus != Enums.ORDER_STATUS.Paid); }
         }

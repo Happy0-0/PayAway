@@ -9,6 +9,12 @@ namespace PayAway.WebAPI.Entities.v0
     /// </summary>
     public class MerchantMBE : NewMerchantMBE
     {
+        /// <summary>
+        /// DB Generated PK for this Merchant.
+        /// </summary>
+        /// <value>The merchant identifier.</value>
+        [JsonIgnore]
+        public int MerchantId { get; set; }
 
         /// <summary>
         /// Gets or sets merchantID guid

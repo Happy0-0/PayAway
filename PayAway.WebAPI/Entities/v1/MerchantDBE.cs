@@ -51,6 +51,7 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantMBE()
                 {
+                    MerchantId = from.MerchantId,
                     MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
                     LogoFileName = from.LogoFileName,

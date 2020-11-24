@@ -181,6 +181,7 @@ namespace PayAway.WebAPI.Controllers.v1
             //trims customer name so that it doesn't have trailing characters
             newOrder.CustomerName = newOrder.CustomerName.Trim();
 
+            #region === Validation =================================================
             // validate request data
             if (string.IsNullOrEmpty(newOrder.CustomerName))
             {
@@ -207,6 +208,7 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 newOrder.CustomerPhoneNo = formatedPhoneNo;
             }
+            #endregion
 
             //query the db for the active merchant
             var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
@@ -393,70 +395,34 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(orderGuid), $"You cannot send the Payment link AFTER the order is paid."));
             }
 
-            // calc the order total
-            decimal orderTotal = (dbOrderExploded.OrderLineItems != null)
-                                            ? dbOrderExploded.OrderLineItems.Sum(oli => oli.ItemUnitPrice)
-                                            : 0.0M;
-
-            // Step 2: Build the SMS Msg
-            string payAwayURL = $"{_webUrlConfig.HPPBaseUrl}/customerorder/{dbOrderExploded.OrderGuid}";
-
-            StringBuilder messageBody = new StringBuilder();
-            messageBody.AppendLine($"Hello {dbOrderExploded.CustomerName}");
-
-            // we do not know what culture the server is set for so we are explicit, we want to make it formats currency with a US $
-            var specificCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
-            FormattableString formattableString = $"{dbOrderExploded.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrderExploded.OrderId.ToString("0000")} for: {orderTotal:C}";
-            messageBody.AppendLine(formattableString.ToString(specificCulture));
-            messageBody.AppendLine($"{payAwayURL}");
-
-            // Step 3: Send the SMS msg
-            // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
-            // SendSMSMessage
-            (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
-            SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
-
-            // Step 3.1 Write the SMS event
-            var dbOrderEvent = new OrderEventDBE()
-            {
-                OrderId = dbOrderExploded.OrderId,
-                EventDateTimeUTC = DateTime.UtcNow,
-                OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
-                EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
-            };
-
-            //save order event
-            SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
-
-            #region (addl work for next sprint)
+            SendSMSMessageSaveEvent(dbOrderExploded, _webUrlConfig);
 
             // Step 4:1 Get the merchant's demo customers
             //query db
             var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbOrderExploded.MerchantId);
 
-
             // Step 4:2 Loop for each demo customer
             foreach (var demoCustomer in dbDemoCustomers)
             {
-                var dbCustomer = new NewOrderMBE()
+                var order = new NewOrderMBE()
                 {
                     CustomerName = demoCustomer.CustomerName,
-                    CustomerPhoneNo = dbOrderExploded.PhoneNumber,
-                    //Todo add orderLineItems.
+                    CustomerPhoneNo = demoCustomer.CustomerPhoneNo,
+                    OrderLineItems = dbOrderExploded.OrderLineItems.ConvertAll(oli => (NewOrderLineItemMBE)oli)
                 };
+                //save the new order
+                var newDbOrder = SQLiteDBContext.InsertOrder(dbOrderExploded.MerchantId, order);
+                //get new order exploded for new order guid
+                var dbNewOrderExploded = SQLiteDBContext.GetOrderExploded(newDbOrder.OrderGuid);
+                //send sms message to demo customer and save new order event.
+                SendSMSMessageSaveEvent(dbNewOrderExploded, _webUrlConfig);
             }
-            // Step 4:2 Loop for each demo customer
-            //  Clone the order setting the customer on the order to be the demo customer
-            // normalize the phone no
-            //  Send the SMS msg
-
-            #endregion
 
             return NoContent();
         }
 
         #region === Helper Methods =============================================
-        private OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
+        private static OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
         {
             // convert DB entity to the public entity type
             var order = (OrderMBE)dbExplodedOrder;
@@ -484,6 +450,44 @@ namespace PayAway.WebAPI.Controllers.v1
             order.OrderEvents = orderEvents;
 
             return order;
+        }
+
+        public static void SendSMSMessageSaveEvent(OrderDBE dbOrderExploded, WebUrlConfigurationBE webUrlConfig)
+        {
+            // calc the order total
+            decimal orderTotal = (dbOrderExploded.OrderLineItems != null)
+                                            ? dbOrderExploded.OrderLineItems.Sum(oli => oli.ItemUnitPrice)
+                                            : 0.0M;
+
+            // Step 2: Build the SMS Msg
+            string payAwayURL = $"{webUrlConfig.HPPBaseUrl}/customerorder/{dbOrderExploded.OrderGuid}";
+
+            StringBuilder messageBody = new StringBuilder();
+            messageBody.AppendLine($"Hello {dbOrderExploded.CustomerName}");
+
+            // we do not know what culture the server is set for so we are explicit, we want to make it formats currency with a US $
+            var specificCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+            FormattableString formattableString = $"{dbOrderExploded.Merchant.MerchantName} is sending you this link to a secure payment page to enter your payment info for your Order Number: {dbOrderExploded.OrderId:0000} for: {orderTotal:C}";
+            messageBody.AppendLine(formattableString.ToString(specificCulture));
+            messageBody.AppendLine($"{payAwayURL}");
+
+            // Step 3: Send the SMS msg
+            // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
+            // SendSMSMessage
+            (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
+            SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
+
+            // Step 3.1 Write the SMS event
+            var dbOrderEvent = new OrderEventDBE()
+            {
+                OrderId = dbOrderExploded.OrderId,
+                EventDateTimeUTC = DateTime.UtcNow,
+                OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
+                EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
+            };
+
+            //save order event
+            SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
         }
 
     #endregion

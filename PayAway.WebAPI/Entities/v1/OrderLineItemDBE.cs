@@ -55,6 +55,20 @@ namespace PayAway.WebAPI.Entities.v1
             }
             return to;
         }
+
+        public static explicit operator NewOrderLineItemMBE(OrderLineItemDBE from)
+        {
+            NewOrderLineItemMBE to = null;
+
+            if (from != null)
+            {
+                to = new NewOrderLineItemMBE()
+                {
+                    ItemGuid = from.CatalogItemGuid
+                };
+            }
+            return to;
+        }
         #endregion
     }
 }
