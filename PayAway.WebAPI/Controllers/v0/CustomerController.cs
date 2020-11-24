@@ -15,7 +15,25 @@ namespace PayAway.WebAPI.Controllers.v0
     /// <remarks>
     /// This version is for the front-end team to have data to develop on until the working WebAPI is available
     /// </remarks>
+    [Route("api/[controller]/v0")]
+    [ApiController]
     public class CustomerController : ControllerBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult<CustomerOrderMBE> GetCustomerOrder()
+        {
+            throw new NotImplementedException();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult<PaymentInfoMBE> PostOrderPayment()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
