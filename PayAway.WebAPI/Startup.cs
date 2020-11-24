@@ -192,6 +192,13 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/11/24</td>
+                                    <td>v1.60</td>
+                                    <td>Implemented Sending SMS messages to demo customers.<br>
+                                        GetAllMerchants method includes list of demo customers.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/22</td>
                                     <td>v1.50</td>
                                     <td>Implemented Date and ID property renaming<br>

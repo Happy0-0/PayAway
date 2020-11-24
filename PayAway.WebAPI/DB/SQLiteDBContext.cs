@@ -195,7 +195,7 @@ namespace PayAway.WebAPI.DB
             //         2.5     OrderEvents
             //         2.6     OrderItems
 
-            #region === Step 2.3: Reload the Catalog Items ===========================
+            #region === Reload the Catalog Items ===========================
             var seedCatalogItems = SeedData.GetSeedCatalogueItems();
             foreach (var seedCatalogItem in seedCatalogItems)
             {
