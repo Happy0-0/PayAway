@@ -325,7 +325,11 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // Step 3: Store in local folder
             string imageFileName = $"{merchantGuid}-logo{System.IO.Path.GetExtension(imageFile.FileName)}";
-            using (var fileStream = System.IO.File.Create(_environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}\\" + imageFileName))
+            // use Path.Combine to deal with O/S differences re Linux: "/" vs Windows: "\"
+            string imageFilePathName = System.IO.Path.Combine(_environment.ContentRootPath,
+                                                                Constants.LOGO_IMAGES_FOLDER_NAME,
+                                                                imageFileName);
+            using (var fileStream = System.IO.File.Create(imageFilePathName))
             {
                 fileStream.Write(fileContents);
             }
