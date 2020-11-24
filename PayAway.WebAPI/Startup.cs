@@ -39,7 +39,7 @@ namespace PayAway.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // load configuration
+            // load configuration (from secrets file in dev or from enviroment variables in Azure)
             var smsServiceConfig = Configuration.GetSection("SMSConfig").Get<SMSServiceConfigBE>();
             var webUrlConfig = Configuration.GetSection("WebURLConfig").Get<WebUrlConfigurationBE>();
 
@@ -47,7 +47,7 @@ namespace PayAway.WebAPI
             services.AddSMSServiceConfig(smsServiceConfig ?? new SMSServiceConfigBE());
             services.AddSingleton(webUrlConfig ?? new WebUrlConfigurationBE());
 
-            services.AddCors();
+            services.AddCors();     // <== enable Cors since request will be coming from a different URL (the Web UIs)
             services.AddControllers();
 
             services.AddProblemDetails(); // Add the required services
@@ -94,70 +94,73 @@ namespace PayAway.WebAPI
                                     <td>Added methods GetOrder, CreateOrder, and UpdateOrder.
                                     </td>
                                 </tr>
-                                <tr>
-                                    <td>2020/11/11</td>
-                                    <td>v0.21</td>
-                                    <td>Get active merchant call on Merchant's Controller now includes the list of default Catalog Items
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/10</td>
-                                    <td>v0.20</td>
-                                    <td>Implemented Merchant Controller. Added GetActiveMerchants and GetOrderQueue methods.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/5</td>
-                                    <td>v0.10</td>
-                                    <td>Changed UpdateCustomer method to take newCustomer object
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/5</td>
-                                    <td>v0.06</td>
-                                    <td>Added MakeMerchantActive method.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/4</td>
-                                    <td>v0.05</td>
-                                    <td>Changed UpdateMerchant method to take newMerchant object.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/4</td>
-                                    <td>v0.04</td>
-                                    <td>reset method now takes a boolean parameter
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/3</td>
-                                    <td>v0.03</td>
-                                    <td>removed url, IsActive from add merchant request object
-                                        corrected path for adding a new merchant was /merchant now /merchants
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/3</td>
-                                    <td>v0.021</td>
-                                    <td>Internal Code Cleanup
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/11/2</td>
-                                    <td>v0.02</td>
-                                    <td>Finalized changes for demo controller. All methods return stubbed data.
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2020/10/28</td>
-                                    <td>v0.01</td>
-                                    <td>Added Demo controller to get stubbed results
-                                    </td>
-                                </tr>
                                 </tbody>
                             <table>
                             ",
+                            //    < tr>
+                            //        <td>2020/11/11</td>
+                            //        <td>v0.21</td>
+                            //        <td>Get active merchant call on Merchant's Controller now includes the list of default Catalog Items
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/10</td>
+                            //        <td>v0.20</td>
+                            //        <td>Implemented Merchant Controller. Added GetActiveMerchants and GetOrderQueue methods.
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/5</td>
+                            //        <td>v0.10</td>
+                            //        <td>Changed UpdateCustomer method to take newCustomer object
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/5</td>
+                            //        <td>v0.06</td>
+                            //        <td>Added MakeMerchantActive method.
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/4</td>
+                            //        <td>v0.05</td>
+                            //        <td>Changed UpdateMerchant method to take newMerchant object.
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/4</td>
+                            //        <td>v0.04</td>
+                            //        <td>reset method now takes a boolean parameter
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/3</td>
+                            //        <td>v0.03</td>
+                            //        <td>removed url, IsActive from add merchant request object
+                            //            corrected path for adding a new merchant was /merchant now /merchants
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/3</td>
+                            //        <td>v0.021</td>
+                            //        <td>Internal Code Cleanup
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/11/2</td>
+                            //        <td>v0.02</td>
+                            //        <td>Finalized changes for demo controller. All methods return stubbed data.
+                            //        </td>
+                            //    </tr>
+                            //    <tr>
+                            //        <td>2020/10/28</td>
+                            //        <td>v0.01</td>
+                            //        <td>Added Demo controller to get stubbed results
+                            //        </td>
+                            //    </tr>
+                            //    </tbody>
+                            //<table>
+                            //",
 
                     TermsOfService = new Uri("https://example.com/terms"),
                             Contact = new OpenApiContact
@@ -191,7 +194,9 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/22</td>
                                     <td>v1.50</td>
-                                    <td>Implemented Date and ID property renaming
+                                    <td>Implemented Date and ID property renaming<br>
+                                        Implemented Tech Debt item re init only properties<br>
+                                        Get active merchant call on Merchant's Controller now includes the list of demo Customers
                                     </td>
                                 </tr>
                                 <tr>
@@ -203,8 +208,8 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/21</td>
                                     <td>v1.41</td>
-                                    <td>Upgraded to .NET 5 RTM and deployed to a new URL
-                                        Added 2 flags to Order to be used by UI
+                                    <td>Upgraded to .NET 5 RTM and deployed to a new URL<br>
+                                        Added 2 flags to Order to be used by UI<br>
                                         1st pass of implementing internal Tech Debt Items
                                     </td>
                                 </tr>

@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 
 namespace PayAway.WebAPI.Entities.v0
 {
-    public class CustomerMBE : NewCustomerMBE
+    /// <summary>
+    /// Class represents an existing Demo customer
+    /// </summary>
+    public class DemoCustomerMBE : NewDemoCustomerMBE
     {
         /// <summary>
         /// Gets or sets the customerID
         /// </summary>
         /// <returns>customerID</returns>
         [JsonPropertyName("customerGuid")]
-        public Guid CustomerGuid { get; set; }
+        public Guid CustomerGuid { get; init; }
     }
 }

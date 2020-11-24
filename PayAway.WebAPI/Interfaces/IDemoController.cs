@@ -25,15 +25,15 @@ namespace PayAway.WebAPI.Interfaces
         ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile);
 
 
-        ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid);
+        ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid);
 
-        ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid);
+        ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid);
 
-        ActionResult<CustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewCustomerMBE newDemoCustomer);
+        ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer);
 
         ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid);
 
-        ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewCustomerMBE updatedDemoCustomer);
+        ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer);
 
     }
 }

@@ -16,7 +16,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("merchantGuid")]
-        public Guid MerchantGuid { get; set; }
+        public Guid MerchantGuid { get; init; }
 
         /// <summary>
         /// Gets or sets the merchant name
@@ -33,11 +33,15 @@ namespace PayAway.WebAPI.Entities.v0
         public Uri LogoUrl { get; set; }
 
         /// <summary>
-        /// Gets or sets a list containing items
+        /// Gets or sets a list containing Catalog Items
         /// </summary>
         [JsonPropertyName("catalogItems")]
         public List<CatalogItemMBE> CatalogItems { get; set; }
 
-        
+        /// <summary>
+        /// Gets or sets a list containing Demo Customers
+        /// </summary>
+        [JsonPropertyName("demoCustomers")]
+        public List<DemoCustomerMBE> DemoCustomers { get; set; }
     }
 }

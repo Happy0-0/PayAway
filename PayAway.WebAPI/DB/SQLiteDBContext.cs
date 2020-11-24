@@ -510,7 +510,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// used by the WebAPI controllers.
         /// </remarks>
-        internal static DemoCustomerDBE InsertDemoCustomer(int merchantID, NewCustomerMBE newCustomer)
+        internal static DemoCustomerDBE InsertDemoCustomer(int merchantID, NewDemoCustomerMBE newCustomer)
         {
             using (var context = new SQLiteDBContext())
             {
@@ -766,7 +766,7 @@ namespace PayAway.WebAPI.DB
             {
                 var dbOrders = context.Orders
                                         .Where(o => o.MerchantId == merchantId)
-                                        .OrderByDescending(o => o.OrderId)
+                                        .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
                                         .ToList();
 
                 return dbOrders;

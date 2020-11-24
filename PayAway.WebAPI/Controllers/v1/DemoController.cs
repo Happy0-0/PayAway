@@ -128,13 +128,13 @@ namespace PayAway.WebAPI.Controllers.v1
             merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
 
             // create an empty working object
-            var demoCustomers = new List<CustomerMBE>();
+            var demoCustomers = new List<DemoCustomerMBE>();
 
             // optionally convert DB entities to the public entity type
             if (dbMerchant.DemoCustomers != null)
             {
                 // convert DB entities to the public entity types
-                demoCustomers = dbMerchant.DemoCustomers.ConvertAll(dbC => (CustomerMBE)dbC);
+                demoCustomers = dbMerchant.DemoCustomers.ConvertAll(dbC => (DemoCustomerMBE)dbC);
             }
 
             // set the value of the property collection on the parent object
@@ -348,9 +348,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns>list of customers</returns>
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
-        [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(List<DemoCustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IEnumerable<CustomerMBE>> GetDemoCustomers(Guid merchantGuid)
+        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -366,11 +366,11 @@ namespace PayAway.WebAPI.Controllers.v1
             // if no results from DB, return an empty list
             if (dbDemoCustomers == null)
             {
-                return Ok(new List<CustomerMBE>());
+                return Ok(new List<DemoCustomerMBE>());
             }
 
             // convert DB entities to the public entity types
-            var demoCustomers = dbDemoCustomers.ConvertAll(dbDC => (CustomerMBE)dbDC);
+            var demoCustomers = dbDemoCustomers.ConvertAll(dbDC => (DemoCustomerMBE)dbDC);
 
             // return the response
             return Ok(demoCustomers);
@@ -385,10 +385,10 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}", Name = nameof(GetDemoCustomer))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
+        public ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -409,7 +409,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return NotFound($"CustomerGuid: [{demoCustomerGuid}] on MerchantGuid: [{merchantGuid}] not found");
             }
 
-            var customer = (CustomerMBE)dbCustomer;
+            var customer = (DemoCustomerMBE)dbCustomer;
 
             return Ok(customer);
         }
@@ -423,9 +423,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <remarks>A pre-setup demo customer will be will have the same demo experience as the customer entered on the order during the demo</remarks>
         [HttpPost("merchants/{merchantGuid:guid}/customers", Name = nameof(AddDemoCustomer))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<CustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewCustomerMBE newDemoCustomer)
+        public ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
             //trims Customer name so that it doesn't have trailing characters
             newDemoCustomer.CustomerName = newDemoCustomer.CustomerName.Trim();
@@ -465,7 +465,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 var dbCustomer = SQLiteDBContext.InsertDemoCustomer(dbMerchant.MerchantId, newDemoCustomer);
 
                 // convert DB entity to the public entity type
-                var customer = (CustomerMBE)dbCustomer;
+                var customer = (DemoCustomerMBE)dbCustomer;
 
                 // return the response
                 return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, demoCustomerGuid = customer.CustomerGuid }, customer);
@@ -489,7 +489,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewCustomerMBE updatedDemoCustomer)
+        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
             // query the db for the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);

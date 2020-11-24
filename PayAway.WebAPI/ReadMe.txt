@@ -14,6 +14,11 @@ Problem Details
 https://andrewlock.net/handling-web-api-exceptions-with-problemdetails-middleware/
 
 ------------------------------------------
+Record Type
+------------------------------------------
+https://www.claudiobernasconi.ch/2020/11/07/csharp-9-record-types-introduction-and-deep-dive/
+
+------------------------------------------
 Entity Framework Reference
 ------------------------------------------
 dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
@@ -35,9 +40,7 @@ https://www.sqlite.org/autoinc.html
 ------------------------------------------
 Tech Debt Items
 ------------------------------------------
-
-9.	Convert to use Record types?
-10. Refactor OrderHeaderMBE
+10. Refactor OrderHeaderMBE (on hold)
 -------------------------------------------------------------------------------
     <tom>
 -------------------------------------------------------------------------------
@@ -52,6 +55,7 @@ Tech Debt Items
 4.	<comp> Update from .net 5 rc2 to rtm
 6.	<comp> Update Publish to Azure App Service to remove Self-Contained
 8.	<comp> Add Table Relationships via navigation properties
+9.	<comp> Convert to use Record types <evaluated, no value in this scenario, chgd to use init only properties
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
 15. <comp> Correct issue with methods not returning ProblemDetails

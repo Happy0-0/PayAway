@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// This class contains information about order events
+    /// This class contains information about an order event
     /// </summary>
     public class OrderEventMBE
     {

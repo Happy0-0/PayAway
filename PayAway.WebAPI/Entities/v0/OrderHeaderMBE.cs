@@ -9,7 +9,7 @@ using PayAway.WebAPI.Controllers.v0;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// Class that contains information for overall order
+    /// Class that contains summary info for an Order
     /// </summary>
     public class OrderHeaderMBE
     {
@@ -18,14 +18,14 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("orderGuid")]
-        public Guid OrderGuid { get; set; }
+        public Guid OrderGuid { get; init; }
 
         /// <summary>
         /// Gets or sets the order number
         /// </summary>
         /// <value>order number</value>
         [JsonPropertyName("orderNumber")]
-        public string OrderNumber { get { return this.OrderId.ToString("0000"); } }
+        public string OrderNumber => this.OrderId.ToString("0000");
 
         [JsonIgnore]
         public int OrderId { get; set; }

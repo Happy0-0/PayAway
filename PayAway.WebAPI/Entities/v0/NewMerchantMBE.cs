@@ -3,7 +3,7 @@
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// Class used when creating new merchants
+    /// Class represents a new or updated merchant
     /// </summary>
     public class NewMerchantMBE
     {

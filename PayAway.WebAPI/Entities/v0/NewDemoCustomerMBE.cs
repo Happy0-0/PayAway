@@ -2,7 +2,10 @@
 
 namespace PayAway.WebAPI.Entities.v0
 {
-    public class NewCustomerMBE
+    /// <summary>
+    /// Class represents a new or updated demo customer
+    /// </summary>
+    public class NewDemoCustomerMBE
     {
         
         /// <summary>

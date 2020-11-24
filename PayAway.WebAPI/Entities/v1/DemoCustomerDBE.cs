@@ -45,13 +45,13 @@ namespace PayAway.WebAPI.Entities.v1
         public MerchantDBE Merchant { get; set; }
 
         #region === Type Conversion Methods ================================
-        public static explicit operator CustomerMBE(DemoCustomerDBE from)
+        public static explicit operator DemoCustomerMBE(DemoCustomerDBE from)
         {
-            CustomerMBE to = null;
+            DemoCustomerMBE to = null;
 
             if (from != null)
             {
-                to = new CustomerMBE()
+                to = new DemoCustomerMBE()
                 {
                     CustomerGuid = from.DemoCustomerGuid,
                     CustomerName = from.CustomerName,
@@ -62,7 +62,7 @@ namespace PayAway.WebAPI.Entities.v1
             return to;
         }
 
-        public static explicit operator DemoCustomerDBE(CustomerMBE from)
+        public static explicit operator DemoCustomerDBE(DemoCustomerMBE from)
         {
             DemoCustomerDBE to = null;
 

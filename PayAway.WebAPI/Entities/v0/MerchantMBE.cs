@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// class used when a method needs to get merchant information. Inherits from NewMerchantMBE.
+    /// Class represents an existing Merchant
     /// </summary>
     public class MerchantMBE : NewMerchantMBE
     {
@@ -15,7 +15,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>merchantID</value>
         [JsonPropertyName("merchantGuid")]
-        public Guid MerchantGuid { get; set; }
+        public Guid MerchantGuid { get; init; }
 
         /// <summary>
         /// Gets or sets the logo url
@@ -24,6 +24,13 @@ namespace PayAway.WebAPI.Entities.v0
         [JsonPropertyName("logoUrl")]
         public Uri LogoUrl { get; set; }
 
+        /// <summary>
+        /// Gets or sets the name of the logo file.
+        /// </summary>
+        /// <value>The name of the logo file.</value>
+        /// <remarks>
+        /// This property is from the DB, its value is dynamically converted to LogoUrl to be returned to the front end
+        /// </remarks>
         [JsonIgnore]
         public string LogoFileName { get; set; }
 
@@ -49,7 +56,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <returns>a list of customers</returns>
         [JsonPropertyName("customers")]
-        public List<CustomerMBE> DemoCustomers { get; set; }
+        public List<DemoCustomerMBE> DemoCustomers { get; set; }
 
     }
 }

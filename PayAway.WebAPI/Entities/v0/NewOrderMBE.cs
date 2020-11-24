@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PayAway.WebAPI.Entities.v0
 {
     /// <summary>
-    /// Class used when a method needs to get merchant order information
+    /// Class represents a new or updated order
     /// </summary>
     public class NewOrderMBE
     {

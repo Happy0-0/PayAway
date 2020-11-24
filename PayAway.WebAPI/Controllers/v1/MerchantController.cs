@@ -47,7 +47,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Gets the active merchant
+        /// Gets the active demo merchant and the available catalog items
         /// </summary>
         /// <returns>active merchant and order queue</returns>
         [HttpGet()]
@@ -55,7 +55,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ActiveMerchantMBE), StatusCodes.Status200OK)]
         public ActionResult<ActiveMerchantMBE> GetActiveMerchant()
         {
-            //Query the db
+            //Query the db for the active merchant
             var dbMerchant = SQLiteDBContext.GetActiveMerchant();
 
             if (dbMerchant == null)
@@ -64,14 +64,26 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //query the db for catalogue Items
-            var dbCatalogueItems = SQLiteDBContext.GetCatalogItems(0);
+            // 1st: look for unique catalog items for this merchant
+            var dbCatalogueItems = SQLiteDBContext.GetCatalogItems(dbMerchant.MerchantId);
 
+            // 2nd: if the merchant did not have unique catalog items, use the default ones on merchantId = 0
+            if (dbCatalogueItems == null || dbCatalogueItems.Count == 0)
+            {
+                dbCatalogueItems = SQLiteDBContext.GetCatalogItems(0);
+            }
+
+            // query the db for demo customers
+            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
+
+            // build the return object
             var activeMerchant = new ActiveMerchantMBE
             {
                 MerchantGuid = dbMerchant.MerchantGuid,
                 MerchantName = dbMerchant.MerchantName,
                 LogoUrl = HttpHelpers.BuildFullURL(this.Request, dbMerchant.LogoFileName),
-                CatalogItems = dbCatalogueItems.ConvertAll(dbCI => (CatalogItemMBE)dbCI)
+                CatalogItems = dbCatalogueItems.ConvertAll(dbCI => (CatalogItemMBE)dbCI),
+                DemoCustomers = dbDemoCustomers.ConvertAll(dbDC => (DemoCustomerMBE)dbDC)
             };
 
             // return the response,
@@ -128,7 +140,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Gets merchant order
+        /// Get a specific merchant order
         /// </summary>
         /// <param name="orderGuid">The unique identifier for the order</param>
         /// <returns>merchant Order</returns>
@@ -245,7 +257,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Updates an order by order guid.
+        /// Updates a merchant order.
         /// </summary>
         /// <param name="orderGuid"></param>
         /// <param name="updatedOrder"></param>
