@@ -44,7 +44,6 @@ Tech Debt Items
 -------------------------------------------------------------------------------
     <tom>
 -------------------------------------------------------------------------------
-11. <gabe wip> Implement SMS Send
 
 -------------------------------------------------------------------------------
 1.	<comp> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
@@ -56,6 +55,7 @@ Tech Debt Items
 7.	<comp> Cleanup Code Analysis messages
 8.	<comp> Add Table Relationships via navigation properties
 9.	<comp> Convert to use Record types <evaluated, no value in this scenario, chgd to use init only properties
+11. <comp> Implement SMS Send
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
 14. <comp> Always restore default catalog items
