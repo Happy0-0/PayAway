@@ -10,11 +10,22 @@ namespace PayAway.WebAPI.Entities.v1
 {
     public class MerchantDBE
     {
+        /// <summary>
+        /// DB Generated PK for this Merchant.
+        /// </summary>
+        /// <value>The merchant identifier.</value>
         [Key]
         [Required]
-        public Guid MerchantID { get; set; }
+        public int MerchantId { get; set; }
 
-        public string LogoUrl { get; set; }
+        /// <summary>
+        /// Publicly Usable Unique Identifier for this Merchant
+        /// </summary>
+        /// <value>The merchant unique identifier.</value>
+        [Required]
+        public Guid MerchantGuid { get; set; }
+
+        public string LogoFileName { get; set; }
 
         [Required]
         public string MerchantName { get; set; }
@@ -25,6 +36,13 @@ namespace PayAway.WebAPI.Entities.v1
         [Required]
         public bool IsSupportsTips { get; set; }
 
+        // Navigation Property
+        public List<DemoCustomerDBE> DemoCustomers { get; set; }
+
+        // Navigation Property
+        public List<OrderDBE> Orders { get; set; }
+
+        #region === Type Conversion Methods ================================
         public static explicit operator MerchantMBE(MerchantDBE from)
         {
             MerchantMBE to = null;
@@ -33,9 +51,10 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantMBE()
                 {
-                    MerchantID = from.MerchantID,
+                    MerchantId = from.MerchantId,
+                    MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
-                    LogoUrl = from.LogoUrl,
+                    LogoFileName = from.LogoFileName,
                     IsSupportsTips = from.IsSupportsTips,
                     IsActive = from.IsActive,
                 };
@@ -52,9 +71,9 @@ namespace PayAway.WebAPI.Entities.v1
             {
                 to = new MerchantDBE()
                 {
-                    MerchantID = from.MerchantID,
+                    MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
-                    LogoUrl = from.LogoUrl,
+                    LogoFileName = from.LogoFileName,
                     IsSupportsTips = from.IsSupportsTips,
                     IsActive = from.IsActive,
                 };
@@ -62,5 +81,7 @@ namespace PayAway.WebAPI.Entities.v1
 
             return to;
         }
+
+        #endregion
     }
 }

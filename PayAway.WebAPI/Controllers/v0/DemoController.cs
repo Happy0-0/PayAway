@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
+using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Utilities;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -15,20 +17,12 @@ namespace PayAway.WebAPI.Controllers.v0
     /// This is v0 for the Demo Controller.
     /// </summary>
     /// <remarks>
-    /// This version is for the front-end team to have data to develop on until further development.
+    /// This version is for the front-end team to have data to develop on until the working WebAPI is available
     /// </remarks>
     [Route("api/[controller]/v0")]
     [ApiController]
-    public class DemoController : ControllerBase
+    public class DemoController : ControllerBase, IDemoController
     {
-        // demo ids
-        static Guid merchant_1_id = new Guid(@"f8c6f5b6-533e-455f-87a1-ced552898e1d");
-        static Guid merchant_1_logo_id = new Guid(@"4670e0dc-0335-4370-a3b1-24d9fa1dfdbf");
-        static Guid merchant_1_customer_1_id = new Guid("5056ce22-50fb-4f1e-bb84-60fb45e21c21");
-        static Guid merchant_1_customer_2_id = new Guid("8b9b276a-cf81-47bf-97dc-3977cd464787");
-        static Guid merchant_2_id = new Guid(@"5d590431-95d2-4f8a-b2d9-6eb4d8cabc89");
-        static Guid merchant_2_logo_id = new Guid(@"062c5897-208a-486a-8c6a-76707b9c07eb");
-
         #region === Overall Demo Methods ================================
 
         /// <summary>
@@ -52,23 +46,23 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<List<MerchantMBE>> GetAllMerchants()
+        public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
         {
-            return Ok( new List<MerchantMBE>
+            return Ok(new List<MerchantMBE>
             {
                 new MerchantMBE
                 {
-                    MerchantID = merchant_1_id,
+                    MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Domino's Pizza",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
+                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = true
                 },
                 new MerchantMBE
                 {
-                    MerchantID = merchant_2_id,
+                    MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Raising Cane's",
-                    LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_2_logo_id}.png",
+                    LogoUrl =HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_2_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = false
                 }
@@ -78,38 +72,38 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Gets merchant information and associated customers using a GUID.
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
         /// <remarks>Requires a merchantID</remarks>
-        [HttpGet("merchants/{merchantID:guid}")]
+        [HttpGet("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant(Guid merchantID)       
+        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
-            if(merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
             return Ok(new MerchantMBE
             {
-                MerchantID = merchant_1_id,
+                MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
-                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                 IsSupportsTips = true,
                 IsActive = true,
-                Customers = new List<CustomerMBE>()
+                DemoCustomers = new List<DemoCustomerMBE>()
                 {
-                    new CustomerMBE
+                    new DemoCustomerMBE
                     {
-                        CustomerID = merchant_1_customer_1_id,
+                        CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
                         CustomerName = @"Joe Smith",
                         CustomerPhoneNo = @"(513) 456-7890"
                     },
-                    new CustomerMBE
+                    new DemoCustomerMBE
                     {
-                        CustomerID = merchant_1_customer_2_id,
+                        CustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
                         CustomerName = @"Jane Doe",
                         CustomerPhoneNo = @"(513) 555-1212"
                     }
@@ -126,33 +120,34 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantMBE> SetupNewMerchant(NewMerchantMBE newMerchant)
+        public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
-            var merchant = new MerchantMBE{ 
-                MerchantID = merchant_1_id,
+            var merchant = new MerchantMBE
+            {
+                MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = newMerchant.MerchantName,
                 IsSupportsTips = newMerchant.IsSupportsTips
             };
 
-            return CreatedAtAction(nameof(GetMerchant), new { merchantID = merchant.MerchantID}, merchant);
+            return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid }, merchant);
         }
 
         /// <summary>
         /// Updates merchants using merchantID
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="merchant"></param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="updatedMerchant"></param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantID:guid}")]
+        [HttpPut("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantID, NewMerchantMBE merchant)
+        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
             return NoContent();
@@ -161,48 +156,61 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Deletes merchant by merchantID
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
-        [HttpDelete("merchants/{merchantID:guid}")]
+        [HttpDelete("merchants/{merchantGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteMerchantByID(Guid merchantID)
+        public ActionResult DeleteMerchant(Guid merchantGuid)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
             return NoContent();
         }
+
         /// <summary>
         /// Makes selected merchant active and all other merchants inactive.
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns></returns>
-        [HttpPost("merchants/{merchantID:guid}/setactive")]
+        [HttpPost("merchants/{merchantGuid:guid}/setactive")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> MakeMerchantActive(Guid merchantID)
+        public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            var activeMerchant = new MerchantMBE
-            {
-                MerchantID = merchant_1_id,
-                MerchantName = @"Domino's Pizza",
-                LogoUrl = $"https://innovatein48sa.blob.core.windows.net/innovatein48-bc/Merchants/{merchant_1_logo_id}.png",
-                IsActive = true,
-            };
 
-            return NoContent();            
+            return NoContent();
 
         }
 
+        /// <summary>
+        /// Uploads the logo image.
+        /// </summary>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="formFile">The form file.</param>
+        /// <returns>ActionResult&lt;System.String&gt;.</returns>
+        [HttpPost("merchants/{merchantGuid:guid}/uploadImage")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
+        {
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            {
+                return BadRequest($"Merchant with ID: {merchantGuid} not found");
+            }
+
+            return Ok();
+        }
 
         #endregion
 
@@ -210,29 +218,29 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Gets list of all customers that belong to a specific merchant
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
         /// <returns>list of customers</returns>
-        [HttpGet("merchants/{merchantID:guid}/customers")]
-        [ProducesResponseType(typeof(List<CustomerMBE>), StatusCodes.Status204NoContent)]
+        [HttpGet("merchants/{merchantGuid:guid}/customers")]
+        [ProducesResponseType(typeof(List<DemoCustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<List<CustomerMBE>> GetCustomers(Guid merchantID)
+        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
-            return new List<CustomerMBE>
+            return new List<DemoCustomerMBE>
             {
-                new CustomerMBE
+                new DemoCustomerMBE
                 {
-                    CustomerID = merchant_1_customer_1_id,
+                    CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
                     CustomerName = "Joe Smith",
                     CustomerPhoneNo = "(513) 456-7890"
                 },
-                new CustomerMBE
+                new DemoCustomerMBE
                 {
-                    CustomerID = merchant_1_customer_2_id,
+                    CustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
                     CustomerName = @"Jane Doe",
                     CustomerPhoneNo = @"(513) 555-1212"
                 }
@@ -242,81 +250,81 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Gets a specific customer by merchantID and customerID
         /// </summary>
-        /// <param name="merchantID">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="customerID">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+        /// <param name="merchantGuid">f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="demoCustomerGuid">5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
         /// <returns>customer</returns>
-        [HttpGet("merchants/{merchantID:guid}/customers/{customerID:guid}")]
-        [ProducesResponseType(typeof(CustomerMBE), StatusCodes.Status200OK)]
+        [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
+        [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerMBE> GetCustomer(Guid merchantID, Guid customerID)
+        public ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (customerID != merchant_1_customer_1_id)
+            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
             {
-                return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
+                return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
-            return new CustomerMBE
+            return new DemoCustomerMBE
             {
-                CustomerID = merchant_1_customer_1_id,
+                CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(513) 456-7890"
             };
-            
+
         }
 
         /// <summary>
         /// Adds a new customer
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="newCustomer"></param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="newDemoCustomer"></param>
         /// <returns>new customer</returns>
-        [HttpPost("merchants/{merchantID:guid}/customers")]
+        [HttpPost("merchants/{merchantGuid:guid}/customers")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerMBE> AddCustomer(Guid merchantID, NewCustomerMBE newCustomer)
+        public ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
-            var customer = new CustomerMBE
+            var customer = new DemoCustomerMBE
             {
-                CustomerID = merchant_1_customer_1_id,
-                CustomerName = newCustomer.CustomerName,
-                CustomerPhoneNo = newCustomer.CustomerPhoneNo
+                CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                CustomerName = newDemoCustomer.CustomerName,
+                CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
             };
 
-            return CreatedAtAction(nameof(GetCustomer), new { merchantID = merchantID, customerID = customer.CustomerID}, customer);
+            return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid }, customer);
         }
 
         /// <summary>
         /// Updates a customer
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="customerID">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
-        /// <param name="customer"></param>
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="demoCustomerGuid">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+        /// <param name="updatedDemoCustomer"></param>
         /// <returns></returns>
-        [HttpPut("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        [HttpPut("merchants/{merchantID:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateCustomer(Guid merchantID, Guid customerID, NewCustomerMBE customer)
+        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (customerID != merchant_1_customer_1_id)
+            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
             {
-                return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
+                return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
             return NoContent();
@@ -325,21 +333,21 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Delete a customer on a merchant
         /// </summary>
-        /// <param name="merchantID">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
-        /// <param name="customerID">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
-        [HttpDelete("merchants/{merchantID:guid}/customers/{customerID:guid}")]
+        /// <param name="merchantGuid">for testing use: f8c6f5b6-533e-455f-87a1-ced552898e1d</param>
+        /// <param name="demoCustomerGuid">for testing use: 5056ce22-50fb-4f1e-bb84-60fb45e21c21</param>
+        [HttpDelete("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteCustomerByID(Guid merchantID, Guid customerID)
+        public ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
-            if (merchantID != merchant_1_id)
+            if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
-                return NotFound($"Merchant with ID: {merchantID} not found");
+                return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (customerID != merchant_1_customer_1_id)
+            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
             {
-                return NotFound($"Customer with ID: {customerID} on Merchant with ID: {merchantID} not found");
+                return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
             return NoContent();

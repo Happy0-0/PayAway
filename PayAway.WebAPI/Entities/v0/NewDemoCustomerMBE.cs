@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace PayAway.WebAPI.Entities.v0
 {
-    public class NewCustomerMBE
+    /// <summary>
+    /// Class represents a new or updated demo customer
+    /// </summary>
+    public class NewDemoCustomerMBE
     {
         
         /// <summary>

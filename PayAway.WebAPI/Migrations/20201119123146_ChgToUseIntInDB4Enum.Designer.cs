@@ -2,19 +2,21 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PayAway.WebAPI.DB;
 
 namespace PayAway.WebAPI.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    partial class SQLiteDBContextModelSnapshot : ModelSnapshot
+    [Migration("20201119123146_ChgToUseIntInDB4Enum")]
+    partial class ChgToUseIntInDB4Enum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.0");
+                .HasAnnotation("ProductVersion", "5.0.0-rc.2.20475.6");
 
             modelBuilder.Entity("PayAway.WebAPI.Entities.v1.CatalogItemDBE", b =>
                 {
@@ -89,7 +91,7 @@ namespace PayAway.WebAPI.Migrations
                     b.Property<bool>("IsSupportsTips")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("LogoFileName")
+                    b.Property<string>("LogoUrl")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("MerchantGuid")
