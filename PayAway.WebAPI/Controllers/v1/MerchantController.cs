@@ -148,7 +148,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<OrderMBE> GetOrder(Guid orderGuid)
+        public ActionResult<OrderMBE> GetOrder([FromRoute] Guid orderGuid)
         {
             //query the db
             var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
@@ -269,7 +269,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
+        public ActionResult UpdateOrder([FromRoute] Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             // get the existing order
             var dbOrder = SQLiteDBContext.GetOrder(orderGuid);
@@ -378,7 +378,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SendOrderPaymentRequest(Guid orderGuid)
+        public ActionResult SendOrderPaymentRequest([FromRoute] Guid orderGuid)
         {
             // get the exploded order w/ the line items
             var dbOrderExploded = SQLiteDBContext.GetOrderExploded(orderGuid);

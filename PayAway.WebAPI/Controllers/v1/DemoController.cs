@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -48,7 +49,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <remarks>You can choose to preload a set of default data</remarks>
         [HttpPost("reset", Name = nameof(ResetDatabase))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase(bool isPreloadEnabled)
+        public ActionResult ResetDatabase([FromQuery] bool isPreloadEnabled)
         {
             SQLiteDBContext.ResetDB(isPreloadEnabled);
 
@@ -58,8 +59,9 @@ namespace PayAway.WebAPI.Controllers.v1
 
             var exclusionList = new List<string> 
             { 
-                $"{logoFolderName}\\{Constants.MERCHANT_1_LOGO_FILENAME}",
-                $"{logoFolderName}\\{Constants.MERCHANT_2_LOGO_FILENAME}",
+                // use Path.Combine to suppport both windows and rhel deployment enironments
+                System.IO.Path.Combine(logoFolderName, Constants.MERCHANT_1_LOGO_FILENAME),
+                System.IO.Path.Combine(logoFolderName, Constants.MERCHANT_2_LOGO_FILENAME)
             };
 
             foreach(var logoFileName in logoFileNames.Except(exclusionList))
@@ -115,7 +117,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
+        public ActionResult<MerchantMBE> GetMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchantAndDemoCustomers(merchantGuid);
@@ -195,7 +197,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
+        public ActionResult UpdateMerchant([FromRoute] Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             //trims merchant name so that it doesn't have trailing characters
             updatedMerchant.MerchantName = updatedMerchant.MerchantName.Trim();
@@ -242,7 +244,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteMerchant(Guid merchantGuid)
+        public ActionResult DeleteMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -274,7 +276,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
+        public ActionResult SetActiveMerchantForDemo([FromRoute] Guid merchantGuid)
         {
             // query the DB
             var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -304,7 +306,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile imageFile)
+        public ActionResult<string> UploadLogoImage([FromRoute] Guid merchantGuid, IFormFile imageFile)
         {
             // Step 1: Get the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -345,7 +347,6 @@ namespace PayAway.WebAPI.Controllers.v1
 
         #endregion
 
-
         #region === Demo Customer Methods ================================
 
         /// <summary>
@@ -357,7 +358,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
         [ProducesResponseType(typeof(List<DemoCustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid)
+        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers([FromRoute] Guid merchantGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -395,7 +396,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
+        public ActionResult<DemoCustomerMBE> GetDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the DB
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -432,7 +433,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
+        public ActionResult<DemoCustomerMBE> AddDemoCustomer([FromRoute] Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
             //trims Customer name so that it doesn't have trailing characters
             newDemoCustomer.CustomerName = newDemoCustomer.CustomerName.Trim();
@@ -496,7 +497,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
+        public ActionResult UpdateDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
             // query the db for the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
@@ -560,7 +561,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
+        public ActionResult DeleteDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the db for the merchant
             var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
