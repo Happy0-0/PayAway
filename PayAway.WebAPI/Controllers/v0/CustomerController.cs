@@ -19,21 +19,46 @@ namespace PayAway.WebAPI.Controllers.v0
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public ActionResult<CustomerOrderMBE> GetCustomerOrder()
+        [HttpGet("orders/{orderGuid:guid}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid)
         {
-            throw new NotImplementedException();
+            if (orderGuid != Constants.ORDER_1_GUID)
+            {
+                return NotFound($"Customer order: [{orderGuid}] not found");
+            }
+            
+            return Ok(new CustomerOrderMBE
+            {
+                OrderGuid = orderGuid,
+                MerchantName = @"Domino's Pizza",
+                IsSupportsTips = true,
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
+                CustomerName = "Joe Smith",
+                CustomerPhoneNo = "(666) 666-6666",
+                OrderTotal = 15.46M,
+                OrderDateTimeUTC = DateTime.UtcNow,
+                IsPaymentAvailable = false
+            });
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public ActionResult<PaymentInfoMBE> PostOrderPayment()
+        [HttpPost("orders/{orderGuid:Guid}/sendOrderPayment")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        public ActionResult<PaymentInfoMBE> SendOrderPayment(Guid orderGuid, PaymentInfoMBE paymentInfo)
         {
-            throw new NotImplementedException();
+            if (orderGuid != Constants.ORDER_1_GUID)
+            {
+                return NotFound($"Merchant order with ID: {orderGuid} not found");
+            }
+            if(paymentInfo.ExpYear < DateTime.UtcNow.Year)
+            {
+                return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
+            }
+
+            return NoContent();
         }
     }
 }

@@ -24,10 +24,10 @@ namespace PayAway.WebAPI.Entities.v0
         public decimal TipAmount { get; set; }
 
         [JsonPropertyName("expMonth")]
-        public string ExpMonth { get; set; }
+        public int ExpMonth { get; set; }
 
         [JsonPropertyName("expYear")]
-        public string ExpYear { get; set; }
+        public int ExpYear { get; set; }
 
     }
 }

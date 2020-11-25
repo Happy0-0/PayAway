@@ -20,7 +20,7 @@ namespace PayAway.WebAPI.Entities.v0
         public Guid OrderGuid { get; init; }
 
         /// <summary>
-        /// Gets or sets the order number
+        /// Creates the order number
         /// </summary>
         /// <value>order number</value>
         [JsonPropertyName("orderNumber")]

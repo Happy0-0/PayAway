@@ -27,17 +27,7 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>The logo url</value>
         [JsonPropertyName("logoUrl")]
-        public Uri LogoUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the name of the logo file.
-        /// </summary>
-        /// <value>The name of the logo file.</value>
-        /// <remarks>
-        /// This property is from the DB, its value is dynamically converted to LogoUrl to be returned to the front end
-        /// </remarks>
-        [JsonIgnore]
-        public string LogoFileName { get; set; }    
+        public Uri LogoUrl { get; set; }  
         
         /// <summary>
         /// Gets or sets the order number
@@ -68,6 +58,13 @@ namespace PayAway.WebAPI.Entities.v0
 
         [JsonIgnore]
         public int OrderId { get; set; }
+
+        /// <summary>
+        /// Gets or sets order guid
+        /// </summary>
+        /// <value>merchantID</value>
+        [JsonPropertyName("orderGuid")]
+        public Guid OrderGuid { get; init; }
 
         /// <summary>
         /// Gets or sets the order date
