@@ -23,7 +23,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid)
+        public ActionResult<CustomerOrderMBE> GetCustomerOrder([FromRoute] Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
@@ -40,19 +40,21 @@ namespace PayAway.WebAPI.Controllers.v0
                 CustomerPhoneNo = "(666) 666-6666",
                 OrderTotal = 15.46M,
                 OrderDateTimeUTC = DateTime.UtcNow,
-                IsPaymentAvailable = false
+                IsPaymentAvailable = true
             });
         }
+
         [HttpPost("orders/{orderGuid:Guid}/sendOrderPayment")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<PaymentInfoMBE> SendOrderPayment(Guid orderGuid, PaymentInfoMBE paymentInfo)
+        public ActionResult<PaymentInfoMBE> SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
+
             if(paymentInfo.ExpYear < DateTime.UtcNow.Year)
             {
                 return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
