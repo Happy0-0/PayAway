@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Entities.v0;
 using PayAway.WebAPI.Utilities;
+using PayAway.WebAPI.PushNotifications;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -19,6 +21,18 @@ namespace PayAway.WebAPI.Controllers.v0
     [ApiController]
     public class CustomerController : ControllerBase
     {
+        private readonly IHubContext<MessageHub> _messageHub;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomerController"/> class.
+        /// </summary>
+        /// <param name="messageHub">The message hub.</param>
+        public CustomerController(IHubContext<MessageHub> messageHub)
+        {
+            _messageHub = messageHub;
+        }
+
+
         [HttpGet("orders/{orderGuid:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
@@ -59,6 +73,8 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
             }
+
+            _messageHub.Clients.All.SendAsync("OrderUpdated", "foobar");
 
             return NoContent();
         }

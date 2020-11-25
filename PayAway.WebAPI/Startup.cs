@@ -23,6 +23,7 @@ using Hellang.Middleware.ProblemDetails;
 
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Entities.Config;
+using PayAway.WebAPI.PushNotifications;
 
 namespace PayAway.WebAPI
 {
@@ -51,6 +52,8 @@ namespace PayAway.WebAPI
             services.AddControllers();
 
             services.AddProblemDetails(); // Add the required services
+
+            services.AddSignalR();
 
             services.AddControllers()
             .AddJsonOptions(options =>
@@ -398,6 +401,8 @@ namespace PayAway.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapHub<MessageHub>("/orderUpdates");
             });
         }
 

@@ -14,6 +14,13 @@ Problem Details
 https://andrewlock.net/handling-web-api-exceptions-with-problemdetails-middleware/
 
 ------------------------------------------
+SignalR
+------------------------------------------
+https://blog.ctglobalservices.com/scripting-development/mme/send-instant-message-from-server-back-to-client-using-signalr/
+https://procodeguide.com/programming/real-time-web-with-signalr-in-aspnet-core/
+https://code-maze.com/netcore-signalr-angular/
+
+------------------------------------------
 Record Type
 ------------------------------------------
 https://www.claudiobernasconi.ch/2020/11/07/csharp-9-record-types-introduction-and-deep-dive/
@@ -42,9 +49,9 @@ Tech Debt Items
 ------------------------------------------
 10. Refactor OrderHeaderMBE (on hold)
 -------------------------------------------------------------------------------
-    <tom>
+    <tom> implement SignalR push notifications when payment is posted for an order
 -------------------------------------------------------------------------------
-
+	<gabe>
 -------------------------------------------------------------------------------
 1.	<comp> Rename JsonAttribute of *Id properties in MBEs to *Guid			<===== Will require Front End refactoring
 2.	<comp> Validate phone nos on the way in, store normalized format in the db
