@@ -9,13 +9,13 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// class that contains a list of orders
     /// </summary>
-    public class OrderQueueMBE
+    public record OrderQueueMBE
     {
         /// <summary>
         /// Gets and sets a list of orders
         /// </summary>
         /// <returns>a list of orders</returns>
         [JsonPropertyName("orders")]
-        public List<OrderHeaderMBE> Orders { get; set; }
+        public List<OrderHeaderMBE> Orders { get; init; }
     }
 }

@@ -9,19 +9,19 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// This class contains information about an order event
     /// </summary>
-    public class OrderEventMBE
+    public record OrderEventMBE
     {
         [JsonPropertyName("eventDateTimeUTC")]
-        public DateTime EventDateTimeUTC { get; set; }
+        public DateTime EventDateTimeUTC { get; init; }
 
         /// <summary>
         /// Gets or sets order status
         /// </summary>
         /// <value>order status</value>
         [JsonPropertyName("eventStatus")]
-        public Enums.ORDER_STATUS OrderStatus { get; set; }
+        public Enums.ORDER_STATUS OrderStatus { get; init; }
         
         [JsonPropertyName("eventDescription")]
-        public string EventDescription { get; set; }
+        public string EventDescription { get; init; }
     }
 }

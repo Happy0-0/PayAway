@@ -9,15 +9,15 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class represents an existing catalog item
     /// </summary>
-    public class CatalogItemMBE
+    public record CatalogItemMBE
     {
         [JsonPropertyName("itemGuid")]
         public Guid ItemGuid { get; init; }
 
         [JsonPropertyName("itemName")]
-        public string ItemName { get; set; }
+        public string ItemName { get; init; }
 
         [JsonPropertyName("itemUnitPrice")]
-        public decimal ItemUnitPrice { get; set; }
+        public decimal ItemUnitPrice { get; init; }
     }
 }

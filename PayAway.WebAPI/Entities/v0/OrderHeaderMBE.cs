@@ -11,7 +11,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class that contains summary info for an Order
     /// </summary>
-    public class OrderHeaderMBE
+    public record OrderHeaderMBE
     {
         /// <summary>
         /// Gets or sets order guid
@@ -28,34 +28,34 @@ namespace PayAway.WebAPI.Entities.v0
         public string OrderNumber => this.OrderId.ToString("0000");
 
         [JsonIgnore]
-        public int OrderId { get; set; }
+        public int OrderId { get; init; }
 
         /// <summary>
         /// Gets or sets customers name
         /// </summary>
         /// <value>order name</value>
         [JsonPropertyName("customerName")]
-        public string CustomerName { get; set; }
+        public string CustomerName { get; init; }
 
         /// <summary>
         /// Gets or sets the order phone number
         /// </summary>
         /// <value>phone number</value>
         [JsonPropertyName("phoneNumber")]
-        public string PhoneNumber { get; set; }
+        public string PhoneNumber { get; init; }
 
         /// <summary>
         /// Gets or sets a credit card number
         /// </summary>
         [JsonPropertyName("creditCardNumber")]
-        public string CreditCardNumber { get; set; }
+        public string PAN { get; init; }
 
         /// <summary>
         /// Gets or sets order status
         /// </summary>
         /// <value>order status</value>
         [JsonPropertyName("status")]
-        public Enums.ORDER_STATUS OrderStatus { get; set; }
+        public Enums.ORDER_STATUS OrderStatus { get; init; }
 
         /// <summary>
         /// Gets or sets the order total
@@ -69,6 +69,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>order date</value>
         [JsonPropertyName("orderDateTimeUTC")]
-        public DateTime OrderDateTimeUTC { get; set; }
+        public DateTime OrderDateTimeUTC { get; init; }
     }
 }

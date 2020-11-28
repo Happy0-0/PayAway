@@ -9,7 +9,7 @@ namespace PayAway.WebAPI.Entities.v0
     /// <summary>
     /// Class used when a method needs to get the active merchant and associated information.
     /// </summary>
-    public class ActiveMerchantMBE 
+    public record ActiveMerchantMBE 
     {
         /// <summary>
         /// Gets or sets merchantID guid
@@ -23,25 +23,25 @@ namespace PayAway.WebAPI.Entities.v0
         /// </summary>
         /// <value>The merchants name</value>
         [JsonPropertyName("merchantName")]
-        public string MerchantName { get; set; }
+        public string MerchantName { get; init; }
 
         /// <summary>
         /// Gets or sets the logo url
         /// </summary>
         /// <value>The logo url</value>
         [JsonPropertyName("logoUrl")]
-        public Uri LogoUrl { get; set; }
+        public Uri LogoUrl { get; init; }
 
         /// <summary>
         /// Gets or sets a list containing Catalog Items
         /// </summary>
         [JsonPropertyName("catalogItems")]
-        public List<CatalogItemMBE> CatalogItems { get; set; }
+        public List<CatalogItemMBE> CatalogItems { get; init; }
 
         /// <summary>
         /// Gets or sets a list containing Demo Customers
         /// </summary>
         [JsonPropertyName("demoCustomers")]
-        public List<DemoCustomerMBE> DemoCustomers { get; set; }
+        public List<DemoCustomerMBE> DemoCustomers { get; init; }
     }
 }

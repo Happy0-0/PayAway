@@ -6,28 +6,28 @@ using System.Threading.Tasks;
 
 namespace PayAway.WebAPI.Entities.v0
 {
-    public class PaymentInfoMBE
+    public record PaymentInfoMBE
     {
         /// <summary>
         /// Gets or sets a primary account number aka credit card number
         /// </summary>
         [JsonPropertyName("pan")]
-        public string PAN { get; set; }
+        public string PAN { get; init; }
 
         /// <summary>
         /// Gets or sets the three digit code on the back of the credit card
         /// </summary>
         [JsonPropertyName("cvv")]
-        public string CVV { get; set; }
+        public string CVV { get; init; }
 
         [JsonPropertyName("tipAmount")]
-        public decimal TipAmount { get; set; }
+        public decimal TipAmount { get; init; }
 
         [JsonPropertyName("expMonth")]
-        public int ExpMonth { get; set; }
+        public int ExpMonth { get; init; }
 
         [JsonPropertyName("expYear")]
-        public int ExpYear { get; set; }
+        public int ExpYear { get; init; }
 
     }
 }

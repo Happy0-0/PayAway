@@ -13,14 +13,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 using PayAway.WebAPI.Entities.Database;
 
-/// <summary>
-/// The DB namespace.
-/// </summary>
-/// <remarks>
-/// MBE entities should NOT leak down into this class
-/// </remarks>
 namespace PayAway.WebAPI.DB
 {
+    /// <summary>
+    /// Class SQLiteDBContext./
+    /// Implements the <see cref="Microsoft.EntityFrameworkCore.DbContext" />
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
+    /// <remarks>
+    /// MBE entities should NOT leak down into this class  <================================
+    /// </remarks>
     public class SQLiteDBContext : DbContext
     {
         public DbSet<MerchantDBE> Merchants { get; set; }
@@ -316,49 +318,6 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
-        /// Inserts the merchant
-        /// </summary>
-        /// <param name="newMerchant">The merchant.</param>
-        /// <returns>MerchantDBE.</returns>
-        /// <remarks>
-        /// used by the WebAPI controllers.
-        /// </remarks>
-        //internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
-        //{
-        //    using (var context = new SQLiteDBContext())
-        //    {
-        //        // make the db entity
-        //        var dbMerchant = new MerchantDBE
-        //        {
-        //            MerchantName = newMerchant.MerchantName,
-        //            IsSupportsTips = newMerchant.IsSupportsTips
-        //        };
-
-        //        context.Merchants.Add(dbMerchant);
-
-        //        try
-        //        {
-        //            context.SaveChanges();
-        //        }
-        //        catch (DbUpdateException ex)
-        //        {
-        //            // exception was raised by the db (ex: UK violation)
-        //            var sqlException = ex.InnerException;
-
-        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-        //            throw new ApplicationException(sqlException.Message);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            // rethrow exception
-        //            throw;
-        //        }
-
-        //        return dbMerchant;
-        //    }
-        //}
-
-        /// <summary>
         /// Inserts the merchant 
         /// </summary>
         /// <param name="newMerchant">The new merchant.</param>
@@ -522,50 +481,6 @@ namespace PayAway.WebAPI.DB
                 return dbDemoCustomers;
             }
         }
-
-        /// <summary>
-        /// Inserts new demo customer into DB (used by the public controllers).
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        /// <param name="newCustomer">object containing information for new customer</param>
-        /// <returns></returns>
-        /// <remarks>
-        /// used by the WebAPI controllers.
-        /// </remarks>
-        //internal static DemoCustomerDBE InsertDemoCustomer(int merchantID, NewDemoCustomerMBE newCustomer)
-        //{
-        //    using (var context = new SQLiteDBContext())
-        //    {
-        //        // make the db entity
-        //        var dbCustomer = new DemoCustomerDBE
-        //        {
-        //            MerchantId = merchantID,
-        //            CustomerName = newCustomer.CustomerName,
-        //            CustomerPhoneNo = newCustomer.CustomerPhoneNo
-        //        };
-
-        //        context.DemoCustomers.Add(dbCustomer);
-        //        try
-        //        {
-        //            context.SaveChanges();
-        //        }
-        //        catch (DbUpdateException ex)
-        //        {
-        //            // exception was raised by the db (ex: UK violation)
-        //            var sqlException = ex.InnerException;
-
-        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-        //            throw new ApplicationException(sqlException.Message);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            // rethrow exception
-        //            throw; 
-        //        }
-
-        //        return dbCustomer;
-        //    }
-        //}
 
         /// <summary>
         /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
@@ -834,53 +749,6 @@ namespace PayAway.WebAPI.DB
             }
 
         }
-
-        /// <summary>
-        /// Inserts new order into DB (Used by the public controllers)
-        /// </summary>
-        /// <param name="merchantId">The Merchant identifier</param>
-        /// <param name="newOrder">object containing information for a new order</param>
-        /// <returns></returns> 
-        /// <remarks>
-        /// used by the WebAPI controllers.
-        /// </remarks>
-        //internal static OrderDBE InsertOrder(int merchantId, NewOrderMBE newOrder)
-        //{
-        //    using (var context = new SQLiteDBContext())
-        //    {
-        //        // make the db entity
-        //        var dbOrder = new OrderDBE
-        //        {
-        //            Status = Enums.ORDER_STATUS.New,
-        //            MerchantId = merchantId,
-        //            CustomerName = newOrder.CustomerName,
-        //            PhoneNumber = newOrder.CustomerPhoneNo,
-        //            OrderDateTimeUTC = DateTime.UtcNow
-        //        };
-
-        //        context.Orders.Add(dbOrder);
-
-        //        try
-        //        {
-        //            context.SaveChanges();
-        //        }
-        //        catch (DbUpdateException ex)
-        //        {
-        //            // exception was raised by the db (ex: UK violation)
-        //            var sqlException = ex.InnerException;
-
-        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-        //            throw new ApplicationException(sqlException.Message);
-        //        }
-        //        catch (Exception)
-        //        {
-        //            // rethrow exception
-        //            throw;
-        //        }
-
-        //        return dbOrder;
-        //    }
-        //}
 
         /// <summary>
         /// Inserts new order
