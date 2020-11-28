@@ -94,6 +94,27 @@ namespace PayAway.WebAPI.Entities.Database
             }
             return to;
         }
+
+        public static explicit operator CustomerOrderMBE(OrderDBE from)
+        {
+            CustomerOrderMBE to = null;
+
+            if (from != null)
+            {
+                to = new CustomerOrderMBE()
+                {
+                    OrderGuid = from.OrderGuid,
+                    CustomerPhoneNo = from.PhoneNumber,
+                    CustomerName = from.CustomerName,
+                    OrderId = from.OrderId,
+                    OrderDateTimeUTC = from.OrderDateTimeUTC,
+                    MerchantName = from.Merchant.MerchantName,
+                    IsSupportsTips = from.Merchant.IsSupportsTips,
+                    MaskedPAN = from.CreditCardNumber
+                };
+            }
+            return to;
+        }
         #endregion
     }
 }

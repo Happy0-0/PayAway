@@ -88,7 +88,7 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/24</td>
                                     <td>v0.51</td>
-                                    <td>Finished stubbed out methods.
+                                    <td>Finished stubbed out methods for customer Controller.
                                     </td>
                                 </tr>
                                 <tr>
