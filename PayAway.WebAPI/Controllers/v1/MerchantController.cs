@@ -1,26 +1,25 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
-using Twilio.Rest.Api.V2010.Account;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Net.Http.Headers;
 
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.Entities.v0;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;
-using Microsoft.AspNetCore.WebUtilities;
-using System.Net.Http.Headers;
-using System.Web;
+
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -160,7 +159,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // convert this to the public mbe
-            var order = BuildExplodedOrder(dbExplodedOrder);
+            var order = BuildExplodedOrderMBE(dbExplodedOrder);
 
             //Return the response
             return Ok(order);
@@ -215,39 +214,11 @@ namespace PayAway.WebAPI.Controllers.v1
 
             try
             {
-                //Store the new merchant Order
-                var dbOrder = SQLiteDBContext.InsertOrder(dbActiveMerchant.MerchantId, newOrder);
+                // insert the order
+                var dbExplodedOrder = InsertNewOrder(dbActiveMerchant.MerchantId, newOrder);
 
-                //create the first event
-                var dbOrderEvent = new OrderEventDBE()
-                {
-                    OrderId = dbOrder.OrderId,
-                    EventDateTimeUTC = DateTime.UtcNow,
-                    OrderStatus = Enums.ORDER_STATUS.New,
-                    EventDescription = "A new order has been created."
-                };
-
-                //save order event
-                SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
-                
-                //iterate through orderLineItems collection to save it in the db
-                foreach(var orderLineItem in newOrder.OrderLineItems)
-                {
-                    var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
-
-                    var dbOrderLineItem = new OrderLineItemDBE()
-                    {
-                        ItemName = catalogItem.ItemName,
-                        ItemUnitPrice = catalogItem.ItemUnitPrice,
-                        OrderId = dbOrder.OrderId,
-                        CatalogItemGuid = orderLineItem.ItemGuid
-                    };
-                    SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
-                }
-
-                //convert dbOrder to public entity.
-                var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
-                var explodedOrder = BuildExplodedOrder(dbExplodedOrder);
+                // convert to MBE
+                var explodedOrder = BuildExplodedOrderMBE(dbExplodedOrder);
 
                 // return the response
                 return CreatedAtAction(nameof(GetOrder), new { orderGuid = explodedOrder.OrderGuid }, explodedOrder);
@@ -277,7 +248,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching order
             if (dbOrder == null)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"OrderGuid: [{orderGuid}] not found"));
+                return BadRequest(new ArgumentException($"OrderGuid: [{orderGuid}] not found", nameof(orderGuid)));
             }
 
             // Biz Logic: Cannot change the order if it has already been paid for.
@@ -323,13 +294,14 @@ namespace PayAway.WebAPI.Controllers.v1
 
             try
             {
-                // update the dbOrder with the values we just got
+                // Step 1: update the dbOrder with the values we just got
                 dbOrder.CustomerName = updatedOrder.CustomerName;
                 dbOrder.PhoneNumber = updatedOrder.CustomerPhoneNo;
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
+
                 SQLiteDBContext.UpdateOrder(dbOrder);
 
-                // in this demo code we are just going to delete and re-add the order line items
+                // Step 2: in this demo code we are just going to delete and re-add the order line items
                 SQLiteDBContext.DeleteOrderLineItems(dbOrder.OrderId);
 
                 //iterate through orderLineItems collection to save it in the db
@@ -348,7 +320,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
                 }
 
-                // create an event
+                // Step 3: create an event
                 var dbOrderEvent = new OrderEventDBE()
                 {
                     OrderId = dbOrder.OrderId,
@@ -392,7 +364,13 @@ namespace PayAway.WebAPI.Controllers.v1
             // Biz Logic: Cannot change the order if it has already been paid for.
             if (dbOrderExploded.Status == Enums.ORDER_STATUS.Paid)
             {
-                return BadRequest(new ArgumentException(nameof(orderGuid), $"You cannot send the Payment link AFTER the order is paid."));
+                return BadRequest(new ArgumentException($"You cannot send the Payment link AFTER the order is paid.", nameof(orderGuid)));
+            }
+
+            // Biz Logic: Cannot send SMS if there are no line items
+            if (dbOrderExploded.OrderLineItems == null || dbOrderExploded.OrderLineItems.Count == 0)
+            {
+                return BadRequest(new ArgumentException($"You cannot send the Payment link if the order does not have any line items", nameof(orderGuid)));
             }
 
             SendSMSMessageSaveEvent(dbOrderExploded, _webUrlConfig);
@@ -404,25 +382,73 @@ namespace PayAway.WebAPI.Controllers.v1
             // Step 4:2 Loop for each demo customer
             foreach (var demoCustomer in dbDemoCustomers)
             {
-                var order = new NewOrderMBE()
+                var newDBDemoCustomerOrder = new NewOrderMBE()
                 {
                     CustomerName = demoCustomer.CustomerName,
                     CustomerPhoneNo = demoCustomer.CustomerPhoneNo,
                     OrderLineItems = dbOrderExploded.OrderLineItems.ConvertAll(oli => (NewOrderLineItemMBE)oli)
                 };
-                //save the new order
-                var newDbOrder = SQLiteDBContext.InsertOrder(dbOrderExploded.MerchantId, order);
-                //get new order exploded for new order guid
-                var dbNewOrderExploded = SQLiteDBContext.GetOrderExploded(newDbOrder.OrderGuid);
+
+                // insert the order
+                var dbDemoCustomerExplodedOrder = InsertNewOrder(dbOrderExploded.MerchantId, newDBDemoCustomerOrder);
+                
                 //send sms message to demo customer and save new order event.
-                SendSMSMessageSaveEvent(dbNewOrderExploded, _webUrlConfig);
+                SendSMSMessageSaveEvent(dbDemoCustomerExplodedOrder, _webUrlConfig);
             }
 
             return NoContent();
         }
 
         #region === Helper Methods =============================================
-        private static OrderMBE BuildExplodedOrder(OrderDBE dbExplodedOrder)
+        private static OrderDBE InsertNewOrder(int merchantId, NewOrderMBE newOrder)
+        {
+            //Step 1: Store the new merchant Order
+            var newDBOrder = new OrderDBE()
+            {
+                Status = Enums.ORDER_STATUS.New,
+                MerchantId = merchantId,
+                CustomerName = newOrder.CustomerName,
+                PhoneNumber = newOrder.CustomerPhoneNo,
+                OrderDateTimeUTC = DateTime.UtcNow
+            };
+
+            var dbOrder = SQLiteDBContext.InsertOrder(newDBOrder);
+
+            //Step 2: create the first event
+            var newDBOrderEvent = new OrderEventDBE()
+            {
+                OrderId = dbOrder.OrderId,
+                EventDateTimeUTC = DateTime.UtcNow,
+                OrderStatus = Enums.ORDER_STATUS.New,
+                EventDescription = "A new order has been created."
+            };
+
+            SQLiteDBContext.InsertOrderEvent(newDBOrderEvent);
+
+            //Step 3: iterate through orderLineItems collection to save it in the db
+            foreach (var orderLineItem in newOrder.OrderLineItems)
+            {
+                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+
+                var newDBOrderLineItem = new OrderLineItemDBE()
+                {
+                    ItemName = catalogItem.ItemName,
+                    ItemUnitPrice = catalogItem.ItemUnitPrice,
+                    OrderId = dbOrder.OrderId,
+                    CatalogItemGuid = orderLineItem.ItemGuid
+                };
+
+                SQLiteDBContext.InsertOrderLineItem(newDBOrderLineItem);
+            }
+
+            // get new exploded DB order
+            var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+
+            return dbExplodedOrder;
+        }
+
+
+        private static OrderMBE BuildExplodedOrderMBE(OrderDBE dbExplodedOrder)
         {
             // convert DB entity to the public entity type
             var order = (OrderMBE)dbExplodedOrder;
@@ -493,6 +519,6 @@ namespace PayAway.WebAPI.Controllers.v1
             SQLiteDBContext.UpdateOrder(dbOrderExploded);
         }
 
-    #endregion
-}
+        #endregion
+    }
 }

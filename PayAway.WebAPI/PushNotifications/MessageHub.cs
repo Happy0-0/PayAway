@@ -15,5 +15,6 @@ namespace PayAway.WebAPI.PushNotifications
     public class MessageHub : Hub
     {
         // empty for now since we only need to send messages from the server to the client
+        // we would add methods if clients needed to publish messages to other clients
     }
 }

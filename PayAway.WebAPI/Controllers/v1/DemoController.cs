@@ -5,18 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Org.BouncyCastle.Bcpg.OpenPgp;
-using PayAway.WebAPI;
+
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.v0;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Utilities;
-using Twilio.Rest.Studio.V1.Flow;
+
 using static System.Net.Mime.MediaTypeNames;
 
 namespace PayAway.WebAPI.Controllers.v1
@@ -34,7 +33,7 @@ namespace PayAway.WebAPI.Controllers.v1
         private readonly long _fileSizeLimit = 100000;  // .1 MB
         private readonly string[] _permittedExtensions = { ".bmp", ".png", ".jpeg", ".jpg" };
 
-        public static IWebHostEnvironment _environment;
+        private static IWebHostEnvironment _environment;
 
         public DemoController(IWebHostEnvironment environment)
         {
@@ -172,7 +171,13 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 // store the new merchant
-                var dbMerchant = SQLiteDBContext.InsertMerchant(newMerchant);
+                var newDBMerchant = new MerchantDBE()
+                {
+                    MerchantName = newMerchant.MerchantName,
+                    IsSupportsTips = newMerchant.IsSupportsTips
+                };
+
+                var dbMerchant = SQLiteDBContext.InsertMerchant(newDBMerchant);
 
                 // convert DB entity to the public entity type
                 var merchant = (MerchantMBE)dbMerchant;
@@ -314,7 +319,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantID: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantID: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
             // Step 2: Validate supported image type and that image format in the file matches the extension
@@ -322,7 +327,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             if (fileContents.Length == 0)
             {
-                return BadRequest(new ArgumentException(nameof(imageFile), errorMessage));
+                return BadRequest(new ArgumentException(errorMessage, nameof(imageFile)));
             }
 
             // Step 3: Store in local folder
@@ -366,7 +371,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
             var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
@@ -404,7 +409,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
             //query DB for a collection of customers from a specific merchant.
@@ -460,7 +465,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
             else
             {
@@ -470,7 +475,14 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 //Store the new customer
-                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(dbMerchant.MerchantId, newDemoCustomer);
+                var newDBDemoCustomer = new DemoCustomerDBE()
+                {
+                    MerchantId = dbMerchant.MerchantId,
+                    CustomerName = newDemoCustomer.CustomerName,
+                    CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
+                };
+
+                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(newDBDemoCustomer);
 
                 // convert DB entity to the public entity type
                 var customer = (DemoCustomerMBE)dbCustomer;
@@ -505,7 +517,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
             // trims Customer name so that it doesn't have trailing characters
@@ -569,7 +581,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // if we did not find a matching merchant
             if (dbMerchant == null)
             {
-                return BadRequest(new ArgumentException(nameof(merchantGuid), $"MerchantGuid: [{merchantGuid}] not found"));
+                return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
             // get the existing demo customer

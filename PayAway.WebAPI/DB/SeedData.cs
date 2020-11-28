@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 
 using PayAway.WebAPI.Controllers.v0;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Entities.Database;
 
 namespace PayAway.WebAPI.DB
 {

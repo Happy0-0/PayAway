@@ -11,9 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 using Microsoft.Extensions.DependencyInjection;
 
-using PayAway.WebAPI.Entities.v0;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Entities.Database;
 
+/// <summary>
+/// The DB namespace.
+/// </summary>
+/// <remarks>
+/// MBE entities should NOT leak down into this class
+/// </remarks>
 namespace PayAway.WebAPI.DB
 {
     public class SQLiteDBContext : DbContext
@@ -318,18 +323,54 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// used by the WebAPI controllers.
         /// </remarks>
-        internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
+        //internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
+        //{
+        //    using (var context = new SQLiteDBContext())
+        //    {
+        //        // make the db entity
+        //        var dbMerchant = new MerchantDBE
+        //        {
+        //            MerchantName = newMerchant.MerchantName,
+        //            IsSupportsTips = newMerchant.IsSupportsTips
+        //        };
+
+        //        context.Merchants.Add(dbMerchant);
+
+        //        try
+        //        {
+        //            context.SaveChanges();
+        //        }
+        //        catch (DbUpdateException ex)
+        //        {
+        //            // exception was raised by the db (ex: UK violation)
+        //            var sqlException = ex.InnerException;
+
+        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+        //            throw new ApplicationException(sqlException.Message);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            // rethrow exception
+        //            throw;
+        //        }
+
+        //        return dbMerchant;
+        //    }
+        //}
+
+        /// <summary>
+        /// Inserts the merchant 
+        /// </summary>
+        /// <param name="newMerchant">The new merchant.</param>
+        /// <returns>MerchantDBE.</returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
         {
             using (var context = new SQLiteDBContext())
             {
-                // make the db entity
-                var dbMerchant = new MerchantDBE
-                {
-                    MerchantName = newMerchant.MerchantName,
-                    IsSupportsTips = newMerchant.IsSupportsTips
-                };
-
-                context.Merchants.Add(dbMerchant);
+                context.Merchants.Add(newMerchant);
 
                 try
                 {
@@ -348,25 +389,6 @@ namespace PayAway.WebAPI.DB
                     // rethrow exception
                     throw;
                 }
-
-                return dbMerchant;
-            }
-        }
-
-        /// <summary>
-        /// Inserts the merchant 
-        /// </summary>
-        /// <param name="newMerchant">The new merchant.</param>
-        /// <returns>MerchantDBE.</returns>
-        /// <remarks>
-        /// only used by the ResetDB method so we can keep the same guids across reloads.
-        /// </remarks>
-        private static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                context.Merchants.Add(newMerchant);
-                context.SaveChanges();
 
                 return newMerchant;
             }
@@ -510,40 +532,40 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// used by the WebAPI controllers.
         /// </remarks>
-        internal static DemoCustomerDBE InsertDemoCustomer(int merchantID, NewDemoCustomerMBE newCustomer)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                // make the db entity
-                var dbCustomer = new DemoCustomerDBE
-                {
-                    MerchantId = merchantID,
-                    CustomerName = newCustomer.CustomerName,
-                    CustomerPhoneNo = newCustomer.CustomerPhoneNo
-                };
+        //internal static DemoCustomerDBE InsertDemoCustomer(int merchantID, NewDemoCustomerMBE newCustomer)
+        //{
+        //    using (var context = new SQLiteDBContext())
+        //    {
+        //        // make the db entity
+        //        var dbCustomer = new DemoCustomerDBE
+        //        {
+        //            MerchantId = merchantID,
+        //            CustomerName = newCustomer.CustomerName,
+        //            CustomerPhoneNo = newCustomer.CustomerPhoneNo
+        //        };
 
-                context.DemoCustomers.Add(dbCustomer);
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
+        //        context.DemoCustomers.Add(dbCustomer);
+        //        try
+        //        {
+        //            context.SaveChanges();
+        //        }
+        //        catch (DbUpdateException ex)
+        //        {
+        //            // exception was raised by the db (ex: UK violation)
+        //            var sqlException = ex.InnerException;
 
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw; 
-                }
+        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+        //            throw new ApplicationException(sqlException.Message);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            // rethrow exception
+        //            throw; 
+        //        }
 
-                return dbCustomer;
-            }
-        }
+        //        return dbCustomer;
+        //    }
+        //}
 
         /// <summary>
         /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
@@ -553,7 +575,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        private static DemoCustomerDBE InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
+        internal static DemoCustomerDBE InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
         {
             using (var context = new SQLiteDBContext())
             {
@@ -822,43 +844,43 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// used by the WebAPI controllers.
         /// </remarks>
-        internal static OrderDBE InsertOrder(int merchantId, NewOrderMBE newOrder)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                // make the db entity
-                var dbOrder = new OrderDBE
-                {
-                    Status = Enums.ORDER_STATUS.New,
-                    MerchantId = merchantId,
-                    CustomerName = newOrder.CustomerName,
-                    PhoneNumber = newOrder.CustomerPhoneNo,
-                    OrderDateTimeUTC = DateTime.UtcNow
-                };
+        //internal static OrderDBE InsertOrder(int merchantId, NewOrderMBE newOrder)
+        //{
+        //    using (var context = new SQLiteDBContext())
+        //    {
+        //        // make the db entity
+        //        var dbOrder = new OrderDBE
+        //        {
+        //            Status = Enums.ORDER_STATUS.New,
+        //            MerchantId = merchantId,
+        //            CustomerName = newOrder.CustomerName,
+        //            PhoneNumber = newOrder.CustomerPhoneNo,
+        //            OrderDateTimeUTC = DateTime.UtcNow
+        //        };
 
-                context.Orders.Add(dbOrder);
+        //        context.Orders.Add(dbOrder);
 
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
+        //        try
+        //        {
+        //            context.SaveChanges();
+        //        }
+        //        catch (DbUpdateException ex)
+        //        {
+        //            // exception was raised by the db (ex: UK violation)
+        //            var sqlException = ex.InnerException;
 
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
+        //            // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+        //            throw new ApplicationException(sqlException.Message);
+        //        }
+        //        catch (Exception)
+        //        {
+        //            // rethrow exception
+        //            throw;
+        //        }
 
-                return dbOrder;
-            }
-        }
+        //        return dbOrder;
+        //    }
+        //}
 
         /// <summary>
         /// Inserts new order
@@ -868,7 +890,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        private static OrderDBE InsertOrder(OrderDBE newOrder)
+        internal static OrderDBE InsertOrder(OrderDBE newOrder)
         {
             using (var context = new SQLiteDBContext())
             {

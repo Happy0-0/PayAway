@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Entities.v1
+namespace PayAway.WebAPI.Entities.Database
 {
     public class CatalogItemDBE
     {
