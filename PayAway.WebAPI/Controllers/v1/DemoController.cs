@@ -53,7 +53,7 @@ namespace PayAway.WebAPI.Controllers.v1
             SQLiteDBContext.ResetDB(isPreloadEnabled);
 
             // purge all uploaded logo files except the demo ones
-            var logoFolderName = _environment.ContentRootPath + $"\\{Constants.LOGO_IMAGES_FOLDER_NAME}";
+            var logoFolderName = System.IO.Path.Combine(_environment.ContentRootPath, Constants.LOGO_IMAGES_FOLDER_NAME);
             var logoFileNames = Directory.GetFiles(logoFolderName).ToList();
 
             var exclusionList = new List<string> 
