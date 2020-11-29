@@ -89,7 +89,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 return BadRequest($"Your Credit card number cannot be empty. ");
             }
 
-            #endregion
+            _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
             return NoContent();
         }
