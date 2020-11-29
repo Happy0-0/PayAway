@@ -74,7 +74,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
             }
 
-            _messageHub.Clients.All.SendAsync("OrderUpdated", "foobar");
+            _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
             return NoContent();
         }

@@ -49,11 +49,10 @@ namespace PayAway.WebAPI
             services.AddSingleton(webUrlConfig ?? new WebUrlConfigurationBE());
 
             services.AddCors();     // <== enable Cors since request will be coming from a different URL (the Web UIs)
+            services.AddSignalR();
             services.AddControllers();
 
             services.AddProblemDetails(); // Add the required services
-
-            services.AddSignalR();
 
             services.AddControllers()
             .AddJsonOptions(options =>
@@ -393,6 +392,7 @@ namespace PayAway.WebAPI
             app.UseCors(x => x
                 .AllowAnyMethod()
                 .AllowAnyHeader()
+                .AllowCredentials()
                 .SetIsOriginAllowed(origin => true)); // allow any origin
 
             app.UseAuthorization();
@@ -401,7 +401,6 @@ namespace PayAway.WebAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-
                 endpoints.MapHub<MessageHub>("/orderUpdates");
             });
         }
