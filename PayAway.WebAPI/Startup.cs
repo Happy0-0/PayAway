@@ -87,7 +87,7 @@ namespace PayAway.WebAPI
                                 <tr>
                                     <td>2020/11/24</td>
                                     <td>v0.51</td>
-                                    <td>Finished stubbed out methods.
+                                    <td>Finished stubbed out methods for customer Controller.
                                     </td>
                                 </tr>
                                 <tr>
@@ -205,6 +205,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/11/24</td>
+                                    <td>v1.61</td>
+                                    <td> Implemented GetCustomerOrder method for customer controller.
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/11/24</td>
                                     <td>v1.60</td>

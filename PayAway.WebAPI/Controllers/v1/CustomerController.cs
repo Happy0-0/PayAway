@@ -1,27 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-using PayAway.WebAPI.Interfaces;
+using PayAway.WebAPI.DB;
+using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.Database;
+using PayAway.WebAPI.Interfaces;
+using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;
-using PayAway.WebAPI.PushNotifications;
 
-namespace PayAway.WebAPI.Controllers.v0
+
+namespace PayAway.WebAPI.Controllers.v1
 {
     /// <summary>
-    /// This is v0 of the CustomerController
+    /// This is v1 of the CustomerController
     /// </summary>
     /// <remarks>
-    /// This version is for the front-end team to have data to develop on until the working WebAPI is available
+    /// This version is a fully functional version of v0.
     /// </remarks>
-    [Route("api/[controller]/v0")]
+    [Route("api/[controller]/v1")]
     [ApiController]
-    public class CustomerController : ControllerBase, ICustomerController
+    public class CustomerController : Controller, ICustomerController
     {
-
         /// <summary>
         /// Gets customer orders
         /// </summary>
@@ -31,26 +35,21 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerOrderMBE> GetCustomerOrder([FromRoute] Guid orderGuid)
+        public ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid)
         {
-            if (orderGuid != Constants.ORDER_1_GUID)
+            //query the db
+            var dbCustomerOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+
+            if (dbCustomerOrder == null)
             {
                 return NotFound($"Customer order: [{orderGuid}] not found");
             }
 
-            return Ok(new CustomerOrderMBE
-            {
-                OrderGuid = orderGuid,
-                MerchantName = @"Domino's Pizza",
-                IsSupportsTips = true,
-                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
-                CustomerName = "Joe Smith",
-                CustomerPhoneNo = "(666) 666-6666",
-                OrderTotal = 15.46M,
-                OrderDateTimeUTC = DateTime.UtcNow,
-                IsPaymentAvailable = true
-            });
+            var customerOrder = (CustomerOrderMBE)dbCustomerOrder;
+
+            return Ok(customerOrder);
         }
+
         /// <summary>
         /// Send Payment information to merchant to be processed.
         /// </summary>
@@ -88,8 +87,9 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return BadRequest($"Your Credit card number cannot be empty. ");
             }
-
             #endregion
+
+
 
             return NoContent();
         }
