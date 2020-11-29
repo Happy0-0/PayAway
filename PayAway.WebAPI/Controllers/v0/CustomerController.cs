@@ -21,6 +21,16 @@ namespace PayAway.WebAPI.Controllers.v0
     [ApiController]
     public class CustomerController : ControllerBase, ICustomerController
     {
+        private readonly IHubContext<MessageHub> _messageHub;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomerController"/> class.
+        /// </summary>
+        /// <param name="messageHub">The message hub.</param>
+        public CustomerController(IHubContext<MessageHub> messageHub)
+        {
+            _messageHub = messageHub;
+        }
 
         /// <summary>
         /// Gets customer orders
@@ -54,14 +64,14 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <summary>
         /// Send Payment information to merchant to be processed.
         /// </summary>
-        /// <param name="orderGuid">unique identifier for order</param>
+        /// <param name="orderGuid">for testing use: 43e351fe-3cbc-4e36-b94a-9befe28637b3</param>
         /// <param name="paymentInfo"></param>
         /// <returns></returns>
         [HttpPost("orders/{orderGuid:Guid}/sendOrderPayment")]
-        [ProducesResponseType(typeof(PaymentInfoMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<PaymentInfoMBE> SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
+        public ActionResult SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
         {
             #region === Validation =====================
             if (orderGuid != Constants.ORDER_1_GUID)
@@ -88,7 +98,9 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return BadRequest($"Your Credit card number cannot be empty. ");
             }
+            #endregion
 
+            // send notification to all connected clients
             _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
             return NoContent();

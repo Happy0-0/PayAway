@@ -21,7 +21,7 @@ namespace PayAway.WebAPI.DB
     /// </summary>
     /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
     /// <remarks>
-    /// MBE entities should NOT leak down into this class  <================================
+    /// MBE entities should NOT leak down into this class
     /// </remarks>
     public class SQLiteDBContext : DbContext
     {

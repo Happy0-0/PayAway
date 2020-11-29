@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Config;
@@ -12,7 +14,7 @@ using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;
-
+using PayAway.WebAPI.PushNotifications;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -26,6 +28,17 @@ namespace PayAway.WebAPI.Controllers.v1
     [ApiController]
     public class CustomerController : Controller, ICustomerController
     {
+        private readonly IHubContext<MessageHub> _messageHub;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomerController"/> class.
+        /// </summary>
+        /// <param name="messageHub">The message hub.</param>
+        public CustomerController(IHubContext<MessageHub> messageHub)
+        {
+            _messageHub = messageHub;
+        }
+
         /// <summary>
         /// Gets customer orders
         /// </summary>
@@ -57,10 +70,10 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <param name="paymentInfo"></param>
         /// <returns></returns>
         [HttpPost("orders/{orderGuid:Guid}/sendOrderPayment")]
-        [ProducesResponseType(typeof(PaymentInfoMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<PaymentInfoMBE> SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
+        public ActionResult SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
         {
             #region === Validation =====================
             if (orderGuid != Constants.ORDER_1_GUID)
@@ -89,7 +102,8 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             #endregion
 
-
+            // send notification to all connected clients
+            _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
             return NoContent();
         }
