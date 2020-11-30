@@ -61,7 +61,6 @@ namespace PayAway.WebAPI.BizTier
 
             // init the client
             TwilioClient.Init(_config.AccountSid, _config.AuthToken);
-            var restClient = TwilioClient.GetRestClient();
 
             try
             {
