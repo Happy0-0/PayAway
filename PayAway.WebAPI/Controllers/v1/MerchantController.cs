@@ -512,11 +512,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
             };
 
-            //save order event
-            SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
-
-            dbOrderExploded.Status = Enums.ORDER_STATUS.SMS_Sent;
-            SQLiteDBContext.UpdateOrder(dbOrderExploded);
+            
         }
 
         #endregion
