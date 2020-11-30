@@ -218,6 +218,12 @@ namespace PayAway.WebAPI
                                 <tbody>
                                 <tr>
                                     <td>2020/11/24</td>
+                                    <td>v1.62</td>
+                                    <td> Implemented SendPaymentOrder method for customer controller.
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2020/11/24</td>
                                     <td>v1.61</td>
                                     <td> Implemented GetCustomerOrder method for customer controller.
                                     </td>

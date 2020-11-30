@@ -103,7 +103,7 @@ namespace PayAway.WebAPI.Controllers.v1
             //Biz Logic: check to see if tip is less than zero
             if (paymentInfo.TipAmount < 0)
             {
-                return BadRequest("Your tip amount cannot be less then zero.");
+                return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
             }
             //Biz Logic: check to see if credit card number is fine.
             if (String.IsNullOrEmpty(paymentInfo.PAN))
