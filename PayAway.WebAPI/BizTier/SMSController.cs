@@ -18,6 +18,8 @@ namespace PayAway.WebAPI.BizTier
     {
         static SMSServiceConfigBE _config;
 
+        internal const string TWILIO_API_URL = @"https://api.twilio.com/";
+
         /// <summary>
         /// Extension method to support DI of config info
         /// </summary>

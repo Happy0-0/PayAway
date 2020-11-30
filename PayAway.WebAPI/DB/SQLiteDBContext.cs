@@ -25,6 +25,7 @@ namespace PayAway.WebAPI.DB
     /// </remarks>
     public class SQLiteDBContext : DbContext
     {
+
         public DbSet<MerchantDBE> Merchants { get; set; }
 
         public DbSet<DemoCustomerDBE> DemoCustomers { get; set; }

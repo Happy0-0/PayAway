@@ -24,6 +24,12 @@ using Hellang.Middleware.ProblemDetails;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.PushNotifications;
+using PayAway.WebAPI.DB;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Text;
+using System.Text.Json;
 
 namespace PayAway.WebAPI
 {
@@ -67,6 +73,11 @@ namespace PayAway.WebAPI
             {
                 c.Conventions.Add(new ApiExplorerGroupPerVersionConvention()); // decorate Controllers to distinguish SwaggerDoc (v1, v2, etc.)
             });
+
+            // add a health check for the DB
+            services.AddHealthChecks()
+                        .AddSqlite(Configuration.GetConnectionString(@"SQLiteDB"), name: @"PrestoPayv2 DB")
+                        .AddUrlGroup(new Uri(SMSController.TWILIO_API_URL), name: @"Twilio WebAPI");
 
             services.AddSwaggerGen(c =>
             {
@@ -409,6 +420,15 @@ namespace PayAway.WebAPI
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("/orderUpdates");
             });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health", new HealthCheckOptions()
+                {
+                    AllowCachingResponses = false,                  // prevent caching
+                    ResponseWriter = WriteHealthCheckResponse       // customize output
+                });
+            });
         }
 
         private class ApiExplorerGroupPerVersionConvention : IControllerModelConvention
@@ -423,6 +443,48 @@ namespace PayAway.WebAPI
                 var apiVersion = controllerNamespace?.Split('.').Last().ToLower();
 
                 controller.ApiExplorer.GroupName = apiVersion;
+            }
+        }
+
+        private static Task WriteHealthCheckResponse(HttpContext context, HealthReport result)
+        {
+            context.Response.ContentType = "application/json; charset=utf-8";
+
+            var options = new JsonWriterOptions
+            {
+                Indented = true
+            };
+
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new Utf8JsonWriter(stream, options))
+                {
+                    writer.WriteStartObject();
+                    writer.WriteString("status", result.Status.ToString());
+                    writer.WriteStartObject("results");
+                    foreach (var entry in result.Entries)
+                    {
+                        writer.WriteStartObject(entry.Key);
+                        writer.WriteString("status", entry.Value.Status.ToString());
+                        writer.WriteString("description", entry.Value.Description);
+                        writer.WriteStartObject("data");
+                        foreach (var item in entry.Value.Data)
+                        {
+                            writer.WritePropertyName(item.Key);
+                            JsonSerializer.Serialize(
+                                writer, item.Value, item.Value?.GetType() ??
+                                typeof(object));
+                        }
+                        writer.WriteEndObject();
+                        writer.WriteEndObject();
+                    }
+                    writer.WriteEndObject();
+                    writer.WriteEndObject();
+                }
+
+                var json = Encoding.UTF8.GetString(stream.ToArray());
+
+                return context.Response.WriteAsync(json);
             }
         }
     }
