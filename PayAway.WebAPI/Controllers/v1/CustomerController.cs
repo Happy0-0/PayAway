@@ -29,13 +29,16 @@ namespace PayAway.WebAPI.Controllers.v1
     public class CustomerController : Controller, ICustomerController
     {
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly SQLiteDBContext _dbContext;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomerController"/> class.
         /// </summary>
+        /// <param name="dbContext">The database context.</param>
         /// <param name="messageHub">The message hub.</param>
-        public CustomerController(IHubContext<MessageHub> messageHub)
+        public CustomerController(SQLiteDBContext dbContext, IHubContext<MessageHub> messageHub)
         {
+            _dbContext = dbContext;
             _messageHub = messageHub;
         }
 
@@ -51,7 +54,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid)
         {
             //query the db
-            var dbCustomerOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+            var dbCustomerOrder = _dbContext.GetOrderExploded(orderGuid);
 
             //if we do not find a matching order
             if (dbCustomerOrder == null)
@@ -77,7 +80,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult SendOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
         {
             //query the db
-            var dbOrderExploded = SQLiteDBContext.GetOrderExploded(orderGuid);
+            var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
 
             #region === Validation =====================
             //Biz Logic: check to see if the order guid is correct
@@ -133,10 +136,10 @@ namespace PayAway.WebAPI.Controllers.v1
                 };
 
                 //save order event
-                SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
+                _dbContext.InsertOrderEvent(dbOrderEvent);
 
                 dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;
-                SQLiteDBContext.UpdateOrder(dbOrderExploded);
+                _dbContext.UpdateOrder(dbOrderExploded);
 
                 // send notification to all connected clients
                 _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");

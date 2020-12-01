@@ -33,10 +33,17 @@ namespace PayAway.WebAPI.Controllers.v1
         private readonly long _fileSizeLimit = 100000;  // .1 MB
         private readonly string[] _permittedExtensions = { ".bmp", ".png", ".jpeg", ".jpg" };
 
+        private readonly SQLiteDBContext _dbContext;
         private static IWebHostEnvironment _environment;
 
-        public DemoController(IWebHostEnvironment environment)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DemoController"/> class.
+        /// </summary>
+        /// <param name="dbContext">The database context.</param>
+        /// <param name="environment">The environment.</param>
+        public DemoController(SQLiteDBContext dbContext, IWebHostEnvironment environment)
         {
+            _dbContext = dbContext;
             _environment = environment;
         }
 
@@ -50,7 +57,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public ActionResult ResetDatabase([FromQuery] bool isPreloadEnabled)
         {
-            SQLiteDBContext.ResetDB(isPreloadEnabled);
+            _dbContext.ResetDB(isPreloadEnabled);
 
             // purge all uploaded logo files except the demo ones
             var logoFolderName = System.IO.Path.Combine(_environment.ContentRootPath, Constants.LOGO_IMAGES_FOLDER_NAME);
@@ -84,7 +91,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
         {
             // query the DB
-            var dbMerchants = SQLiteDBContext.GetAllMerchants();
+            var dbMerchants = _dbContext.GetAllMerchants();
             
 
             // if no results from DB, return an empty list
@@ -99,7 +106,7 @@ namespace PayAway.WebAPI.Controllers.v1
             foreach(var merchant in merchants)
             {
                merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
-               var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(merchant.MerchantId);
+               var dbDemoCustomers = _dbContext.GetDemoCustomers(merchant.MerchantId);
                merchant.DemoCustomers = dbDemoCustomers.ConvertAll(dbDc => (DemoCustomerMBE)dbDc);
             }
             
@@ -119,7 +126,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<MerchantMBE> GetMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchantAndDemoCustomers(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchantAndDemoCustomers(merchantGuid);
 
             // if we did not find a matching merchant
             if(dbMerchant == null)
@@ -177,7 +184,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     IsSupportsTips = newMerchant.IsSupportsTips
                 };
 
-                var dbMerchant = SQLiteDBContext.InsertMerchant(newDBMerchant);
+                var dbMerchant = _dbContext.InsertMerchant(newDBMerchant);
 
                 // convert DB entity to the public entity type
                 var merchant = (MerchantMBE)dbMerchant;
@@ -214,7 +221,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -230,7 +237,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbMerchant.MerchantName = updatedMerchant.MerchantName;
                 dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
 
-                SQLiteDBContext.UpdateMerchant(dbMerchant);
+                _dbContext.UpdateMerchant(dbMerchant);
             }
             catch(Exception ex)
             {
@@ -252,7 +259,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult DeleteMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             if (dbMerchant == null)
             {
@@ -267,7 +274,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 System.IO.File.Delete(logoFilePathName);
             }
 
-            SQLiteDBContext.DeleteMerchant(dbMerchant.MerchantId);
+            _dbContext.DeleteMerchant(dbMerchant.MerchantId);
 
             return NoContent();
         }
@@ -284,7 +291,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult SetActiveMerchantForDemo([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var merchantToMakeActive = SQLiteDBContext.GetMerchant(merchantGuid);
+            var merchantToMakeActive = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (merchantToMakeActive == null)
@@ -293,7 +300,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //update merchant in the db
-            SQLiteDBContext.SetActiveMerchantForDemo(merchantToMakeActive.MerchantId);
+            _dbContext.SetActiveMerchantForDemo(merchantToMakeActive.MerchantId);
 
             return NoContent();
         }
@@ -314,7 +321,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<string> UploadLogoImage([FromRoute] Guid merchantGuid, IFormFile imageFile)
         {
             // Step 1: Get the merchant
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -343,7 +350,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // Step 4: Update the merchant
             dbMerchant.LogoFileName = imageFileName;
-            SQLiteDBContext.UpdateMerchant(dbMerchant);
+            _dbContext.UpdateMerchant(dbMerchant);
 
             // Step 5: Return results        https://localhost:44318/LogoImages/f8c6f5b6-533e-455f-87a1-ced552898e1d.png
             var imageUri = HttpHelpers.BuildFullURL(this.Request, imageFileName);
@@ -366,7 +373,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -374,7 +381,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
-            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
+            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbMerchant.MerchantId);
 
             // if no results from DB, return an empty list
             if (dbDemoCustomers == null)
@@ -404,7 +411,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<DemoCustomerMBE> GetDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the DB
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -413,7 +420,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //query DB for a collection of customers from a specific merchant.
-            var dbCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId)
+            var dbCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId)
                                             .Where(dc => dc.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             // if we did not find a matching demo customer
@@ -460,7 +467,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //query the db for the merchant
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -482,7 +489,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
                 };
 
-                var dbCustomer = SQLiteDBContext.InsertDemoCustomer(newDBDemoCustomer);
+                var dbCustomer = _dbContext.InsertDemoCustomer(newDBDemoCustomer);
 
                 // convert DB entity to the public entity type
                 var customer = (DemoCustomerMBE)dbCustomer;
@@ -512,7 +519,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult UpdateDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
             // query the db for the merchant
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -536,7 +543,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // get the existing demo customer
-            var dbDemoCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+            var dbDemoCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             if (dbDemoCustomer == null)
             {
@@ -552,7 +559,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName;
                 dbDemoCustomer.CustomerPhoneNo = formatedPhoneNo;
 
-                SQLiteDBContext.UpdateDemoCustomer(dbDemoCustomer);
+                _dbContext.UpdateDemoCustomer(dbDemoCustomer);
             }
             catch (Exception ex)
             {
@@ -576,7 +583,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult DeleteDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the db for the merchant
-            var dbMerchant = SQLiteDBContext.GetMerchant(merchantGuid);
+            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -585,14 +592,14 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // get the existing demo customer
-            var dbDemoCustomer = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+            var dbDemoCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             if (dbDemoCustomer == null)
             {
                 return NotFound($"CustomerID: [{demoCustomerGuid}] on MerchantID: [{merchantGuid}] not found");
             }
 
-            SQLiteDBContext.DeleteDemoCustomer(dbDemoCustomer.DemoCustomerId);
+            _dbContext.DeleteDemoCustomer(dbDemoCustomer.DemoCustomerId);
 
             return NoContent();
         }

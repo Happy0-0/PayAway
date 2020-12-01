@@ -35,13 +35,18 @@ namespace PayAway.WebAPI.Controllers.v1
     {
         private readonly ILogger<MerchantController> logger;
         private readonly WebUrlConfigurationBE _webUrlConfig;
+        private readonly SQLiteDBContext _dbContext;
 
-        /// <summary>Initializes a new instance of the <see cref="T:PrestoPayv3.Server.WebAPI.Controllers.v1.MerchantController" /> class.</summary>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MerchantController"/> class.
+        /// </summary>
         /// <param name="webUrlConfig">The web URL configuration.</param>
+        /// <param name="dbContext">The database context.</param>
         /// <param name="logger">The logger.</param>
-        public MerchantController(WebUrlConfigurationBE webUrlConfig, ILogger<MerchantController> logger)
+        public MerchantController(WebUrlConfigurationBE webUrlConfig, SQLiteDBContext dbContext, ILogger<MerchantController> logger)
         {
             this._webUrlConfig = webUrlConfig;
+            this._dbContext = dbContext;
             this.logger = logger;
         }
 
@@ -55,7 +60,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<ActiveMerchantMBE> GetActiveMerchant()
         {
             //Query the db for the active merchant
-            var dbMerchant = SQLiteDBContext.GetActiveMerchant();
+            var dbMerchant = _dbContext.GetActiveMerchant();
 
             if (dbMerchant == null)
             {
@@ -64,16 +69,16 @@ namespace PayAway.WebAPI.Controllers.v1
 
             //query the db for catalogue Items
             // 1st: look for unique catalog items for this merchant
-            var dbCatalogueItems = SQLiteDBContext.GetCatalogItems(dbMerchant.MerchantId);
+            var dbCatalogueItems = _dbContext.GetCatalogItems(dbMerchant.MerchantId);
 
             // 2nd: if the merchant did not have unique catalog items, use the default ones on merchantId = 0
             if (dbCatalogueItems == null || dbCatalogueItems.Count == 0)
             {
-                dbCatalogueItems = SQLiteDBContext.GetCatalogItems(0);
+                dbCatalogueItems = _dbContext.GetCatalogItems(0);
             }
 
             // query the db for demo customers
-            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbMerchant.MerchantId);
+            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbMerchant.MerchantId);
 
             // build the return object
             var activeMerchant = new ActiveMerchantMBE
@@ -99,7 +104,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<OrderQueueMBE> GetOrderQueue()
         {
             //Query the db
-            var dbMerchant = SQLiteDBContext.GetActiveMerchant();
+            var dbMerchant = _dbContext.GetActiveMerchant();
 
             if (dbMerchant == null)
             {
@@ -113,14 +118,14 @@ namespace PayAway.WebAPI.Controllers.v1
             };
 
             // get the list of current orders
-            var dbOrders = SQLiteDBContext.GetOrders(dbMerchant.MerchantId);
+            var dbOrders = _dbContext.GetOrders(dbMerchant.MerchantId);
 
             if(dbOrders != null && dbOrders.Count > 0)
             {
                 foreach(var dbOrder in dbOrders)
                 {
                     // get the exploded order w/ the line items
-                    var dbOrderExploded = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+                    var dbOrderExploded = _dbContext.GetOrderExploded(dbOrder.OrderGuid);
 
                     // convert to the MBE 
                     var orderHeader = (OrderHeaderMBE)dbOrderExploded;
@@ -150,7 +155,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult<OrderMBE> GetOrder([FromRoute] Guid orderGuid)
         {
             //query the db
-            var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(orderGuid);
+            var dbExplodedOrder = _dbContext.GetOrderExploded(orderGuid);
 
             // if we did not find a matching merchant order
             if (dbExplodedOrder == null)
@@ -192,7 +197,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             foreach (var orderLineItem in newOrder.OrderLineItems)
             {
-                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
                 if(catalogItem == null)
                 {
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
@@ -210,7 +215,7 @@ namespace PayAway.WebAPI.Controllers.v1
             #endregion
 
             //query the db for the active merchant
-            var dbActiveMerchant = SQLiteDBContext.GetActiveMerchant();
+            var dbActiveMerchant = _dbContext.GetActiveMerchant();
 
             try
             {
@@ -243,7 +248,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult UpdateOrder([FromRoute] Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             // get the existing order
-            var dbOrder = SQLiteDBContext.GetOrder(orderGuid);
+            var dbOrder = _dbContext.GetOrder(orderGuid);
 
             // if we did not find a matching order
             if (dbOrder == null)
@@ -281,7 +286,7 @@ namespace PayAway.WebAPI.Controllers.v1
             foreach (var orderLineItem in updatedOrder.OrderLineItems)
             {
                 // try to find the catalog item
-                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
 
                 // if it did not exist (ie: a invalid guid)
                 if (catalogItem == null)
@@ -299,15 +304,15 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbOrder.PhoneNumber = updatedOrder.CustomerPhoneNo;
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
 
-                SQLiteDBContext.UpdateOrder(dbOrder);
+                _dbContext.UpdateOrder(dbOrder);
 
                 // Step 2: in this demo code we are just going to delete and re-add the order line items
-                SQLiteDBContext.DeleteOrderLineItems(dbOrder.OrderId);
+                _dbContext.DeleteOrderLineItems(dbOrder.OrderId);
 
                 //iterate through orderLineItems collection to save it in the db
                 foreach (var orderLineItem in updatedOrder.OrderLineItems)
                 {
-                    var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                    var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
 
                     var dbOrderLineItem = new OrderLineItemDBE()
                     {
@@ -317,7 +322,7 @@ namespace PayAway.WebAPI.Controllers.v1
                         CatalogItemGuid = orderLineItem.ItemGuid
                     };
 
-                    SQLiteDBContext.InsertOrderLineItem(dbOrderLineItem);
+                    _dbContext.InsertOrderLineItem(dbOrderLineItem);
                 }
 
                 // Step 3: create an event
@@ -330,7 +335,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 };
 
                 //save order event
-                SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
+                _dbContext.InsertOrderEvent(dbOrderEvent);
 
                 return NoContent();
             }
@@ -353,7 +358,7 @@ namespace PayAway.WebAPI.Controllers.v1
         public ActionResult SendOrderPaymentRequest([FromRoute] Guid orderGuid)
         {
             // get the exploded order w/ the line items
-            var dbOrderExploded = SQLiteDBContext.GetOrderExploded(orderGuid);
+            var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
 
             // if we did not find a matching order
             if (dbOrderExploded == null)
@@ -377,7 +382,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // Step 4:1 Get the merchant's demo customers
             //query db
-            var dbDemoCustomers = SQLiteDBContext.GetDemoCustomers(dbOrderExploded.MerchantId);
+            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbOrderExploded.MerchantId);
 
             // Step 4:2 Loop for each demo customer
             foreach (var demoCustomer in dbDemoCustomers)
@@ -400,7 +405,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         #region === Helper Methods =============================================
-        private static OrderDBE InsertNewOrder(int merchantId, NewOrderMBE newOrder)
+        private OrderDBE InsertNewOrder(int merchantId, NewOrderMBE newOrder)
         {
             //Step 1: Store the new merchant Order
             var newDBOrder = new OrderDBE()
@@ -412,7 +417,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 OrderDateTimeUTC = DateTime.UtcNow
             };
 
-            var dbOrder = SQLiteDBContext.InsertOrder(newDBOrder);
+            var dbOrder = _dbContext.InsertOrder(newDBOrder);
 
             //Step 2: create the first event
             var newDBOrderEvent = new OrderEventDBE()
@@ -423,12 +428,12 @@ namespace PayAway.WebAPI.Controllers.v1
                 EventDescription = "A new order has been created."
             };
 
-            SQLiteDBContext.InsertOrderEvent(newDBOrderEvent);
+            _dbContext.InsertOrderEvent(newDBOrderEvent);
 
             //Step 3: iterate through orderLineItems collection to save it in the db
             foreach (var orderLineItem in newOrder.OrderLineItems)
             {
-                var catalogItem = SQLiteDBContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
 
                 var newDBOrderLineItem = new OrderLineItemDBE()
                 {
@@ -438,11 +443,11 @@ namespace PayAway.WebAPI.Controllers.v1
                     CatalogItemGuid = orderLineItem.ItemGuid
                 };
 
-                SQLiteDBContext.InsertOrderLineItem(newDBOrderLineItem);
+                _dbContext.InsertOrderLineItem(newDBOrderLineItem);
             }
 
             // get new exploded DB order
-            var dbExplodedOrder = SQLiteDBContext.GetOrderExploded(dbOrder.OrderGuid);
+            var dbExplodedOrder = _dbContext.GetOrderExploded(dbOrder.OrderGuid);
 
             return dbExplodedOrder;
         }

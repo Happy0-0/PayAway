@@ -26,6 +26,11 @@ namespace PayAway.WebAPI.DB
     public class SQLiteDBContext : DbContext
     {
 
+        public SQLiteDBContext(DbContextOptions<SQLiteDBContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<MerchantDBE> Merchants { get; set; }
 
         public DbSet<DemoCustomerDBE> DemoCustomers { get; set; }
@@ -56,11 +61,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="optionsBuilder">A builder used to create or modify options for this context. Databases (and other extensions)
         /// typically define extension methods on this object that allow you to configure the context.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder
-                .UseSqlite(@"Data Source=PrestoPayv2.db;");
-        }
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder
+        //        .UseSqlite(@"Data Source=PrestoPayv2.db;");
+        //}
 
         /// <summary>
         /// Override this method to further configure the model that was discovered by convention from the entity types
@@ -166,7 +171,7 @@ namespace PayAway.WebAPI.DB
         /// Resets the database.
         /// </summary>
         /// <param name="isPreloadEnabled">The is preload enabled.</param>
-        public static void ResetDB(bool isPreloadEnabled)
+        public void ResetDB(bool isPreloadEnabled)
         {
             // Step 1: Purge the exisiting Merchants all dependant items
             //         1.1     DemoCustomers
@@ -175,11 +180,11 @@ namespace PayAway.WebAPI.DB
             //         1.4     Orders
             //         1.5     CatalogItems
             //         1.6     Merchant
-            var existingMerchants = SQLiteDBContext.GetAllMerchants();
+            var existingMerchants = this.GetAllMerchants();
             
             foreach (var existingMerchant in existingMerchants)
             {
-                SQLiteDBContext.DeleteMerchant(existingMerchant.MerchantId);
+                this.DeleteMerchant(existingMerchant.MerchantId);
                 // this deletes via cascading delete
                 //  === Step 1.1: Demo Customers ======================================
                 //  === Step 1.2: OrderEvents ======================================
@@ -188,11 +193,11 @@ namespace PayAway.WebAPI.DB
             }
 
             // delete "default" catalog items under MerchantId 0
-            var existingCatalogItems = SQLiteDBContext.GetCatalogItems(0);
+            var existingCatalogItems = this.GetCatalogItems(0);
 
             foreach (var existingCatalogItem in existingCatalogItems)
             {
-                SQLiteDBContext.DeleteCatalogItem(existingCatalogItem.CatalogItemId);
+                this.DeleteCatalogItem(existingCatalogItem.CatalogItemId);
             }
 
             // Step 2:Optionally reload the seed data
@@ -207,7 +212,7 @@ namespace PayAway.WebAPI.DB
             var seedCatalogItems = SeedData.GetSeedCatalogueItems();
             foreach (var seedCatalogItem in seedCatalogItems)
             {
-                SQLiteDBContext.InsertCatalogItem(seedCatalogItem);
+                this.InsertCatalogItem(seedCatalogItem);
             }
             #endregion
 
@@ -217,7 +222,7 @@ namespace PayAway.WebAPI.DB
                 var seedMerchants = SeedData.GetSeedMerchants();
                 foreach (var seedMerchant in seedMerchants)
                 {
-                    SQLiteDBContext.InsertMerchant(seedMerchant);
+                    this.InsertMerchant(seedMerchant);
                 }
                 #endregion
 
@@ -225,7 +230,7 @@ namespace PayAway.WebAPI.DB
                 var seedDemoCustomers = SeedData.GetSeedDemoCustomers();
                 foreach(var seedDemoCustomer in seedDemoCustomers)
                 {
-                    SQLiteDBContext.InsertDemoCustomer(seedDemoCustomer);
+                    this.InsertDemoCustomer(seedDemoCustomer);
                 }
                 #endregion                
 
@@ -233,7 +238,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrders = SeedData.GetSeedOrders();
                 foreach(var seedOrder in seedOrders)
                 {
-                    SQLiteDBContext.InsertOrder(seedOrder);
+                    this.InsertOrder(seedOrder);
                 }
                 #endregion
 
@@ -241,7 +246,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrderEvents = SeedData.GetOrderEvents();
                 foreach(var seedOrderEvent in seedOrderEvents)
                 {
-                    SQLiteDBContext.InsertOrderEvent(seedOrderEvent);
+                    this.InsertOrderEvent(seedOrderEvent);
                 }
                 #endregion
 
@@ -249,7 +254,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrderLineItems = SeedData.GetOrderLineItems();
                 foreach(var seedOrderLineItem in seedOrderLineItems)
                 {
-                    SQLiteDBContext.InsertOrderLineItem(seedOrderLineItem);
+                    this.InsertOrderLineItem(seedOrderLineItem);
                 }
                 #endregion
             }
@@ -262,12 +267,9 @@ namespace PayAway.WebAPI.DB
         /// Gets the merchants.
         /// </summary>
         /// <returns>List&lt;MerchantDBE&gt;.</returns>
-        internal static List<MerchantDBE> GetAllMerchants()
+        internal List<MerchantDBE> GetAllMerchants()
         {
-            using (var context = new SQLiteDBContext())
-            {
-                return context.Merchants.ToList();
-            }
+                return this.Merchants.ToList();
         }
 
         /// <summary>
@@ -275,14 +277,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantGuid">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
-        internal static MerchantDBE GetMerchant(Guid merchantGuid)
+        internal MerchantDBE GetMerchant(Guid merchantGuid)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantGuid == merchantGuid);
+            var dbMerchant = this.Merchants.FirstOrDefault(m => m.MerchantGuid == merchantGuid);
 
-                return dbMerchant;
-            }
+            return dbMerchant;
         }
 
         /// <summary>
@@ -291,16 +290,13 @@ namespace PayAway.WebAPI.DB
         /// <param name="merchantGuid">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
         /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
-        internal static MerchantDBE GetMerchantAndDemoCustomers(Guid merchantGuid)
+        internal MerchantDBE GetMerchantAndDemoCustomers(Guid merchantGuid)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbMerchantAndDemoCustomers = context.Merchants
-                                                        .Include(m => m.DemoCustomers)
-                                                        .FirstOrDefault(m => m.MerchantGuid == merchantGuid);
+            var dbMerchantAndDemoCustomers = this.Merchants
+                                                    .Include(m => m.DemoCustomers)
+                                                    .FirstOrDefault(m => m.MerchantGuid == merchantGuid);
 
-                return dbMerchantAndDemoCustomers;
-            }
+            return dbMerchantAndDemoCustomers;
         }
 
         /// <summary>
@@ -308,14 +304,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>MerchantDBE.</returns>
-        internal static MerchantDBE GetMerchant(int merchantId)
+        internal MerchantDBE GetMerchant(int merchantId)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantId == merchantId);
+            var dbMerchant = this.Merchants.FirstOrDefault(m => m.MerchantId == merchantId);
 
-                return dbMerchant;
-            }
+            return dbMerchant;
         }
 
         /// <summary>
@@ -326,56 +319,50 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
+        internal MerchantDBE InsertMerchant(MerchantDBE newMerchant)
         {
-            using (var context = new SQLiteDBContext())
+            this.Merchants.Add(newMerchant);
+
+            try
             {
-                context.Merchants.Add(newMerchant);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return newMerchant;
+                this.SaveChanges();
             }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newMerchant;
         }
 
         /// <summary>
         /// Deletes the merchant.
         /// </summary>
         /// <param name="merchantID">The merchant unique identifier.</param>
-        internal static bool DeleteMerchant(int merchantID)
+        internal bool DeleteMerchant(int merchantID)
         {
-            using (var context = new SQLiteDBContext())
+            var currentMerchant = this.Merchants.FirstOrDefault(m => m.MerchantId == merchantID);
+
+            if (currentMerchant != null)
             {
-                var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantId == merchantID);
+                this.Merchants.Remove(currentMerchant);
+                this.SaveChanges();
 
-                if (currentMerchant != null)
-                {
-                    context.Merchants.Remove(currentMerchant);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    // returns false if the merchant did not exist
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                // returns false if the merchant did not exist
+                return false;
             }
         }
 
@@ -384,41 +371,38 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchant">The merchant.</param>
         /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
-        internal static void UpdateMerchant(MerchantDBE merchant)
+        internal void UpdateMerchant(MerchantDBE merchant)
         {
-            using (var context = new SQLiteDBContext())
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            // try and find the existing merchant
+            var currentMerchant = this.Merchants.FirstOrDefault(m => m.MerchantGuid == merchant.MerchantGuid);
+
+            if (currentMerchant == null)
             {
-                // turn off change tracking since we are going to overwite the entity
-                // Note: I would not do this if there was a db assigned unique id for the record
-                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+                throw new ApplicationException($"Merchant: [{merchant.MerchantGuid}] is not valid");
+            }
 
-                // try and find the existing merchant
-                var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantGuid == merchant.MerchantGuid);
+            this.Update(merchant);
 
-                if (currentMerchant == null)
-                {
-                    throw new ApplicationException($"Merchant: [{merchant.MerchantGuid}] is not valid");
-                }
+            try
+            {
+                this.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
 
-                context.Update(merchant);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
             }
         }
 
@@ -426,41 +410,38 @@ namespace PayAway.WebAPI.DB
         /// Sets the active merchant.
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
-        internal static void SetActiveMerchantForDemo(int merchantId)
+        internal void SetActiveMerchantForDemo(int merchantId)
         {
             //gets all merchants who are already active (logically should only be 0 or 1)
-            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
+            var merchantsToChange = this.GetAllMerchants().Where(am => am.IsActive).ToList();
 
             //set other active merchant to inactive
             foreach (var merchant in merchantsToChange)
             {
                 merchant.IsActive = false;
-                SQLiteDBContext.UpdateMerchant(merchant);
+                this.UpdateMerchant(merchant);
             }
 
             // query the DB
-            var activeMerchant = SQLiteDBContext.GetMerchant(merchantId);
+            var activeMerchant = this.GetMerchant(merchantId);
 
             //set merchant to active
             activeMerchant.IsActive = true;
 
             //update merchant in the db
-            SQLiteDBContext.UpdateMerchant(activeMerchant);
+            this.UpdateMerchant(activeMerchant);
         }
 
         /// <summary>
         /// Gets active merchant
         /// </summary>
         /// <returns>active merchant</returns>
-        internal static MerchantDBE GetActiveMerchant()
+        internal MerchantDBE GetActiveMerchant()
         {
-            using (var context = new SQLiteDBContext())
-            {
-                //query the db to get active merchant
-                var activeMerchant = context.Merchants.Where(m => m.IsActive).FirstOrDefault();
+            //query the db to get active merchant
+            var activeMerchant = this.Merchants.Where(m => m.IsActive).FirstOrDefault();
 
-                return activeMerchant;
-            }
+            return activeMerchant;
         }
 
 
@@ -473,14 +454,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>List&lt;CustomerDBE&gt;.</returns>
-        internal static List<DemoCustomerDBE> GetDemoCustomers(int merchantId)
+        internal List<DemoCustomerDBE> GetDemoCustomers(int merchantId)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbDemoCustomers = context.DemoCustomers.Where(m => m.MerchantId == merchantId).ToList();
+            var dbDemoCustomers = this.DemoCustomers.Where(m => m.MerchantId == merchantId).ToList();
 
-                return dbDemoCustomers;
-            }
+            return dbDemoCustomers;
         }
 
         /// <summary>
@@ -491,15 +469,74 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static DemoCustomerDBE InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
+        internal DemoCustomerDBE InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
         {
-            using (var context = new SQLiteDBContext())
+            this.DemoCustomers.Add(newDemoCustomer);
+
+            try
             {
-                context.DemoCustomers.Add(newDemoCustomer);
+                this.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newDemoCustomer;
+        }
+
+        /// <summary>
+        /// Deletes the customer.
+        /// </summary>
+        /// <param name="demoCustomerId">The customer identifier.</param>
+        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
+        internal bool DeleteDemoCustomer(int demoCustomerId)
+        {
+            var currentDemoCustomer = this.DemoCustomers.FirstOrDefault(c => c.DemoCustomerId == demoCustomerId);
+
+            if (currentDemoCustomer != null)
+            {
+                this.DemoCustomers.Remove(currentDemoCustomer);
+                this.SaveChanges();
+
+                return true;
+            }
+            else
+            {
+                // returns false if the demoCustomer did not exist
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Updates a customer
+        /// </summary>
+        /// <param name="demoCustomer">object containing information about customers</param>
+        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
+        public void UpdateDemoCustomer(DemoCustomerDBE demoCustomer)
+        {
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            var currentCustomer = this.DemoCustomers.FirstOrDefault(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
+
+            if (currentCustomer != null)
+            {
+                this.Update(demoCustomer);
 
                 try
                 {
-                    context.SaveChanges();
+                    this.SaveChanges();
                 }
                 catch (DbUpdateException ex)
                 {
@@ -514,78 +551,10 @@ namespace PayAway.WebAPI.DB
                     // rethrow exception
                     throw;
                 }
-
-                return newDemoCustomer;
             }
-        }
-
-        /// <summary>
-        /// Deletes the customer.
-        /// </summary>
-        /// <param name="demoCustomerId">The customer identifier.</param>
-        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
-        internal static bool DeleteDemoCustomer(int demoCustomerId)
-        {
-            using (var context = new SQLiteDBContext())
+            else
             {
-                var currentDemoCustomer = context.DemoCustomers.FirstOrDefault(c => c.DemoCustomerId == demoCustomerId);
-
-                if (currentDemoCustomer != null)
-                {
-                    context.DemoCustomers.Remove(currentDemoCustomer);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    // returns false if the demoCustomer did not exist
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates a customer
-        /// </summary>
-        /// <param name="demoCustomer">object containing information about customers</param>
-        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
-        public static void UpdateDemoCustomer(DemoCustomerDBE demoCustomer)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                // turn off change tracking since we are going to overwite the entity
-                // Note: I would not do this if there was a db assigned unique id for the record
-                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-
-                var currentCustomer = context.DemoCustomers.FirstOrDefault(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
-
-                if (currentCustomer != null)
-                {
-                    context.Update(demoCustomer);
-
-                    try
-                    {
-                        context.SaveChanges();
-                    }
-                    catch (DbUpdateException ex)
-                    {
-                        // exception was raised by the db (ex: UK violation)
-                        var sqlException = ex.InnerException;
-
-                        // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                        throw new ApplicationException(sqlException.Message);
-                    }
-                    catch (Exception)
-                    {
-                        // rethrow exception
-                        throw;
-                    }
-                }
-                else
-                {
-                    throw new ApplicationException($"Customer: [{demoCustomer.DemoCustomerId}] is not valid on MerchantID: [{demoCustomer.MerchantId}]");
-                }
+                throw new ApplicationException($"Customer: [{demoCustomer.DemoCustomerId}] is not valid on MerchantID: [{demoCustomer.MerchantId}]");
             }
         }
 
@@ -599,17 +568,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
-        internal static List<CatalogItemDBE> GetCatalogItems(int merchantId)
+        internal  List<CatalogItemDBE> GetCatalogItems(int merchantId)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbCatalogItems = context.CatalogItems
-                                                .Where(ci => ci.MerchantId == merchantId)
-                                                .OrderBy(ci => ci.CatalogItemId)
-                                                .ToList();
+            var dbCatalogItems = this.CatalogItems
+                                            .Where(ci => ci.MerchantId == merchantId)
+                                            .OrderBy(ci => ci.CatalogItemId)
+                                            .ToList();
 
-                return dbCatalogItems;
-            }
+            return dbCatalogItems;
         }
 
         /// <summary>
@@ -617,14 +583,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="catalogItemGuid">The unique catalog item identifier.</param>
         /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
-        internal static CatalogItemDBE GetCatalogItem(Guid catalogItemGuid)
+        internal CatalogItemDBE GetCatalogItem(Guid catalogItemGuid)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbCatalogItem = context.CatalogItems.FirstOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
+            var dbCatalogItem = this.CatalogItems.FirstOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
 
-                return dbCatalogItem;
-            }
+            return dbCatalogItem;
         }
 
         /// <summary>
@@ -635,32 +598,29 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        private static CatalogItemDBE InsertCatalogItem(CatalogItemDBE newCatalogItem)
+        private CatalogItemDBE InsertCatalogItem(CatalogItemDBE newCatalogItem)
         {
-            using (var context = new SQLiteDBContext())
+            this.CatalogItems.Add(newCatalogItem);
+
+            try
             {
-                context.CatalogItems.Add(newCatalogItem);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return newCatalogItem;
+                this.SaveChanges();
             }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newCatalogItem;
         }
 
 
@@ -669,24 +629,21 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="catalogItemId">The catalog item identifier.</param>
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
-        internal static bool DeleteCatalogItem(int catalogItemId)
+        internal bool DeleteCatalogItem(int catalogItemId)
         {
-            using (var context = new SQLiteDBContext())
+            var currentCatalogItem = this.CatalogItems.FirstOrDefault(ci => ci.CatalogItemId == catalogItemId);
+
+            if (currentCatalogItem != null)
             {
-                var currentCatalogItem = context.CatalogItems.FirstOrDefault(ci => ci.CatalogItemId == catalogItemId);
+                this.CatalogItems.Remove(currentCatalogItem);
+                this.SaveChanges();
 
-                if (currentCatalogItem != null)
-                {
-                    context.CatalogItems.Remove(currentCatalogItem);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    // returns false if the CatalogItem did not exist
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                // returns false if the CatalogItem did not exist
+                return false;
             }
         }
         #endregion
@@ -698,18 +655,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">Merchant Unique Indentifier.</param>
         /// <returns>List of orders</returns>
-        internal static List<OrderDBE> GetOrders(int merchantId)
+        internal List<OrderDBE> GetOrders(int merchantId)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbOrders = context.Orders
-                                        .Where(o => o.MerchantId == merchantId)
-                                        .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
-                                        .ToList();
+            var dbOrders = this.Orders
+                                    .Where(o => o.MerchantId == merchantId)
+                                    .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
+                                    .ToList();
 
-                return dbOrders;
-            }
-
+            return dbOrders;
         }
 
         /// <summary>
@@ -717,15 +670,11 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderGuid">order Unique Indentifier.</param>
         /// <returns>a specific order</returns>
-        internal static OrderDBE GetOrder(Guid orderGuid)
+        internal OrderDBE GetOrder(Guid orderGuid)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == orderGuid);
+            var dbOrder = this.Orders.FirstOrDefault(o => o.OrderGuid == orderGuid);
 
-                return dbOrder;
-            }
-
+            return dbOrder;
         }
 
         /// <summary>
@@ -733,22 +682,18 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderGuid">order Unique Indentifier.</param>
         /// <returns>a specific order</returns>
-        internal static OrderDBE GetOrderExploded(Guid orderGuid)
+        internal OrderDBE GetOrderExploded(Guid orderGuid)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbOrder = context.Orders
-                                        .Include(o => o.Merchant)
-                                        .Include(o => o.OrderEvents)
-                                        .Include(o => o.OrderLineItems)
-                                        .FirstOrDefault(o => o.OrderGuid == orderGuid);
+            var dbOrder = this.Orders
+                                    .Include(o => o.Merchant)
+                                    .Include(o => o.OrderEvents)
+                                    .Include(o => o.OrderLineItems)
+                                    .FirstOrDefault(o => o.OrderGuid == orderGuid);
 
-                // sort the order events descending by d/t in memory
-                dbOrder.OrderEvents = dbOrder.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC).ToList();
+            // sort the order events descending by d/t in memory
+            dbOrder.OrderEvents = dbOrder.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC).ToList();
 
-                return dbOrder;
-            }
-
+            return dbOrder;
         }
 
         /// <summary>
@@ -759,32 +704,29 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static OrderDBE InsertOrder(OrderDBE newOrder)
+        internal OrderDBE InsertOrder(OrderDBE newOrder)
         {
-            using (var context = new SQLiteDBContext())
+            this.Orders.Add(newOrder);
+
+            try
             {
-                context.Orders.Add(newOrder);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return newOrder;
+                this.SaveChanges();
             }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newOrder;
         }
 
         /// <summary>
@@ -792,24 +734,21 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderID">Identifier for order</param>
         /// <returns></returns>
-        internal static bool DeleteOrder(int orderID)
+        internal bool DeleteOrder(int orderID)
         {
-            using (var context = new SQLiteDBContext())
+            var currentOrder = this.Orders.FirstOrDefault(o => o.OrderId == orderID);
+
+            if (currentOrder != null)
             {
-                var currentOrder = context.Orders.FirstOrDefault(o => o.OrderId == orderID);
+                this.Orders.Remove(currentOrder);
+                this.SaveChanges();
 
-                if (currentOrder != null)
-                {
-                    context.Orders.Remove(currentOrder);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    // returns false if the order did not exist
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                // returns false if the order did not exist
+                return false;
             }
         }
 
@@ -818,40 +757,37 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="order">The order</param>
         /// <exception cref="ApplicationException">Order: [{order.OrderGuid}] is not valid</exception>
-        internal static void UpdateOrder(OrderDBE order)
+        internal void UpdateOrder(OrderDBE order)
         {
-            using (var context = new SQLiteDBContext())
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            var currentOrder = this.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
+
+            if (currentOrder == null)
             {
-                // turn off change tracking since we are going to overwite the entity
-                // Note: I would not do this if there was a db assigned unique id for the record
-                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+                throw new ApplicationException($"Order: [{order.OrderGuid}] is not valid");
+            }
 
-                var currentOrder = context.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
+            this.Update(order);
 
-                if (currentOrder == null)
-                {
-                    throw new ApplicationException($"Order: [{order.OrderGuid}] is not valid");
-                }
+            try
+            {
+                this.SaveChanges();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
 
-                context.Update(order);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
             }
         }
 
@@ -867,32 +803,29 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static OrderEventDBE InsertOrderEvent(OrderEventDBE newOrderEvent)
+        internal OrderEventDBE InsertOrderEvent(OrderEventDBE newOrderEvent)
         {
-            using (var context = new SQLiteDBContext())
+            this.OrderEvents.Add(newOrderEvent);
+
+            try
             {
-                context.OrderEvents.Add(newOrderEvent);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return newOrderEvent;
+                this.SaveChanges();
             }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newOrderEvent;
         }
 
         #endregion
@@ -907,50 +840,45 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal static OrderLineItemDBE InsertOrderLineItem(OrderLineItemDBE newLineItem)
+        internal OrderLineItemDBE InsertOrderLineItem(OrderLineItemDBE newLineItem)
         {
-            using (var context = new SQLiteDBContext())
+            this.OrderLineItems.Add(newLineItem);
+
+            try
             {
-                context.OrderLineItems.Add(newLineItem);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return newLineItem;
+                this.SaveChanges();
             }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+
+            return newLineItem;
         }
 
         /// <summary>
         /// Delete Order line items
         /// </summary>
         /// <param name="orderId"></param>
-        internal static void DeleteOrderLineItems(int orderId)
+        internal void DeleteOrderLineItems(int orderId)
         {
-            using (var context = new SQLiteDBContext())
+            var orderLineItems = this.OrderLineItems.Where(a => a.OrderId == orderId);
+
+            foreach(var orderLineItem in orderLineItems)
             {
-                var orderLineItems = context.OrderLineItems.Where(a => a.OrderId == orderId);
-                foreach(var orderLineItem in orderLineItems)
-                {
-                    context.Remove(orderLineItem);
-                    context.SaveChanges();
-                }
-                
+                this.Remove(orderLineItem);
+                this.SaveChanges();
             }
+                
         }
         #endregion
 
