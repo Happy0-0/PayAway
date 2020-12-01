@@ -135,7 +135,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
                 //update order
                 dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;
-                SQLiteDBContext.UpdateOrder(dbOrderExploded);
+                _dbContext.UpdateOrder(dbOrderExploded);
 
                 //Write the order payment event
                 var dbOrderEvent = new OrderEventDBE()

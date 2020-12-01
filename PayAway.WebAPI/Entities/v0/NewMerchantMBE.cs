@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace PayAway.WebAPI.Entities.v0
 {
@@ -20,5 +21,11 @@ namespace PayAway.WebAPI.Entities.v0
         /// <value>True</value>
         [JsonPropertyName("isSupportsTips")]
         public bool IsSupportsTips { get; set; }
+
+        /// <summary>
+        /// Gets or sets the merchant Url
+        /// </summary>
+        /// <value>the merchant url</value>
+        public Uri MerchantUrl { get; set; }
     }
 }

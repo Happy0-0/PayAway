@@ -174,6 +174,12 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ArgumentNullException(nameof(newMerchant.MerchantName), @"You must supply a non blank value for the Merchant Name."));
             }
+            // validate the input params
+            if (!Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+            {
+
+                return BadRequest(new ArgumentException(nameof(newMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https://"));
+            }
 
             try
             {
@@ -181,7 +187,8 @@ namespace PayAway.WebAPI.Controllers.v1
                 var newDBMerchant = new MerchantDBE()
                 {
                     MerchantName = newMerchant.MerchantName,
-                    IsSupportsTips = newMerchant.IsSupportsTips
+                    IsSupportsTips = newMerchant.IsSupportsTips,
+                    MerchantUrl = newMerchant.MerchantUrl
                 };
 
                 var dbMerchant = _dbContext.InsertMerchant(newDBMerchant);
@@ -194,7 +201,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             catch (Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to add merchant: [{newMerchant.MerchantName}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed trying to add merchant: [{newMerchant.MerchantName}]"));
             }
         }
 
@@ -219,6 +226,12 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantName), @"The merchant name cannot be blank."));
             }
+            // validate the input params
+            if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute)) 
+            {
+                
+                return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https://"));
+            }
 
             // query the DB
             var dbMerchant = _dbContext.GetMerchant(merchantGuid);
@@ -236,12 +249,13 @@ namespace PayAway.WebAPI.Controllers.v1
                 // save the updated merchant
                 dbMerchant.MerchantName = updatedMerchant.MerchantName;
                 dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
+                dbMerchant.MerchantUrl = updatedMerchant.MerchantUrl;
 
                 _dbContext.UpdateMerchant(dbMerchant);
             }
             catch(Exception ex)
             {
-                return BadRequest(new ApplicationException($"Error: [{ex.Message}] trying to update merchant: [{exisitingDBMerchantName}]"));
+                return BadRequest(new ApplicationException($"Error: [{ex.Message}] failed trying to update merchant: [{exisitingDBMerchantName}]"));
             }
 
             return NoContent();

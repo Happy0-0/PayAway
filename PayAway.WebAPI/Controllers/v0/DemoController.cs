@@ -50,6 +50,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Domino's Pizza",
+                    MerchantUrl = new Uri("https://www.dominos.com"),
                     LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = true
@@ -58,7 +59,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Raising Cane's",
-                    LogoUrl =HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_2_LOGO_FILENAME),
+                    MerchantUrl = new Uri("https://www.raisingcanes.com"),
+                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_2_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = false
                 }
@@ -86,6 +88,7 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
+                MerchantUrl = new Uri("https://www.dominos.com"),
                 LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
                 IsSupportsTips = true,
                 IsActive = true,
@@ -118,10 +121,23 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
+            // validate request data
+            if (string.IsNullOrEmpty(newMerchant.MerchantName))
+            {
+                return BadRequest(new ArgumentNullException(nameof(newMerchant.MerchantName), @"You must supply a non blank value for the Merchant Name."));
+            }
+            // validate the input params
+            if (!Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+            {
+
+                return BadRequest(new ArgumentException(nameof(newMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https:// or http://"));
+            }
+
             var merchant = new MerchantMBE
             {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = newMerchant.MerchantName,
+                MerchantUrl = newMerchant.MerchantUrl,
                 IsSupportsTips = newMerchant.IsSupportsTips
             };
 
@@ -141,9 +157,17 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
+            // validate the input params
             if (merchantGuid != Constants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
+            }
+            // validate the input params
+            // validate the input params
+            if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+            {
+
+                return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https:// or http://"));
             }
 
             return NoContent();

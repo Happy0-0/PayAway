@@ -22,6 +22,7 @@ namespace PayAway.WebAPI.DB
                     MerchantGuid = Constants.MERCHANT_1_GUID,
                     MerchantName = @"Test Merchant #1",
                     LogoFileName = Constants.MERCHANT_1_LOGO_FILENAME,
+                    MerchantUrl = new Uri(Constants.MERCHANT_1_MERCHANT_URL),
                     IsSupportsTips = true,
                     IsActive = true
                 },
@@ -31,6 +32,7 @@ namespace PayAway.WebAPI.DB
                     MerchantGuid = Constants.MERCHANT_2_GUID,
                     MerchantName = @"Test Merchant #2",
                     LogoFileName = Constants.MERCHANT_2_LOGO_FILENAME,
+                    MerchantUrl = new Uri(Constants.MERCHANT_2_MERCHANT_URL),
                     IsSupportsTips = false,
                     IsActive = false
                 }

@@ -28,6 +28,9 @@ namespace PayAway.WebAPI.Entities.Database
         public string LogoFileName { get; set; }
 
         [Required]
+        public Uri MerchantUrl { get; set; }
+
+        [Required]
         public string MerchantName { get; set; }
 
         [Required]
@@ -55,6 +58,7 @@ namespace PayAway.WebAPI.Entities.Database
                     MerchantGuid = from.MerchantGuid,
                     MerchantName = from.MerchantName,
                     LogoFileName = from.LogoFileName,
+                    MerchantUrl = from.MerchantUrl,
                     IsSupportsTips = from.IsSupportsTips,
                     IsActive = from.IsActive,
                 };
@@ -75,6 +79,7 @@ namespace PayAway.WebAPI.Entities.Database
                     MerchantName = from.MerchantName,
                     LogoFileName = from.LogoFileName,
                     IsSupportsTips = from.IsSupportsTips,
+                    MerchantUrl = from.MerchantUrl,
                     IsActive = from.IsActive,
                 };
             }

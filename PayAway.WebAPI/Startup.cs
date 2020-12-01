@@ -102,6 +102,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/12/1</td>
+                                    <td>v0.52</td>
+                                    <td> Added merchantUrl to demo controller
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/24</td>
                                     <td>v0.51</td>
                                     <td>Finished stubbed out methods for customer Controller.
@@ -222,6 +228,12 @@ namespace PayAway.WebAPI
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>2020/12/1</td>
+                                    <td>v1.64</td>
+                                    <td> Added merchantUrl to demo controller
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>2020/12/1</td>
                                     <td>v1.63</td>
