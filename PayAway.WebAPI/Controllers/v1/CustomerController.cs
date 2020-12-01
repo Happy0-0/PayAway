@@ -115,13 +115,24 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest($"There are no order line items present.");
             }
+            //check to see if auth code is present
+            if (!String.IsNullOrEmpty(dbOrderExploded.AuthCode))
+            {
+                return BadRequest("Order has already been marked paid.");
+            }
             #endregion
 
             try
             {
                 //update the dbOrder with the values we just got
                 dbOrderExploded.CreditCardNumber = paymentInfo.PAN;
-                dbOrderExploded.AuthCode = paymentInfo.CVV;
+                dbOrderExploded.ExpMonth = paymentInfo.ExpMonth;
+                dbOrderExploded.ExpYear = paymentInfo.ExpYear;
+                dbOrderExploded.AuthCode = @"A1234";
+
+                //update order
+                dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;
+                SQLiteDBContext.UpdateOrder(dbOrderExploded);
 
                 //Write the order payment event
                 var dbOrderEvent = new OrderEventDBE()
@@ -134,9 +145,6 @@ namespace PayAway.WebAPI.Controllers.v1
 
                 //save order event
                 SQLiteDBContext.InsertOrderEvent(dbOrderEvent);
-
-                dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;
-                SQLiteDBContext.UpdateOrder(dbOrderExploded);
 
                 // send notification to all connected clients
                 _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");

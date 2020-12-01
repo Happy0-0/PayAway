@@ -80,7 +80,7 @@ namespace PayAway.WebAPI.Controllers.v0
                     },
                     new OrderHeaderMBE
                     {
-                        OrderGuid = Constants.ORDER_1_GUID,
+                        OrderGuid = Constants.ORDER_2_GUID,
                         OrderId = 2,
                         CustomerName = "Joanna Smith",
                         PhoneNumber = "(444) 444-4444",

@@ -46,6 +46,10 @@ namespace PayAway.WebAPI.Entities.Database
         public string CreditCardNumber { get; set; }
 
         public string AuthCode { get; set; }
+                
+        public int ExpMonth { get; set; }
+
+        public int ExpYear { get; set; }
 
         // Navigation Property
         public MerchantDBE Merchant { get; set; }

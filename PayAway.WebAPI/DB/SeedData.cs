@@ -111,7 +111,9 @@ namespace PayAway.WebAPI.DB
                     CustomerName = @"Joe Smith",
                     PhoneNumber = @"(555) 555-5555",
                     CreditCardNumber = @"1234-5678-9101-1121",
-                    AuthCode = @"506"
+                    AuthCode = @"506",
+                    ExpMonth = DateTime.Now.AddMonths(6).Month,
+                    ExpYear = DateTime.Now.AddMonths(6).Year
                 },
                 new OrderDBE
                 {
