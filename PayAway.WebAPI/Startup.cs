@@ -54,6 +54,12 @@ namespace PayAway.WebAPI
             services.AddSMSServiceConfig(smsServiceConfig ?? new SMSServiceConfigBE());
             services.AddSingleton(webUrlConfig ?? new WebUrlConfigurationBE());
 
+            // inject DBContext in the Service IOC container
+            services.AddDbContext<SQLiteDBContext>(options =>
+            {
+                options.UseSqlite(Configuration.GetConnectionString(@"SQLiteDB"));
+            });
+
             services.AddCors();     // <== enable Cors since request will be coming from a different URL (the Web UIs)
             services.AddSignalR();
             services.AddControllers();
@@ -74,9 +80,9 @@ namespace PayAway.WebAPI
                 c.Conventions.Add(new ApiExplorerGroupPerVersionConvention()); // decorate Controllers to distinguish SwaggerDoc (v1, v2, etc.)
             });
 
-            // add a health check for the DB
+            // add a health checks
             services.AddHealthChecks()
-                        .AddSqlite(Configuration.GetConnectionString(@"SQLiteDB"), name: @"PrestoPayv2 DB")
+                        .AddDbContextCheck<SQLiteDBContext>()
                         .AddUrlGroup(new Uri(SMSController.TWILIO_API_URL), name: @"Twilio WebAPI");
 
             services.AddSwaggerGen(c =>
