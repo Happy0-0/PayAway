@@ -223,6 +223,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/12/1</td>
+                                    <td>v1.63</td>
+                                    <td> Fixed SendPaymentOrder and added new payment info to orders.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/11/24</td>
                                     <td>v1.62</td>
                                     <td> Implemented SendPaymentOrder method for customer controller.
