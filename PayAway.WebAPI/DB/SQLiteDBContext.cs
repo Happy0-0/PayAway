@@ -64,7 +64,7 @@ namespace PayAway.WebAPI.DB
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
         //    optionsBuilder
-        //        .UseSqlite(@"Data Source=PrestoPayv2.db;");
+        //      .UseSqlite(@"Data Source=xxxxxxxxxxx;");
         //}
 
         /// <summary>
