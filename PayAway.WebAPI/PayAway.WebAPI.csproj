@@ -30,7 +30,7 @@
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>$(NoWarn);1591</NoWarn>
-		<FileVersion>1.0.20336.0009</FileVersion>
+		<FileVersion>1.0.20336.2142</FileVersion>
 		<UserSecretsId>a99deb02-3b4c-4115-9777-c610d8a7d9cb</UserSecretsId>
 	</PropertyGroup>
 
@@ -50,7 +50,13 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="PrestoPayv2.db">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="PrestoPayv2.db-shm">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="PrestoPayv2.db-wal">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="UploadedImageFiles\5d590431-95d2-4f8a-b2d9-6eb4d8cabc89.jpg">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

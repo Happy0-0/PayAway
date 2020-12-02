@@ -49,7 +49,7 @@ Tech Debt Items
 ------------------------------------------
 10. Refactor OrderHeaderMBE (on hold)
 -------------------------------------------------------------------------------
-    <tom> implement SignalR push notifications when payment is posted for an order
+    <tom> 
 -------------------------------------------------------------------------------
 	<gabe>
 -------------------------------------------------------------------------------
@@ -61,11 +61,14 @@ Tech Debt Items
 6.	<comp> Update Publish to Azure App Service to remove Self-Contained
 7.	<comp> Cleanup Code Analysis messages
 8.	<comp> Add Table Relationships via navigation properties
-9.	<comp> Convert to use Record types <evaluated, no value in this scenario, chgd to use init only properties
+9.	<comp> Convert to use Record types on some MBEs
 11. <comp> Implement SMS Send
 12. <comp> Implement Image Upload
 13. <comp> Refactor OrderNumber vs OrderId
-14. <comp> Always restore default catalog items
+14. <comp> Always restore default catalog items on ResetDB
 15. <comp> Correct issue with methods not returning ProblemDetails
 16. <comp> Rename all JsonAttribute *Date properties to *DateTimeUTC		<===== Will require Front End refactoring
 17. <comp> Add flags to order												<===== Will need Front End changes
+18. <comp> implemented WebHook (SignalR)
+19. <comp> moved DB connection string out of source code
+20. <comp> implemented best practice for managing lifetime of DBContext object
