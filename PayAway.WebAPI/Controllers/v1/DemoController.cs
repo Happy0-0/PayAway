@@ -188,7 +188,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     MerchantName = newMerchant.MerchantName,
                     IsSupportsTips = newMerchant.IsSupportsTips,
-                    MerchantUrl = newMerchant.MerchantUrl
+                    MerchantUrl = new Uri("https://www.testmerchant.com")
                 };
 
                 var dbMerchant = _dbContext.InsertMerchant(newDBMerchant);
@@ -249,7 +249,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 // save the updated merchant
                 dbMerchant.MerchantName = updatedMerchant.MerchantName;
                 dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
-                dbMerchant.MerchantUrl = updatedMerchant.MerchantUrl;
+                dbMerchant.MerchantUrl = new Uri("https://www.testmerchant.com");
 
                 _dbContext.UpdateMerchant(dbMerchant);
             }
