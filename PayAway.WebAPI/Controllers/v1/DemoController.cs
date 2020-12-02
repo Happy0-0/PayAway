@@ -226,11 +226,11 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantName), @"The merchant name cannot be blank."));
             }
             // validate the input params
-            if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute)) 
+            /*if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute)) 
             {
                 
                 return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https://"));
-            }
+            }*/
 
             // query the DB
             var dbMerchant = _dbContext.GetMerchant(merchantGuid);

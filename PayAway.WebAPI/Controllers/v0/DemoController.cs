@@ -127,17 +127,17 @@ namespace PayAway.WebAPI.Controllers.v0
                 return BadRequest(new ArgumentNullException(nameof(newMerchant.MerchantName), @"You must supply a non blank value for the Merchant Name."));
             }
             // validate the input params
-            if (!Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+            /*if (!Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute))
             {
 
                 return BadRequest(new ArgumentException(nameof(newMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https:// or http://"));
-            }
+            }*/
 
             var merchant = new MerchantMBE
             {
                 MerchantGuid = Constants.MERCHANT_1_GUID,
                 MerchantName = newMerchant.MerchantName,
-                MerchantUrl = newMerchant.MerchantUrl,
+                MerchantUrl = new Uri("https://www.testmerchant.com"),
                 IsSupportsTips = newMerchant.IsSupportsTips
             };
 
@@ -163,12 +163,11 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
             // validate the input params
-            // validate the input params
-            if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+            /*if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute))
             {
 
                 return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https:// or http://"));
-            }
+            }*/
 
             return NoContent();
         }
