@@ -313,7 +313,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //update merchant in the db
-            _dbContext.SetActiveMerchantForDemo(merchantToMakeActive.MerchantId);
+            _dbContext.SetActiveMerchantForDemo(merchantToMakeActive);
 
             return NoContent();
         }

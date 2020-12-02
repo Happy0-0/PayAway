@@ -407,10 +407,10 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
-        /// Sets the active merchant.
+        /// Sets the active merchant for demo.
         /// </summary>
-        /// <param name="merchantId">The merchant identifier.</param>
-        internal void SetActiveMerchantForDemo(int merchantId)
+        /// <param name="merchantToMakeActive">The merchant to make active.</param>
+        internal void SetActiveMerchantForDemo(MerchantDBE merchantToMakeActive)
         {
             //gets all merchants who are already active (logically should only be 0 or 1)
             var merchantsToChange = this.GetAllMerchants().Where(am => am.IsActive).ToList();
@@ -422,14 +422,11 @@ namespace PayAway.WebAPI.DB
                 this.UpdateMerchant(merchant);
             }
 
-            // query the DB
-            var activeMerchant = this.GetMerchant(merchantId);
-
             //set merchant to active
-            activeMerchant.IsActive = true;
+            merchantToMakeActive.IsActive = true;
 
             //update merchant in the db
-            this.UpdateMerchant(activeMerchant);
+            this.UpdateMerchant(merchantToMakeActive);
         }
 
         /// <summary>
