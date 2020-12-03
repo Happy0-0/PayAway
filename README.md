@@ -1,4 +1,4 @@
 # PayAway
 Repository for PayAway WebAPI
 
-![Merchant New Order Placeholder](Images/arch.jpg?raw=true)
+![Merchant New Order Placeholder](images/arch.jpg?raw=true)
