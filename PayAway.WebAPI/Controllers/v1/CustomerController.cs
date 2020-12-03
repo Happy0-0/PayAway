@@ -128,7 +128,7 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 //update the dbOrder with the values we just got
-                dbOrderExploded.CreditCardNumber = paymentInfo.PAN;
+                dbOrderExploded.CreditCardNumber = paymentInfo.PAN.CleanUp();
                 dbOrderExploded.ExpMonth = paymentInfo.ExpMonth;
                 dbOrderExploded.ExpYear = paymentInfo.ExpYear;
                 dbOrderExploded.AuthCode = @"A1234";
