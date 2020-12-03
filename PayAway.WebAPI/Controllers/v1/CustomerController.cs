@@ -81,7 +81,7 @@ namespace PayAway.WebAPI.Controllers.v1
         {
             //query the db
             var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
-
+            
             #region === Validation =====================
             //Biz Logic: check to see if the order guid is correct
             if (dbOrderExploded == null)

@@ -686,16 +686,24 @@ namespace PayAway.WebAPI.DB
         /// <returns>a specific order</returns>
         internal OrderDBE GetOrderExploded(Guid orderGuid)
         {
+
             var dbOrder = this.Orders
-                                    .Include(o => o.Merchant)
-                                    .Include(o => o.OrderEvents)
-                                    .Include(o => o.OrderLineItems)
-                                    .FirstOrDefault(o => o.OrderGuid == orderGuid);
+                                .Include(o => o.Merchant)
+                                .Include(o => o.OrderEvents)
+                                .Include(o => o.OrderLineItems)
+                                .FirstOrDefault(o => o.OrderGuid == orderGuid);
+
+            if (dbOrder == null)
+            {
+                return null;
+            }
 
             // sort the order events descending by d/t in memory
             dbOrder.OrderEvents = dbOrder.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC).ToList();
 
             return dbOrder;
+            
+
         }
 
         /// <summary>
