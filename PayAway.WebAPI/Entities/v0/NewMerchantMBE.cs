@@ -26,6 +26,6 @@ namespace PayAway.WebAPI.Entities.v0
         /// Gets or sets the merchant Url
         /// </summary>
         /// <value>the merchant url</value>
-        public Uri? MerchantUrl { get; set; }
+        public Uri MerchantUrl { get; set; }
     }
 }

@@ -321,7 +321,6 @@ namespace PayAway.WebAPI.Controllers.v1
             return NoContent();
         }
 
-
         /// <summary>Uploads the logo image for a merchant.</summary>
         /// <param name="merchantGuid">The unique identifier for the merchant</param>
         /// <param name="imageFile">The file containing the logo in one of the supported formats.</param>

@@ -462,7 +462,6 @@ namespace PayAway.WebAPI.Controllers.v1
             return newDBOrder;
         }
 
-
         private static OrderMBE BuildExplodedOrderMBE(OrderDBE dbExplodedOrder)
         {
             // convert DB entity to the public entity type
