@@ -158,7 +158,6 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return BadRequest(new ApplicationException($"Error: [{ex.Message}] Failed to send order payment."));
             }
-
         }
     }
 }

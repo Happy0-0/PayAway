@@ -19,7 +19,7 @@ using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace PayAway.WebAPI.Controllers.v1
 {
@@ -168,7 +168,6 @@ namespace PayAway.WebAPI.Controllers.v1
 
             //Return the response
             return Ok(order);
-
         }
 
         /// <summary>
@@ -220,7 +219,7 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 // insert the order
-                var dbExplodedOrder = InsertNewOrder(dbActiveMerchant.MerchantId, newOrder);
+                var dbExplodedOrder = InsertNewExplodedOrder(dbActiveMerchant.MerchantId, newOrder);
 
                 // convert to MBE
                 var explodedOrder = BuildExplodedOrderMBE(dbExplodedOrder);
@@ -331,7 +330,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     OrderId = dbOrder.OrderId,
                     EventDateTimeUTC = DateTime.UtcNow,
                     OrderStatus = Enums.ORDER_STATUS.Updated,
-                    EventDescription = "Order was updated."
+                    EventDescription = "Order updated."
                 };
 
                 //save order event
@@ -378,60 +377,73 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException($"You cannot send the Payment link if the order does not have any line items", nameof(orderGuid)));
             }
 
-            SendSMSMessageSaveEvent(dbOrderExploded, _webUrlConfig);
+            SendSMSMessage(dbOrderExploded, _webUrlConfig);
 
-            // Step 4:1 Get the merchant's demo customers
-            //query db
-            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbOrderExploded.MerchantId);
-
-            // Step 4:2 Loop for each demo customer
-            foreach (var demoCustomer in dbDemoCustomers)
+            // only create the demo customer orders if this order was itself NOT a demo customer order
+            // this allows the SMS for a specific demo customer order to be resent
+            if (!dbOrderExploded.RefOrderId.HasValue)
             {
-                var newDBDemoCustomerOrder = new NewOrderMBE()
-                {
-                    CustomerName = demoCustomer.CustomerName,
-                    CustomerPhoneNo = demoCustomer.CustomerPhoneNo,
-                    OrderLineItems = dbOrderExploded.OrderLineItems.ConvertAll(oli => (NewOrderLineItemMBE)oli)
-                };
+                var dbDemoCustomersOrders = _dbContext.GetOrdersViaRefOrderId(dbOrderExploded.OrderId);
 
-                // insert the order
-                var dbDemoCustomerExplodedOrder = InsertNewOrder(dbOrderExploded.MerchantId, newDBDemoCustomerOrder);
-                
-                //send sms message to demo customer and save new order event.
-                SendSMSMessageSaveEvent(dbDemoCustomerExplodedOrder, _webUrlConfig);
+                // Step 4:1 Get the merchant's demo customers
+                var dbDemoCustomers = _dbContext.GetDemoCustomers(dbOrderExploded.MerchantId);
+
+                // Step 4:2 Loop for each demo customer
+                foreach (var dbDemoCustomer in dbDemoCustomers)
+                {
+                    var matchingOrder = dbDemoCustomersOrders.FirstOrDefault(dco => dco.PhoneNumber == dbDemoCustomer.CustomerPhoneNo);
+                    if (matchingOrder != null)
+                        continue;   // skip if demo order is already created, can happen if we resend sms on the "main" order
+
+                    // create the exploded order
+                    var newDemoCustomerOrderExploded = new NewOrderMBE()
+                    {
+                        CustomerName = dbDemoCustomer.CustomerName,
+                        CustomerPhoneNo = dbDemoCustomer.CustomerPhoneNo,
+                        OrderLineItems = dbOrderExploded.OrderLineItems.ConvertAll(oli => (NewOrderLineItemMBE)oli)
+                    };
+
+                    // insert the order
+                    var dbDemoCustomerExplodedOrder = InsertNewExplodedOrder(dbOrderExploded.MerchantId, newDemoCustomerOrderExploded, dbOrderExploded.OrderId);
+
+                    // send sms message to demo customer
+                    SendSMSMessage(dbDemoCustomerExplodedOrder, _webUrlConfig);
+                }
             }
 
             return NoContent();
         }
 
         #region === Helper Methods =============================================
-        private OrderDBE InsertNewOrder(int merchantId, NewOrderMBE newOrder)
+        private OrderDBE InsertNewExplodedOrder(int merchantId, NewOrderMBE newExplodedOrder, int? refOrderId = null)
         {
             //Step 1: Store the new merchant Order
             var newDBOrder = new OrderDBE()
             {
                 Status = Enums.ORDER_STATUS.New,
                 MerchantId = merchantId,
-                CustomerName = newOrder.CustomerName,
-                PhoneNumber = newOrder.CustomerPhoneNo,
-                OrderDateTimeUTC = DateTime.UtcNow
+                CustomerName = newExplodedOrder.CustomerName,
+                PhoneNumber = newExplodedOrder.CustomerPhoneNo,
+                OrderDateTimeUTC = DateTime.UtcNow,
+                RefOrderId = refOrderId
             };
 
-            var dbOrder = _dbContext.InsertOrder(newDBOrder);
-
+            _dbContext.InsertOrder(newDBOrder);
+ 
             //Step 2: create the first event
             var newDBOrderEvent = new OrderEventDBE()
             {
-                OrderId = dbOrder.OrderId,
+                OrderId = newDBOrder.OrderId,
                 EventDateTimeUTC = DateTime.UtcNow,
                 OrderStatus = Enums.ORDER_STATUS.New,
-                EventDescription = "A new order has been created."
+                EventDescription = "Order created."
             };
 
             _dbContext.InsertOrderEvent(newDBOrderEvent);
+            newDBOrder.OrderEvents.Add(newDBOrderEvent);        // build exploded order
 
             //Step 3: iterate through orderLineItems collection to save it in the db
-            foreach (var orderLineItem in newOrder.OrderLineItems)
+            foreach (var orderLineItem in newExplodedOrder.OrderLineItems)
             {
                 var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
 
@@ -439,17 +451,15 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     ItemName = catalogItem.ItemName,
                     ItemUnitPrice = catalogItem.ItemUnitPrice,
-                    OrderId = dbOrder.OrderId,
+                    OrderId = newDBOrder.OrderId,
                     CatalogItemGuid = orderLineItem.ItemGuid
                 };
 
                 _dbContext.InsertOrderLineItem(newDBOrderLineItem);
+                newDBOrder.OrderLineItems.Add(newDBOrderLineItem);        // build exploded order
             }
 
-            // get new exploded DB order
-            var dbExplodedOrder = _dbContext.GetOrderExploded(dbOrder.OrderGuid);
-
-            return dbExplodedOrder;
+            return newDBOrder;
         }
 
 
@@ -483,9 +493,9 @@ namespace PayAway.WebAPI.Controllers.v1
             return order;
         }
 
-        public static void SendSMSMessageSaveEvent(OrderDBE dbOrderExploded, WebUrlConfigurationBE webUrlConfig)
+        private void SendSMSMessage(OrderDBE dbOrderExploded, WebUrlConfigurationBE webUrlConfig)
         {
-            // calc the order total
+            // Step 1: calc the order total
             decimal orderTotal = (dbOrderExploded.OrderLineItems != null)
                                             ? dbOrderExploded.OrderLineItems.Sum(oli => oli.ItemUnitPrice)
                                             : 0.0M;
@@ -504,11 +514,10 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // Step 3: Send the SMS msg
             // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
-            // SendSMSMessage
             (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
             SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
 
-            // Step 3.1 Write the SMS event
+            // Step 4 Create & Save the SMS event
             var dbOrderEvent = new OrderEventDBE()
             {
                 OrderId = dbOrderExploded.OrderId,
@@ -517,7 +526,11 @@ namespace PayAway.WebAPI.Controllers.v1
                 EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
             };
 
-            
+            _dbContext.InsertOrderEvent(dbOrderEvent);
+
+            // Step 5: Update the order status
+            dbOrderExploded.Status = Enums.ORDER_STATUS.SMS_Sent;
+            _dbContext.UpdateOrder(dbOrderExploded);
         }
 
         #endregion

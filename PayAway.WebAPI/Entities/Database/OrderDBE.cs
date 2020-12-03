@@ -24,6 +24,8 @@ namespace PayAway.WebAPI.Entities.Database
         [Required]
         public Guid OrderGuid { get; set; }
 
+        public int? RefOrderId { get; set; }
+
         /// <summary>
         /// ID of the merchant this Order is related to
         /// </summary>

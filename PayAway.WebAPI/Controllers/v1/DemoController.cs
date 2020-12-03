@@ -190,10 +190,10 @@ namespace PayAway.WebAPI.Controllers.v1
                     MerchantUrl = new Uri("https://www.testmerchant.com")
                 };
 
-                var dbMerchant = _dbContext.InsertMerchant(newDBMerchant);
+                _dbContext.InsertMerchant(newDBMerchant);
 
                 // convert DB entity to the public entity type
-                var merchant = (MerchantMBE)dbMerchant;
+                var merchant = (MerchantMBE)newDBMerchant;
 
                 // return the response
                 return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid }, merchant);
@@ -502,10 +502,10 @@ namespace PayAway.WebAPI.Controllers.v1
                     CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
                 };
 
-                var dbCustomer = _dbContext.InsertDemoCustomer(newDBDemoCustomer);
+                _dbContext.InsertDemoCustomer(newDBDemoCustomer);
 
                 // convert DB entity to the public entity type
-                var customer = (DemoCustomerMBE)dbCustomer;
+                var customer = (DemoCustomerMBE)newDBDemoCustomer;
 
                 // return the response
                 return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, demoCustomerGuid = customer.CustomerGuid }, customer);

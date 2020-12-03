@@ -319,7 +319,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal MerchantDBE InsertMerchant(MerchantDBE newMerchant)
+        internal void InsertMerchant(MerchantDBE newMerchant)
         {
             this.Merchants.Add(newMerchant);
 
@@ -340,8 +340,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newMerchant;
         }
 
         /// <summary>
@@ -466,7 +464,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal DemoCustomerDBE InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
+        internal void InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
         {
             this.DemoCustomers.Add(newDemoCustomer);
 
@@ -487,8 +485,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newDemoCustomer;
         }
 
         /// <summary>
@@ -595,7 +591,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        private CatalogItemDBE InsertCatalogItem(CatalogItemDBE newCatalogItem)
+        private void InsertCatalogItem(CatalogItemDBE newCatalogItem)
         {
             this.CatalogItems.Add(newCatalogItem);
 
@@ -616,8 +612,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newCatalogItem;
         }
 
 
@@ -675,6 +669,21 @@ namespace PayAway.WebAPI.DB
         }
 
         /// <summary>
+        /// Gets the orders via reference order identifier.
+        /// </summary>
+        /// <param name="refOrderId">The reference order identifier.</param>
+        /// <returns>List&lt;OrderDBE&gt;.</returns>
+        internal List<OrderDBE> GetOrdersViaRefOrderId(int refOrderId)
+        {
+            var dbOrders = this.Orders
+                                    .Where(o => o.RefOrderId == refOrderId)
+                                    .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
+                                    .ToList();
+
+            return dbOrders;
+        }
+
+        /// <summary>
         /// Get a specific order by orderGuid
         /// </summary>
         /// <param name="orderGuid">order Unique Indentifier.</param>
@@ -701,7 +710,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal OrderDBE InsertOrder(OrderDBE newOrder)
+        internal void InsertOrder(OrderDBE newOrder)
         {
             this.Orders.Add(newOrder);
 
@@ -722,8 +731,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newOrder;
         }
 
         /// <summary>
@@ -752,22 +759,22 @@ namespace PayAway.WebAPI.DB
         /// <summary>
         /// Updates an order
         /// </summary>
-        /// <param name="order">The order</param>
+        /// <param name="dbOrder">The order</param>
         /// <exception cref="ApplicationException">Order: [{order.OrderGuid}] is not valid</exception>
-        internal void UpdateOrder(OrderDBE order)
+        internal void UpdateOrder(OrderDBE dbOrder)
         {
             // turn off change tracking since we are going to overwite the entity
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var currentOrder = this.Orders.FirstOrDefault(o => o.OrderGuid == order.OrderGuid);
+            var currentOrder = this.Orders.AsNoTracking().FirstOrDefault(o => o.OrderGuid == dbOrder.OrderGuid);
 
             if (currentOrder == null)
             {
-                throw new ApplicationException($"Order: [{order.OrderGuid}] is not valid");
+                throw new ApplicationException($"Order: [{dbOrder.OrderGuid}] is not valid");
             }
 
-            this.Update(order);
+            this.Update(dbOrder);
 
             try
             {
@@ -800,7 +807,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal OrderEventDBE InsertOrderEvent(OrderEventDBE newOrderEvent)
+        internal void InsertOrderEvent(OrderEventDBE newOrderEvent)
         {
             this.OrderEvents.Add(newOrderEvent);
 
@@ -821,8 +828,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newOrderEvent;
         }
 
         #endregion
@@ -837,7 +842,7 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal OrderLineItemDBE InsertOrderLineItem(OrderLineItemDBE newLineItem)
+        internal void InsertOrderLineItem(OrderLineItemDBE newLineItem)
         {
             this.OrderLineItems.Add(newLineItem);
 
@@ -858,8 +863,6 @@ namespace PayAway.WebAPI.DB
                 // rethrow exception
                 throw;
             }
-
-            return newLineItem;
         }
 
         /// <summary>
