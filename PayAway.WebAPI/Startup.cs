@@ -229,6 +229,12 @@ namespace PayAway.WebAPI
                                 </thead>
                                 <tbody>
                                 <tr>
+                                    <td>2020/12/3</td>
+                                    <td>v1.65</td>
+                                    <td> Removed OrderGuid from PaymentInfoMBE and renamed SendPaymentOrder to SubmitPaymentOrder.
+                                    </td>
+                                </tr>
+                                <tr>
                                     <td>2020/12/1</td>
                                     <td>v1.64</td>
                                     <td> Added merchantUrl to demo controller

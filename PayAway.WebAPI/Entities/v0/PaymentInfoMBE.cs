@@ -9,13 +9,6 @@ namespace PayAway.WebAPI.Entities.v0
     public record PaymentInfoMBE
     {
         /// <summary>
-        /// Gets or sets order guid
-        /// </summary>
-        /// <value>orderGuid</value>
-        [JsonPropertyName("orderGuid")]
-        public Guid OrderGuid { get; init; }
-
-        /// <summary>
         /// Gets or sets a primary account number aka credit card number
         /// </summary>
         [JsonPropertyName("pan")]

@@ -7,6 +7,6 @@ namespace PayAway.WebAPI.Interfaces
     public interface ICustomerController
     {
         ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid);
-        ActionResult SendOrderPayment(Guid orderGuid, PaymentInfoMBE paymentInfo);
+        ActionResult SubmitOrderPayment(Guid orderGuid, PaymentInfoMBE paymentInfo);
     }
 }

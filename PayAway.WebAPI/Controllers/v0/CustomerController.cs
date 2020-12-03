@@ -76,7 +76,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SendOrderPayment([FromRoute] Guid orderGuid, PaymentInfoMBE paymentInfo)
+        public ActionResult SubmitOrderPayment([FromRoute] Guid orderGuid, PaymentInfoMBE paymentInfo)
         {
             #region === Validation =====================
             if (orderGuid != Constants.ORDER_1_GUID)
