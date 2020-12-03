@@ -84,24 +84,13 @@ namespace PayAway.WebAPI.Entities.v0
         /// Indicates if updates are allowed based on the current status of the order
         /// </summary>
         [JsonPropertyName("isUpdateAvailable")]
-        public bool IsUpdateAvailable
-        {
-            get { return (this.OrderStatus != Enums.ORDER_STATUS.SMS_Sent && this.OrderStatus != Enums.ORDER_STATUS.Paid); }
-        }
+        public bool IsUpdateAvailable => (this.OrderStatus != Enums.ORDER_STATUS.SMS_Sent && this.OrderStatus != Enums.ORDER_STATUS.Paid);
 
         /// <summary>
         /// Gets or sets the order total
         /// </summary> 
         /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
-        public decimal? OrderTotal 
-        {
-            get
-            {
-                return this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
-            }
-
-        }
-                
+        public decimal? OrderTotal => this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
     }
 }
