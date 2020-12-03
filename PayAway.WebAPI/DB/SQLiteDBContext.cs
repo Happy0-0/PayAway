@@ -274,7 +274,7 @@ namespace PayAway.WebAPI.DB
         /// <returns>List&lt;MerchantDBE&gt;.</returns>
         internal List<MerchantDBE> GetAllMerchants()
         {
-                return this.Merchants.ToList();
+            return this.Merchants.ToList();
         }
 
         /// <summary>
