@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Converters;
 using PayAway.WebAPI.Controllers.v0;
 
-namespace PayAway.WebAPI.Entities.v0
+namespace PayAway.WebAPI.Entities.v1
 {
     /// <summary>
     /// Class that contains summary info for an Order

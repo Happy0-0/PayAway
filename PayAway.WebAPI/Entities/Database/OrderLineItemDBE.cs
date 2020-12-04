@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
 
 namespace PayAway.WebAPI.Entities.Database
 {

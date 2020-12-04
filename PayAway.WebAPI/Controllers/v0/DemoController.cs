@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 using PayAway.WebAPI.Interfaces;
-using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Utilities;
 
 namespace PayAway.WebAPI.Controllers.v0

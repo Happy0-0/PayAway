@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace PayAway.WebAPI.Entities.v0
+namespace PayAway.WebAPI.Entities.v1
 {
     /// <summary>
     /// Class represents an existing Merchant

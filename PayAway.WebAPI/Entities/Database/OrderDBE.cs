@@ -1,4 +1,5 @@
-﻿using PayAway.WebAPI.Entities.v0;
+﻿using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

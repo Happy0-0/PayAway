@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.SignalR;
 
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Config;
-using PayAway.WebAPI.Entities.v0;
+using PayAway.WebAPI.Entities.v1;
 using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
@@ -114,8 +114,13 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
                 }
-
             }
+            //Check to see if the order has a tip even when themerchant doesn't support tips.
+            if (dbOrderExploded.Merchant.IsSupportsTips == false && paymentInfo.TipAmount < 0)
+            {
+                return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
+            }
+
             //Biz Logic: check to see if credit card number is fine.
             if (String.IsNullOrEmpty(paymentInfo.PAN))
             {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Entities.v0
+namespace PayAway.WebAPI.Entities.v1
 {
     /// <summary>
     /// Class represents an existing Demo customer

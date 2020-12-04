@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Entities.v0
+namespace PayAway.WebAPI.Entities.v1
 {
     /// <summary>
     /// This class contains information about an order event

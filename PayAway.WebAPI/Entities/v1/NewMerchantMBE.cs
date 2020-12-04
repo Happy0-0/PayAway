@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace PayAway.WebAPI.Entities.v0
+namespace PayAway.WebAPI.Entities.v1
 {
     /// <summary>
     /// Class represents a new or updated merchant
