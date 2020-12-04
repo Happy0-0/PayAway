@@ -81,32 +81,40 @@ namespace PayAway.WebAPI.Controllers.v1
         {
             //query the db
             var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
-            
+
             #region === Validation =====================
             //Biz Logic: check to see if the order guid is correct
             if (dbOrderExploded == null)
             {
                 return NotFound($"Customer order with ID: {orderGuid} not found");
             }
-            //Biz Logic: validate exp year
-            if (paymentInfo.ExpYear < (DateTime.UtcNow.Year) && paymentInfo.ExpYear > (DateTime.UtcNow.Year + 10))
+            // Step: Is it even a valid date (this takes care of wacky month values)
+            DateTime parsedDate;
+            if (!DateTime.TryParse($"{paymentInfo.ExpMonth}/1/{ paymentInfo.ExpYear}", out parsedDate))
             {
-                return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
+                return BadRequest($"{paymentInfo.ExpMonth}/{paymentInfo.ExpYear} is not a valid expiration date");
             }
-            //Biz Logic: validate exp month
-            if (paymentInfo.ExpMonth < 12 && paymentInfo.ExpMonth > 1)
+
+            // Step 2: The expiration date cannot be to far into the future (this takes care of yrs too far into the future)
+            if (parsedDate > DateTime.Today.AddYears(5))
             {
-                return BadRequest($"Payment info with expiration month: {paymentInfo.ExpMonth} is not valid. ");
+                return BadRequest($"{paymentInfo.ExpMonth}/{ paymentInfo.ExpYear} is not a valid expiration date");
             }
-            //Biz Logic: making sure month and year is valid
-            if ((paymentInfo.ExpMonth < DateTime.UtcNow.Month && paymentInfo.ExpYear <= DateTime.UtcNow.Year))
+
+            // Step 3: Is the card still valid today (cards are valid thru the last day of the month  (this check prevents dates in the past)
+            DateTime calcExpireDate = parsedDate.AddMonths(1).AddDays(-1);
+            if (DateTime.Today > calcExpireDate)
             {
-                return BadRequest($"Payment info with expiration month and year: {paymentInfo.ExpMonth} / {paymentInfo.ExpYear} is not valid. ");
+                return BadRequest($"Payment Instrument is no longer valid, expired on {calcExpireDate:MM/dd/yyyy}");
             }
-            //Biz Logic: check to see if tip is less than zero
-            if (paymentInfo.TipAmount < 0)
+            if(dbOrderExploded.Merchant.IsSupportsTips == true)
             {
-                return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
+                //Biz Logic: check to see if tip is less than zero
+                if (paymentInfo.TipAmount < 0)
+                {
+                    return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
+                }
+
             }
             //Biz Logic: check to see if credit card number is fine.
             if (String.IsNullOrEmpty(paymentInfo.PAN))
