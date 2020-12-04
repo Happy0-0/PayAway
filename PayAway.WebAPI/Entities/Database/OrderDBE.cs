@@ -64,13 +64,13 @@ namespace PayAway.WebAPI.Entities.Database
         public List<OrderLineItemDBE> OrderLineItems { get; set; }
 
         #region === Type Conversion Methods ================================
-        public static explicit operator OrderMBE(OrderDBE from)
+        public static explicit operator MerchantOrderMBE(OrderDBE from)
         {
-            OrderMBE to = null;
+            MerchantOrderMBE to = null;
 
             if (from != null)
             {
-                to = new OrderMBE()
+                to = new MerchantOrderMBE()
                 {
                     OrderId = from.OrderId,
                     OrderDateTimeUTC = from.OrderDateTimeUTC,

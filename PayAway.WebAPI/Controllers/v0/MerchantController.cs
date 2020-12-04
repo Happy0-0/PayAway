@@ -98,16 +98,16 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <returns>merchant Order</returns>
         [HttpGet("orders/{orderGuid:Guid}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<OrderMBE> GetOrder(Guid orderGuid)
+        public ActionResult<MerchantOrderMBE> GetOrder(Guid orderGuid)
         {
             if (orderGuid != Constants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
 
-            return Ok(new OrderMBE
+            return Ok(new MerchantOrderMBE
             {
                 OrderGuid = orderGuid,
                 OrderId = 1234,
@@ -157,11 +157,11 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <returns></returns>
         [HttpPost("orders")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
+        public ActionResult<MerchantOrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
-            var order = new OrderMBE
+            var order = new MerchantOrderMBE
             {
                 OrderGuid = Constants.ORDER_1_GUID,
                 OrderId = 1234,

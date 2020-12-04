@@ -9,7 +9,7 @@ namespace PayAway.WebAPI.Entities.v1
     /// <summary>
     /// Class used when a method needs to get merchant order information
     /// </summary>
-    public class OrderMBE
+    public class MerchantOrderMBE
     {
         /// <summary>
         /// Gets or sets order guid

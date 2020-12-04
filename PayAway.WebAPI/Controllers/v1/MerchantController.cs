@@ -150,9 +150,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns>merchant Order</returns>
         [HttpGet("orders/{orderGuid:Guid}", Name = nameof(GetOrder))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<OrderMBE> GetOrder([FromRoute] Guid orderGuid)
+        public ActionResult<MerchantOrderMBE> GetOrder([FromRoute] Guid orderGuid)
         {
             //query the db
             var dbExplodedOrder = _dbContext.GetOrderExploded(orderGuid);
@@ -164,7 +164,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // convert this to the public mbe
-            var order = BuildExplodedOrderMBE(dbExplodedOrder);
+            var order = BuildExplodedMerchantOrderMBE(dbExplodedOrder);
 
             //Return the response
             return Ok(order);
@@ -177,9 +177,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns>new Order</returns>
         [HttpPost("orders")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(OrderMBE), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<OrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
+        public ActionResult<MerchantOrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
             //trims customer name so that it doesn't have trailing characters
             newOrder.CustomerName = newOrder.CustomerName.Trim();
@@ -222,7 +222,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 var dbExplodedOrder = InsertNewExplodedOrder(dbActiveMerchant.MerchantId, newOrder);
 
                 // convert to MBE
-                var explodedOrder = BuildExplodedOrderMBE(dbExplodedOrder);
+                var explodedOrder = BuildExplodedMerchantOrderMBE(dbExplodedOrder);
 
                 // return the response
                 return CreatedAtAction(nameof(GetOrder), new { orderGuid = explodedOrder.OrderGuid }, explodedOrder);
@@ -462,10 +462,10 @@ namespace PayAway.WebAPI.Controllers.v1
             return newDBOrder;
         }
 
-        private static OrderMBE BuildExplodedOrderMBE(OrderDBE dbExplodedOrder)
+        private static MerchantOrderMBE BuildExplodedMerchantOrderMBE(OrderDBE dbExplodedOrder)
         {
             // convert DB entity to the public entity type
-            var order = (OrderMBE)dbExplodedOrder;
+            var order = (MerchantOrderMBE)dbExplodedOrder;
 
             order.MerchantGuid = dbExplodedOrder.Merchant.MerchantGuid;
 
