@@ -60,14 +60,14 @@ namespace PayAway.WebAPI.Controllers.v1
             _dbContext.ResetDB(isPreloadEnabled);
 
             // purge all uploaded logo files except the demo ones
-            var logoFolderName = System.IO.Path.Combine(_environment.ContentRootPath, Constants.LOGO_IMAGES_FOLDER_NAME);
+            var logoFolderName = System.IO.Path.Combine(_environment.ContentRootPath, GeneralConstants.LOGO_IMAGES_FOLDER_NAME);
             var logoFileNames = Directory.GetFiles(logoFolderName).ToList();
 
             var exclusionList = new List<string> 
             { 
                 // use Path.Combine to suppport both windows and rhel deployment enironments
-                System.IO.Path.Combine(logoFolderName, Constants.MERCHANT_1_LOGO_FILENAME),
-                System.IO.Path.Combine(logoFolderName, Constants.MERCHANT_2_LOGO_FILENAME)
+                System.IO.Path.Combine(logoFolderName, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
+                System.IO.Path.Combine(logoFolderName, GeneralConstants.MERCHANT_2_LOGO_FILENAME)
             };
 
             foreach(var logoFileName in logoFileNames.Except(exclusionList))
@@ -284,7 +284,7 @@ namespace PayAway.WebAPI.Controllers.v1
             if(!string.IsNullOrEmpty(dbMerchant.LogoFileName) && (dbMerchant.LogoFileName.IndexOf(@"-logo") > -1))
             {;
                 var logoFilePathName = System.IO.Path.Combine(_environment.ContentRootPath,
-                                                    Constants.LOGO_IMAGES_FOLDER_NAME,
+                                                    GeneralConstants.LOGO_IMAGES_FOLDER_NAME,
                                                     dbMerchant.LogoFileName);
 
                 System.IO.File.Delete(logoFilePathName);
@@ -356,7 +356,7 @@ namespace PayAway.WebAPI.Controllers.v1
             string imageFileName = $"{merchantGuid}-logo{System.IO.Path.GetExtension(imageFile.FileName)}";
             // use Path.Combine to deal with O/S differences re Linux: "/" vs Windows: "\"
             string imageFilePathName = System.IO.Path.Combine(_environment.ContentRootPath,
-                                                                Constants.LOGO_IMAGES_FOLDER_NAME,
+                                                                GeneralConstants.LOGO_IMAGES_FOLDER_NAME,
                                                                 imageFileName);
             using (var fileStream = System.IO.File.Create(imageFilePathName))
             {

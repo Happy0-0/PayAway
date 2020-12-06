@@ -30,7 +30,8 @@ namespace PayAway.WebAPI.Utilities
         {
             if (numberOfChars >= source.Length)
                 return source;
-            return source.Substring(source.Length - numberOfChars);
+            //return source.Substring(source.Length - numberOfChars);
+            return source[^numberOfChars..];
         }
 
         /// <summary>Gets the first.</summary>

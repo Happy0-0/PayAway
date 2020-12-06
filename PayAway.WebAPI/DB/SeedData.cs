@@ -19,20 +19,20 @@ namespace PayAway.WebAPI.DB
                 new MerchantDBE
                 {
                     MerchantId = 1,
-                    MerchantGuid = Constants.MERCHANT_1_GUID,
+                    MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                     MerchantName = @"Test Merchant #1",
-                    LogoFileName = Constants.MERCHANT_1_LOGO_FILENAME,
-                    MerchantUrl = new Uri(Constants.MERCHANT_1_MERCHANT_URL),
+                    LogoFileName = GeneralConstants.MERCHANT_1_LOGO_FILENAME,
+                    MerchantUrl = new Uri(GeneralConstants.MERCHANT_1_MERCHANT_URL),
                     IsSupportsTips = true,
                     IsActive = true
                 },
                 new MerchantDBE
                 {
                     MerchantId = 2,
-                    MerchantGuid = Constants.MERCHANT_2_GUID,
+                    MerchantGuid = GeneralConstants.MERCHANT_2_GUID,
                     MerchantName = @"Test Merchant #2",
-                    LogoFileName = Constants.MERCHANT_2_LOGO_FILENAME,
-                    MerchantUrl = new Uri(Constants.MERCHANT_2_MERCHANT_URL),
+                    LogoFileName = GeneralConstants.MERCHANT_2_LOGO_FILENAME,
+                    MerchantUrl = new Uri(GeneralConstants.MERCHANT_2_MERCHANT_URL),
                     IsSupportsTips = false,
                     IsActive = false
                 }
@@ -49,7 +49,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 1,
                     DemoCustomerId = 1,
-                    DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                    DemoCustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
                     CustomerName = @"Test Customer 1",
                     CustomerPhoneNo = @"(513) 498-6016"
                 },
@@ -57,7 +57,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 1,
                     DemoCustomerId = 2,
-                    DemoCustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
+                    DemoCustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_2_GUID,
                     CustomerName = @"Test Customer 2",
                     CustomerPhoneNo = @"(513) 791-9800"
                 }
@@ -74,7 +74,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 1,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_1_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_1_GUID,
                     ItemName = "Product/Service 1",
                     ItemUnitPrice = 10.51M
                 },
@@ -82,7 +82,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 2,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_2_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_2_GUID,
                     ItemName = "Product/Service 2",
                     ItemUnitPrice = 20.52M
                 },
@@ -90,7 +90,7 @@ namespace PayAway.WebAPI.DB
                 {
                     MerchantId = 0,
                     CatalogItemId = 3,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_3_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_3_GUID,
                     ItemName = "Product/Service 3",
                     ItemUnitPrice = 15.92M
                 },
@@ -106,7 +106,7 @@ namespace PayAway.WebAPI.DB
                 new OrderDBE
                 {
                     OrderId = 1,
-                    OrderGuid = Constants.ORDER_1_GUID,
+                    OrderGuid = GeneralConstants.ORDER_1_GUID,
                     MerchantId = 1,
                     OrderDateTimeUTC = DateTime.Now.AddMinutes(-10),
                     Status = Enums.ORDER_STATUS.Paid,
@@ -120,7 +120,7 @@ namespace PayAway.WebAPI.DB
                 new OrderDBE
                 {
                     OrderId = 2,
-                    OrderGuid = Constants.ORDER_2_GUID,
+                    OrderGuid = GeneralConstants.ORDER_2_GUID,
                     MerchantId = 1,
                     OrderDateTimeUTC = DateTime.Now.AddMinutes(-5),
                     Status = Enums.ORDER_STATUS.New,
@@ -179,21 +179,21 @@ namespace PayAway.WebAPI.DB
                 new OrderLineItemDBE
                 {
                     OrderId = 1,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_1_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_1_GUID,
                     ItemName = @"Product/Service 1",
                     ItemUnitPrice = 10.51M
                 },
                 new OrderLineItemDBE
                 {
                     OrderId = 1,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_2_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_2_GUID,
                     ItemName = @"Product/Service 2",
                     ItemUnitPrice = 20.52M
                 },
                 new OrderLineItemDBE
                 {
                     OrderId = 1,
-                    CatalogItemGuid = Constants.CATALOG_ITEM_3_GUID,
+                    CatalogItemGuid = GeneralConstants.CATALOG_ITEM_3_GUID,
                     ItemName = @"Product/Service 3",
                     ItemUnitPrice = 15.92M
                 }

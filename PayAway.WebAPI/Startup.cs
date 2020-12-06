@@ -438,7 +438,7 @@ namespace PayAway.WebAPI
             // enable serving static merchant logo image files
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), Constants.LOGO_IMAGES_FOLDER_NAME)), RequestPath = new PathString($"/{Constants.LOGO_IMAGES_URI_FOLDER}")
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), GeneralConstants.LOGO_IMAGES_FOLDER_NAME)), RequestPath = new PathString($"/{GeneralConstants.LOGO_IMAGES_URI_FOLDER}")
             });
 
             // global cors policy

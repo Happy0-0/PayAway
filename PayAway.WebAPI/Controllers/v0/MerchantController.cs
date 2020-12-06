@@ -30,9 +30,9 @@ namespace PayAway.WebAPI.Controllers.v0
         {
             return Ok(new ActiveMerchantMBE
             {
-                MerchantGuid = Constants.MERCHANT_1_GUID,
+                MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
-                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
                 CatalogItems = new List<CatalogItemMBE>
                 {
                     new CatalogItemMBE
@@ -70,7 +70,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 {
                     new OrderHeaderMBE
                     {
-                        OrderGuid = Constants.ORDER_1_GUID,
+                        OrderGuid = GeneralConstants.ORDER_1_GUID,
                         OrderId = 1,
                         CustomerName = "Joe Smith",
                         PhoneNumber = "(555) 555-5555",
@@ -80,7 +80,7 @@ namespace PayAway.WebAPI.Controllers.v0
                     },
                     new OrderHeaderMBE
                     {
-                        OrderGuid = Constants.ORDER_2_GUID,
+                        OrderGuid = GeneralConstants.ORDER_2_GUID,
                         OrderId = 2,
                         CustomerName = "Joanna Smith",
                         PhoneNumber = "(444) 444-4444",
@@ -102,7 +102,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<MerchantOrderMBE> GetOrder(Guid orderGuid)
         {
-            if (orderGuid != Constants.ORDER_1_GUID)
+            if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
@@ -111,7 +111,7 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 OrderGuid = orderGuid,
                 OrderId = 1234,
-                MerchantGuid = Constants.MERCHANT_1_GUID,
+                MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
                 OrderStatus = Enums.ORDER_STATUS.Paid,
@@ -163,9 +163,9 @@ namespace PayAway.WebAPI.Controllers.v0
         {
             var order = new MerchantOrderMBE
             {
-                OrderGuid = Constants.ORDER_1_GUID,
+                OrderGuid = GeneralConstants.ORDER_1_GUID,
                 OrderId = 1234,
-                MerchantGuid = Constants.MERCHANT_1_GUID,
+                MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                 Name = "Joe Smith",
                 PhoneNumber = "(333) 333-3333",
                 OrderStatus = Enums.ORDER_STATUS.New,
@@ -206,7 +206,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
-            if (orderGuid != Constants.ORDER_1_GUID)
+            if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
@@ -225,7 +225,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult SendOrderPaymentRequest(Guid orderGuid)
         {
-            if (orderGuid != Constants.ORDER_1_GUID)
+            if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }

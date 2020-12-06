@@ -47,7 +47,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<CustomerOrderMBE> GetCustomerOrder([FromRoute] Guid orderGuid)
         {
-            if (orderGuid != Constants.ORDER_1_GUID)
+            if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Customer order: [{orderGuid}] not found");
             }
@@ -57,7 +57,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 OrderGuid = orderGuid,
                 MerchantName = @"Domino's Pizza",
                 IsSupportsTips = true,
-                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(666) 666-6666",
                 OrderTotal = 15.46M,
@@ -79,7 +79,7 @@ namespace PayAway.WebAPI.Controllers.v0
         public ActionResult SubmitOrderPayment([FromRoute] Guid orderGuid, PaymentInfoMBE paymentInfo)
         {
             #region === Validation =====================
-            if (orderGuid != Constants.ORDER_1_GUID)
+            if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }

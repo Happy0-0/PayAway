@@ -11,7 +11,7 @@ namespace PayAway.WebAPI.Utilities
         internal static Uri BuildFullURL(HttpRequest httpRequest, string imageFileName)
         {
             var baseUrl = $"{httpRequest.Scheme}://{httpRequest.Host.Value}{httpRequest.PathBase.Value}";
-            var fullURL = $"{baseUrl}/{Constants.LOGO_IMAGES_URI_FOLDER}/{imageFileName}";
+            var fullURL = $"{baseUrl}/{GeneralConstants.LOGO_IMAGES_URI_FOLDER}/{imageFileName}";
 
             return new Uri(fullURL);
         }

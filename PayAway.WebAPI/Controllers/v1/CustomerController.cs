@@ -88,50 +88,59 @@ namespace PayAway.WebAPI.Controllers.v1
             {
                 return NotFound($"Customer order with ID: {orderGuid} not found");
             }
-            // Step: Is it even a valid date (this takes care of wacky month values)
+
+            // == Expiration Date =====================================
+            // Step 2a: Is it even a valid date (this takes care of wacky month values)
             DateTime parsedDate;
             if (!DateTime.TryParse($"{paymentInfo.ExpMonth}/1/{ paymentInfo.ExpYear}", out parsedDate))
             {
                 return BadRequest($"{paymentInfo.ExpMonth}/{paymentInfo.ExpYear} is not a valid expiration date");
             }
 
-            // Step 2: The expiration date cannot be to far into the future (this takes care of yrs too far into the future)
+            // Step 2b: The expiration date cannot be to far into the future (this takes care of yrs too far into the future)
             if (parsedDate > DateTime.Today.AddYears(5))
             {
                 return BadRequest($"{paymentInfo.ExpMonth}/{ paymentInfo.ExpYear} is not a valid expiration date");
             }
 
-            // Step 3: Is the card still valid today (cards are valid thru the last day of the month  (this check prevents dates in the past)
+            // Step 2c: Is the card still valid today (cards are valid thru the last day of the month  (this check prevents dates in the past)
             DateTime calcExpireDate = parsedDate.AddMonths(1).AddDays(-1);
             if (DateTime.Today > calcExpireDate)
             {
                 return BadRequest($"Payment Instrument is no longer valid, expired on {calcExpireDate:MM/dd/yyyy}");
             }
-            if(dbOrderExploded.Merchant.IsSupportsTips == true)
+
+            // == Tip Amount ====================================
+            // Step 3a: Check to see if the order has a tip even when the merchant doesn't support tips.
+            if (dbOrderExploded.Merchant.IsSupportsTips == false 
+                    && paymentInfo.TipAmount.HasValue 
+                    && paymentInfo.TipAmount.Value != 0.0M)
             {
-                //Biz Logic: check to see if tip is less than zero
-                if (paymentInfo.TipAmount < 0)
-                {
-                    return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
-                }
-            }
-            //Check to see if the order has a tip even when themerchant doesn't support tips.
-            if (dbOrderExploded.Merchant.IsSupportsTips == false && paymentInfo.TipAmount < 0)
-            {
-                return BadRequest($"Payment info with tip amount: {paymentInfo.TipAmount} cannot less than zero.");
+                return BadRequest($"This merchant does NOT support tips.");
             }
 
-            //Biz Logic: check to see if credit card number is fine.
-            if (String.IsNullOrEmpty(paymentInfo.PAN))
+            // Step 3b: Biz Logic: check to see if tip is less than zero
+            if (paymentInfo.TipAmount.HasValue
+                && paymentInfo.TipAmount.Value < 0.0M)
             {
-                return BadRequest("Your Credit card number cannot be empty.");
+                return BadRequest($"The tip amount: {paymentInfo.TipAmount} cannot less than $0.00.");
             }
-            //check to see if order line items for the order.
-            if (dbOrderExploded.OrderLineItems.Count == 0)
+
+            // == CC Number ===================================
+            string paymentPan = paymentInfo.PAN.Trim().CleanUp();
+            // // Step 4a: Biz Logic: check to see if credit card number is fine.
+            if (paymentPan.Length != 16)
             {
-                return BadRequest($"There are no order line items present.");
+                return BadRequest("Your Credit card number must be 16 digits.");
             }
-            //check to see if auth code is present
+
+            if (!paymentPan.CheckLuhn())
+            {
+                return BadRequest("Your Credit card number must pass a LUN check.");
+            }
+
+            // == Auth Code ===================================
+            // check to see if auth code is present
             if (!String.IsNullOrEmpty(dbOrderExploded.AuthCode))
             {
                 return BadRequest("Order has already been marked paid.");
@@ -141,10 +150,10 @@ namespace PayAway.WebAPI.Controllers.v1
             try
             {
                 //update the dbOrder with the values we just got
-                dbOrderExploded.CreditCardNumber = paymentInfo.PAN.CleanUp();
+                dbOrderExploded.CreditCardNumber = paymentPan;
                 dbOrderExploded.ExpMonth = paymentInfo.ExpMonth;
                 dbOrderExploded.ExpYear = paymentInfo.ExpYear;
-                dbOrderExploded.AuthCode = @"A1234";
+                dbOrderExploded.AuthCode = CardNetworkHelper.GenerateAuthCode();
 
                 //update order
                 dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;

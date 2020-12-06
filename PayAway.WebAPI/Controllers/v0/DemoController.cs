@@ -48,19 +48,19 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 new MerchantMBE
                 {
-                    MerchantGuid = Constants.MERCHANT_1_GUID,
+                    MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                     MerchantName = @"Domino's Pizza",
                     MerchantUrl = new Uri("https://www.dominos.com"),
-                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
+                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = true
                 },
                 new MerchantMBE
                 {
-                    MerchantGuid = Constants.MERCHANT_2_GUID,
+                    MerchantGuid = GeneralConstants.MERCHANT_2_GUID,
                     MerchantName = @"Raising Cane's",
                     MerchantUrl = new Uri("https://www.raisingcanes.com"),
-                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_2_LOGO_FILENAME),
+                    LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_2_LOGO_FILENAME),
                     IsSupportsTips = true,
                     IsActive = false
                 }
@@ -79,30 +79,30 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
             return Ok(new MerchantMBE
             {
-                MerchantGuid = Constants.MERCHANT_1_GUID,
+                MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                 MerchantName = @"Domino's Pizza",
                 MerchantUrl = new Uri("https://www.dominos.com"),
-                LogoUrl = HttpHelpers.BuildFullURL(this.Request, Constants.MERCHANT_1_LOGO_FILENAME),
+                LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
                 IsSupportsTips = true,
                 IsActive = true,
                 DemoCustomers = new List<DemoCustomerMBE>()
                 {
                     new DemoCustomerMBE
                     {
-                        CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                        CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
                         CustomerName = @"Joe Smith",
                         CustomerPhoneNo = @"(513) 456-7890"
                     },
                     new DemoCustomerMBE
                     {
-                        CustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
+                        CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_2_GUID,
                         CustomerName = @"Jane Doe",
                         CustomerPhoneNo = @"(513) 555-1212"
                     }
@@ -135,7 +135,7 @@ namespace PayAway.WebAPI.Controllers.v0
 
             var merchant = new MerchantMBE
             {
-                MerchantGuid = Constants.MERCHANT_1_GUID,
+                MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
                 MerchantName = newMerchant.MerchantName,
                 MerchantUrl = new Uri("https://www.testmerchant.com"),
                 IsSupportsTips = newMerchant.IsSupportsTips
@@ -158,7 +158,7 @@ namespace PayAway.WebAPI.Controllers.v0
         public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             // validate the input params
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
@@ -183,7 +183,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteMerchant(Guid merchantGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
@@ -202,7 +202,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
@@ -223,7 +223,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return BadRequest($"Merchant with ID: {merchantGuid} not found");
             }
@@ -244,7 +244,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
@@ -253,13 +253,13 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 new DemoCustomerMBE
                 {
-                    CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                    CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
                     CustomerName = "Joe Smith",
                     CustomerPhoneNo = "(513) 456-7890"
                 },
                 new DemoCustomerMBE
                 {
-                    CustomerGuid = Constants.MERCHANT_1_CUSTOMER_2_GUID,
+                    CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_2_GUID,
                     CustomerName = @"Jane Doe",
                     CustomerPhoneNo = @"(513) 555-1212"
                 }
@@ -277,18 +277,18 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
+            else if (demoCustomerGuid != GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID)
             {
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
             return new DemoCustomerMBE
             {
-                CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(513) 456-7890"
             };
@@ -308,14 +308,14 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
             var customer = new DemoCustomerMBE
             {
-                CustomerGuid = Constants.MERCHANT_1_CUSTOMER_1_GUID,
+                CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
                 CustomerName = newDemoCustomer.CustomerName,
                 CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
             };
@@ -337,11 +337,11 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
+            else if (demoCustomerGuid != GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID)
             {
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
@@ -360,11 +360,11 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
-            if (merchantGuid != Constants.MERCHANT_1_GUID)
+            if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
-            else if (demoCustomerGuid != Constants.MERCHANT_1_CUSTOMER_1_GUID)
+            else if (demoCustomerGuid != GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID)
             {
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
