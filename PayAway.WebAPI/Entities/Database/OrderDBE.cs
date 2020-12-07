@@ -77,7 +77,8 @@ namespace PayAway.WebAPI.Entities.Database
                     OrderGuid = from.OrderGuid,
                     OrderStatus = from.Status,
                     PhoneNumber = from.PhoneNumber,
-                    Name = from.CustomerName
+                    Name = from.CustomerName,
+                    MaskedPAN = from.CreditCardNumber.Mask()
                 };
             }
             return to;
@@ -117,7 +118,7 @@ namespace PayAway.WebAPI.Entities.Database
                     OrderDateTimeUTC = from.OrderDateTimeUTC,
                     MerchantName = from.Merchant.MerchantName,
                     IsSupportsTips = from.Merchant.IsSupportsTips,
-                    MaskedPAN = from.CreditCardNumber
+                    MaskedPAN = from.CreditCardNumber.Mask()
                 };
             }
             return to;

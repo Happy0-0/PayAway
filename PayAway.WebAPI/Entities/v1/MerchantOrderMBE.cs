@@ -92,5 +92,11 @@ namespace PayAway.WebAPI.Entities.v1
         /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
         public decimal? OrderTotal => this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
+
+        /// <summary>
+        /// Gets or sets a masked primary account number aka credit card number
+        /// </summary>
+        [JsonPropertyName("maskedPan")]
+        public string MaskedPAN { get; set; }
     }
 }
