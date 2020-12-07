@@ -93,7 +93,6 @@ namespace PayAway.WebAPI.Controllers.v1
             // query the DB
             var dbMerchants = _dbContext.GetAllMerchants();
             
-
             // if no results from DB, return an empty list
             if (dbMerchants == null)
             {
@@ -169,11 +168,6 @@ namespace PayAway.WebAPI.Controllers.v1
             //trims merchant name so that it doesn't have trailing characters
             newMerchant.MerchantName = newMerchant.MerchantName.Trim();
 
-            // validate request data
-            if(string.IsNullOrEmpty(newMerchant.MerchantName))
-            {
-                return BadRequest(new ArgumentNullException(nameof(newMerchant.MerchantName), @"You must supply a non blank value for the Merchant Name."));
-            }
             // validate the input params
             //if (!Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute))
             //{
@@ -221,11 +215,6 @@ namespace PayAway.WebAPI.Controllers.v1
             updatedMerchant.MerchantName = updatedMerchant.MerchantName.Trim();
 
             // validate the input params
-            if (string.IsNullOrEmpty(updatedMerchant.MerchantName))
-            {
-                return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantName), @"The merchant name cannot be blank."));
-            }
-            // validate the input params
             /*if (!Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute)) 
             {
                 
@@ -267,7 +256,7 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <returns></returns>
         [HttpDelete("merchants/{merchantGuid:guid}", Name = nameof(DeleteMerchant))]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult DeleteMerchant([FromRoute] Guid merchantGuid)
         {
@@ -466,19 +455,11 @@ namespace PayAway.WebAPI.Controllers.v1
             newDemoCustomer.CustomerName = newDemoCustomer.CustomerName.Trim();
 
             // validate request data
-            if (string.IsNullOrEmpty(newDemoCustomer.CustomerName))
-            {
-                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerName), @"You must supply a non blank value for the Customer Name."));
-            }
-            else if (string.IsNullOrEmpty(newDemoCustomer.CustomerPhoneNo))
-            {
-                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), @"You must supply a non blank value for the Customer Phone No."));
-            }
-
             (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(newDemoCustomer.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
-                return BadRequest(new ArgumentNullException(nameof(newDemoCustomer.CustomerPhoneNo), $"[{newDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));
+                ModelState.AddModelError(nameof(newDemoCustomer.CustomerPhoneNo), $"[{newDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format.");
+                return BadRequest(ModelState);
             }
 
             //query the db for the merchant
@@ -546,11 +527,6 @@ namespace PayAway.WebAPI.Controllers.v1
             updatedDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName.Trim();
 
             // validate the input params
-            if (string.IsNullOrEmpty(updatedDemoCustomer.CustomerName))
-            {
-                return BadRequest(new ArgumentException(nameof(updatedDemoCustomer.CustomerName), @"The customer name cannot be blank."));
-            }
-
             (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(updatedDemoCustomer.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {

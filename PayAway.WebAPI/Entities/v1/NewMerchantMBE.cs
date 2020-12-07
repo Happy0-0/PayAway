@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace PayAway.WebAPI.Entities.v1
@@ -13,6 +14,7 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The merchants name</value>
         [JsonPropertyName("merchantName")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "A non blank Merchant Name is required.")]
         public string MerchantName { get; set; }
 
         /// <summary>
@@ -26,6 +28,11 @@ namespace PayAway.WebAPI.Entities.v1
         /// Gets or sets the merchant Url
         /// </summary>
         /// <value>the merchant url</value>
+        /// <remarks>
+        /// We cannot add this validation until the the UI tier adds this field
+        /// </remarks>
+        //[Required]
+        //[Url(ErrorMessage = "You must supply a valid URL to a page on the merhant's web site")]
         public Uri MerchantUrl { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace PayAway.WebAPI.Entities.v1
 {
@@ -13,6 +14,7 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <remarks>the customer name</remarks>
         [JsonPropertyName("customerName")]
+        [Required(AllowEmptyStrings = false, ErrorMessage = "A non blank Demo Customer Name is required.")]
         public string CustomerName { get; set; }
 
         /// <summary>
@@ -20,6 +22,7 @@ namespace PayAway.WebAPI.Entities.v1
         /// </summary>
         /// <value>The customer phone number</value>
         [JsonPropertyName("customerPhoneNo")]
+        [PhoneAttribute(ErrorMessage = "A valid phone number for the demo customer is required.")]
         public string CustomerPhoneNo { get; set; }
 
     }
