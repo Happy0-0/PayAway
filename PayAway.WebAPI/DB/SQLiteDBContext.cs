@@ -290,7 +290,8 @@ namespace PayAway.WebAPI.DB
         {
             var dbMerchantAndDemoCustomers = this.Merchants
                                                     .Include(m => m.DemoCustomers)
-                                                    .FirstOrDefault(m => m.MerchantGuid == merchantGuid);
+                                                    .Where(m => m.MerchantGuid == merchantGuid)
+                                                    .FirstOrDefault();
 
             return dbMerchantAndDemoCustomers;
         }
@@ -447,7 +448,8 @@ namespace PayAway.WebAPI.DB
         /// <returns>List&lt;CustomerDBE&gt;.</returns>
         internal List<DemoCustomerDBE> GetDemoCustomers(int merchantId)
         {
-            var dbDemoCustomers = this.DemoCustomers.Where(m => m.MerchantId == merchantId).ToList();
+            var dbDemoCustomers = this.DemoCustomers
+                                        .Where(m => m.MerchantId == merchantId).ToList();
 
             return dbDemoCustomers;
         }
@@ -490,7 +492,7 @@ namespace PayAway.WebAPI.DB
         /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
         internal bool DeleteDemoCustomer(int demoCustomerId)
         {
-            var currentDemoCustomer = this.DemoCustomers.FirstOrDefault(c => c.DemoCustomerId == demoCustomerId);
+            var currentDemoCustomer = this.DemoCustomers.SingleOrDefault(c => c.DemoCustomerId == demoCustomerId);
 
             if (currentDemoCustomer != null)
             {
@@ -517,7 +519,7 @@ namespace PayAway.WebAPI.DB
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var currentCustomer = this.DemoCustomers.FirstOrDefault(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
+            var currentCustomer = this.DemoCustomers.SingleOrDefault(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
 
             if (currentCustomer != null)
             {
@@ -574,7 +576,7 @@ namespace PayAway.WebAPI.DB
         /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
         internal CatalogItemDBE GetCatalogItem(Guid catalogItemGuid)
         {
-            var dbCatalogItem = this.CatalogItems.FirstOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
+            var dbCatalogItem = this.CatalogItems.SingleOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
 
             return dbCatalogItem;
         }
@@ -618,7 +620,7 @@ namespace PayAway.WebAPI.DB
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
         internal bool DeleteCatalogItem(int catalogItemId)
         {
-            var currentCatalogItem = this.CatalogItems.FirstOrDefault(ci => ci.CatalogItemId == catalogItemId);
+            var currentCatalogItem = this.CatalogItems.SingleOrDefault(ci => ci.CatalogItemId == catalogItemId);
 
             if (currentCatalogItem != null)
             {
@@ -659,7 +661,7 @@ namespace PayAway.WebAPI.DB
         /// <returns>a specific order</returns>
         internal OrderDBE GetOrder(Guid orderGuid)
         {
-            var dbOrder = this.Orders.FirstOrDefault(o => o.OrderGuid == orderGuid);
+            var dbOrder = this.Orders.SingleOrDefault(o => o.OrderGuid == orderGuid);
 
             return dbOrder;
         }
@@ -686,24 +688,14 @@ namespace PayAway.WebAPI.DB
         /// <returns>a specific order</returns>
         internal OrderDBE GetOrderExploded(Guid orderGuid)
         {
-
             var dbOrder = this.Orders
                                 .Include(o => o.Merchant)
-                                .Include(o => o.OrderEvents)
+                                .Include(o => o.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC))
                                 .Include(o => o.OrderLineItems)
-                                .FirstOrDefault(o => o.OrderGuid == orderGuid);
-
-            if (dbOrder == null)
-            {
-                return null;
-            }
-
-            // sort the order events descending by d/t in memory
-            dbOrder.OrderEvents = dbOrder.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC).ToList();
+                                .Where(o => o.OrderGuid == orderGuid)
+                                .SingleOrDefault();
 
             return dbOrder;
-            
-
         }
 
         /// <summary>
@@ -744,7 +736,7 @@ namespace PayAway.WebAPI.DB
         /// <returns></returns>
         internal bool DeleteOrder(int orderID)
         {
-            var currentOrder = this.Orders.FirstOrDefault(o => o.OrderId == orderID);
+            var currentOrder = this.Orders.SingleOrDefault(o => o.OrderId == orderID);
 
             if (currentOrder != null)
             {
@@ -771,7 +763,7 @@ namespace PayAway.WebAPI.DB
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var currentOrder = this.Orders.AsNoTracking().FirstOrDefault(o => o.OrderGuid == dbOrder.OrderGuid);
+            var currentOrder = this.Orders.AsNoTracking().SingleOrDefault(o => o.OrderGuid == dbOrder.OrderGuid);
 
             if (currentOrder == null)
             {
