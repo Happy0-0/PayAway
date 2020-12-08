@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +44,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
+        public async Task<ActionResult<IEnumerable<MerchantMBE>>> GetAllMerchants()
         {
             return Ok(new List<MerchantMBE>
             {

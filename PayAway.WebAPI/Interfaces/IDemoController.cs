@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using PayAway.WebAPI.Entities.v1;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+using PayAway.WebAPI.Entities.v1;
 
 namespace PayAway.WebAPI.Interfaces
 {
@@ -10,7 +13,7 @@ namespace PayAway.WebAPI.Interfaces
     {
         ActionResult ResetDatabase(bool isPreloadEnabled);
 
-        ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants();
+        Task<ActionResult<IEnumerable<MerchantMBE>>> GetAllMerchants();
 
         ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid);
 

@@ -88,10 +88,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpGet("merchants", Name = nameof(GetAllMerchants))]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<IEnumerable<MerchantMBE>> GetAllMerchants()
+        public async Task<ActionResult<IEnumerable<MerchantMBE>>> GetAllMerchants()
         {
             // query the DB
-            var dbMerchants = _dbContext.GetAllMerchants();
+            var dbMerchants = await _dbContext.GetAllMerchantsAsync();
             
             // if no results from DB, return an empty list
             if (dbMerchants == null)

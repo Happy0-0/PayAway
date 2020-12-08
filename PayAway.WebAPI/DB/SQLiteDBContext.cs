@@ -167,7 +167,7 @@ namespace PayAway.WebAPI.DB
         /// Resets the database.
         /// </summary>
         /// <param name="isPreloadEnabled">The is preload enabled.</param>
-        public void ResetDB(bool isPreloadEnabled)
+        public async void ResetDB(bool isPreloadEnabled)
         {
             // Step 1: Purge the exisiting Merchants all dependant items
             //         1.1     DemoCustomers
@@ -176,7 +176,7 @@ namespace PayAway.WebAPI.DB
             //         1.4     Orders
             //         1.5     CatalogItems
             //         1.6     Merchant
-            var existingMerchants = this.GetAllMerchants();
+            var existingMerchants = await this.GetAllMerchantsAsync();
             
             foreach (var existingMerchant in existingMerchants)
             {
@@ -263,9 +263,9 @@ namespace PayAway.WebAPI.DB
         /// Gets the merchants.
         /// </summary>
         /// <returns>List&lt;MerchantDBE&gt;.</returns>
-        internal List<MerchantDBE> GetAllMerchants()
+        internal async Task<List<MerchantDBE>> GetAllMerchantsAsync()
         {
-            return this.Merchants.ToList();
+            return await this.Merchants.ToListAsync();
         }
 
         /// <summary>
@@ -405,10 +405,11 @@ namespace PayAway.WebAPI.DB
         /// Sets the active merchant for demo.
         /// </summary>
         /// <param name="merchantToMakeActive">The merchant to make active.</param>
-        internal void SetActiveMerchantForDemo(MerchantDBE merchantToMakeActive)
+        internal async void SetActiveMerchantForDemo(MerchantDBE merchantToMakeActive)
         {
             //gets all merchants who are already active (logically should only be 0 or 1)
-            var merchantsToChange = this.GetAllMerchants().Where(am => am.IsActive).ToList();
+            var allMerchants = await this.GetAllMerchantsAsync();
+            var merchantsToChange = allMerchants.Where(am => am.IsActive).ToList();
 
             //set other active merchant to inactive
             foreach (var merchant in merchantsToChange)
