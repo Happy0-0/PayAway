@@ -51,10 +51,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerOrderMBE> GetCustomerOrder(Guid orderGuid)
+        public async Task<ActionResult<CustomerOrderMBE>> GetCustomerOrder(Guid orderGuid)
         {
             //query the db
-            var dbCustomerOrder = _dbContext.GetOrderExploded(orderGuid);
+            var dbCustomerOrder = await _dbContext.GetOrderExplodedAsync(orderGuid);
 
             //if we do not find a matching order
             if (dbCustomerOrder == null)
@@ -77,10 +77,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SubmitOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
+        public async Task<ActionResult> SubmitOrderPayment([FromRoute] Guid orderGuid, [FromBody] PaymentInfoMBE paymentInfo)
         {
             //query the db
-            var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
+            var dbOrderExploded = await _dbContext.GetOrderExplodedAsync(orderGuid);
 
             #region === Validation =====================
             //Biz Logic: check to see if the order guid is correct
@@ -154,10 +154,11 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbOrderExploded.ExpMonth = paymentInfo.ExpMonth;
                 dbOrderExploded.ExpYear = paymentInfo.ExpYear;
                 dbOrderExploded.AuthCode = CardNetworkHelper.GenerateAuthCode();
+                dbOrderExploded.TipAmount = paymentInfo.TipAmount?? 0.9M;
 
                 //update order
                 dbOrderExploded.Status = Enums.ORDER_STATUS.Paid;
-                _dbContext.UpdateOrder(dbOrderExploded);
+                await _dbContext.UpdateOrderAsync(dbOrderExploded);
 
                 //Write the order payment event
                 var dbOrderEvent = new OrderEventDBE()
@@ -169,10 +170,10 @@ namespace PayAway.WebAPI.Controllers.v1
                 };
 
                 //save order event
-                _dbContext.InsertOrderEvent(dbOrderEvent);
+                await _dbContext.InsertOrderEventAsync(dbOrderEvent);
 
                 // send notification to all connected clients
-                _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
+                await _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
                 return NoContent();
             }

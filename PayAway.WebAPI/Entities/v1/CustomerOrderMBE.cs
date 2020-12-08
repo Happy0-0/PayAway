@@ -26,6 +26,13 @@ namespace PayAway.WebAPI.Entities.v1
         public Guid OrderGuid { get; init; }
 
         /// <summary>
+        /// Gets or sets order status
+        /// </summary>
+        /// <value>order status</value>
+        [JsonPropertyName("status")]
+        public Enums.ORDER_STATUS OrderStatus { get; set; }
+
+        /// <summary>
         /// Gets or sets the order date
         /// </summary>
         /// <value>order date</value>
@@ -36,8 +43,22 @@ namespace PayAway.WebAPI.Entities.v1
         /// Gets or sets the order total
         /// </summary>
         /// <value>order total</value>
+        [JsonPropertyName("orderSubTotal")]
+        public decimal OrderSubTotal { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tip amount.
+        /// </summary>
+        /// <value>The tip amount.</value>
+        [JsonPropertyName("tipAmount")]
+        public decimal TipAmount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the order total
+        /// </summary> 
+        /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
-        public decimal OrderTotal { get; set; }
+        public decimal OrderTotal => this.OrderSubTotal + this.TipAmount;
 
         /// <summary>
         /// Gets or sets the merchant name
@@ -87,9 +108,16 @@ namespace PayAway.WebAPI.Entities.v1
         public string MaskedPAN { get; set; }
 
         /// <summary>
+        /// Gets or sets the authortization code.
+        /// </summary>
+        /// <value>The authortization code.</value>
+        [JsonPropertyName("authCode")]
+        public string AuthortizationCode { get; set; }
+
+        /// <summary>
         /// Gets or set whether or not payment is available.
         /// </summary>
         [JsonPropertyName("isPaymentAvailable")]
-        public bool IsPaymentAvailable { get; set; }   
+        public bool IsPaymentAvailable => this.OrderStatus != Enums.ORDER_STATUS.Paid;
     }
 }

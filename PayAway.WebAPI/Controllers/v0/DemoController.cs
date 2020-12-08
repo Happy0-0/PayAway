@@ -29,7 +29,7 @@ namespace PayAway.WebAPI.Controllers.v0
         /// <param name="isPreloadEnabled">Optionally preloads sample data</param>
         [HttpPost("reset")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase(bool isPreloadEnabled)
+        public async Task<ActionResult> ResetDatabase(bool isPreloadEnabled)
         {
             return NoContent();
         }
@@ -79,7 +79,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant(Guid merchantGuid)
+        public async Task<ActionResult<MerchantMBE>> GetMerchant(Guid merchantGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -121,7 +121,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
+        public async Task<ActionResult<MerchantMBE>> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
             // validate request data
             if (string.IsNullOrEmpty(newMerchant.MerchantName))
@@ -157,7 +157,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
+        public async Task<ActionResult> UpdateMerchant(Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             // validate the input params
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
@@ -183,7 +183,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(NewMerchantMBE), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteMerchant(Guid merchantGuid)
+        public async Task<ActionResult> DeleteMerchant(Guid merchantGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -202,7 +202,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult SetActiveMerchantForDemo(Guid merchantGuid)
+        public async Task<ActionResult> SetActiveMerchantForDemo(Guid merchantGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -223,7 +223,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<string> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
+        public async Task<ActionResult<string>> UploadLogoImage(Guid merchantGuid, IFormFile formFile)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -244,7 +244,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants/{merchantGuid:guid}/customers")]
         [ProducesResponseType(typeof(List<DemoCustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers(Guid merchantGuid)
+        public async Task<ActionResult<IEnumerable<DemoCustomerMBE>>> GetDemoCustomers(Guid merchantGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -277,7 +277,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("merchants/{merchantGuid:guid}/customers/{demoCustomerGuid:guid}")]
         [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<DemoCustomerMBE> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
+        public async Task<ActionResult<DemoCustomerMBE>> GetDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -308,7 +308,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<DemoCustomerMBE> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
+        public async Task<ActionResult<DemoCustomerMBE>> AddDemoCustomer(Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -337,7 +337,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
+        public async Task<ActionResult> UpdateDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {
@@ -360,7 +360,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
+        public async Task<ActionResult> DeleteDemoCustomer(Guid merchantGuid, Guid demoCustomerGuid)
         {
             if (merchantGuid != GeneralConstants.MERCHANT_1_GUID)
             {

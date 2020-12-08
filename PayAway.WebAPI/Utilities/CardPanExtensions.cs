@@ -96,6 +96,8 @@ namespace PayAway.WebAPI.Utilities
         /// <returns>System.String.</returns>
         public static string Mask(this string input)
         {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+
             string first6 = input.GetFirst(6);
             string last4 = input.GetLast(4);
 

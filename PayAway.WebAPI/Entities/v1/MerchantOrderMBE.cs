@@ -90,13 +90,30 @@ namespace PayAway.WebAPI.Entities.v1
         /// Gets or sets the order total
         /// </summary> 
         /// <value>order total</value>
+        [JsonPropertyName("orderSubTotal")]
+        public decimal? OrderSubTotal => this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
+
+        [JsonPropertyName("tipAmount")]
+        public decimal? TipAmount { get; set; }
+
+        /// <summary>
+        /// Gets or sets the order total
+        /// </summary> 
+        /// <value>order total</value>
         [JsonPropertyName("orderTotal")]
-        public decimal? OrderTotal => this.OrderLineItems?.Sum(oli => oli.ItemUnitPrice);
+        public decimal? OrderTotal => (this.OrderSubTotal ?? 0.0M) + this.TipAmount;
 
         /// <summary>
         /// Gets or sets a masked primary account number aka credit card number
         /// </summary>
         [JsonPropertyName("maskedPan")]
         public string MaskedPAN { get; set; }
+
+        /// <summary>
+        /// Gets or sets the authortization code.
+        /// </summary>
+        /// <value>The authortization code.</value>
+        [JsonPropertyName("authCode")]
+        public string AuthortizationCode { get; set; }
     }
 }

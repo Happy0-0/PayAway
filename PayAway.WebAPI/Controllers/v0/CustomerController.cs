@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -11,8 +14,8 @@ using PayAway.WebAPI.PushNotifications;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Entities.Config;
+
 using PhoneNumbers;
-using System.Linq;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -46,24 +49,27 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(CustomerOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<CustomerOrderMBE> GetCustomerOrder([FromRoute] Guid orderGuid)
+        public async Task<ActionResult<CustomerOrderMBE>> GetCustomerOrder([FromRoute] Guid orderGuid)
         {
             if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Customer order: [{orderGuid}] not found");
             }
 
+            await Task.Delay(100);
+
             return Ok(new CustomerOrderMBE
             {
                 OrderGuid = orderGuid,
+                OrderId = 99,
+                OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
                 MerchantName = @"Domino's Pizza",
                 IsSupportsTips = true,
                 LogoUrl = HttpHelpers.BuildFullURL(this.Request, GeneralConstants.MERCHANT_1_LOGO_FILENAME),
                 CustomerName = "Joe Smith",
                 CustomerPhoneNo = "(666) 666-6666",
-                OrderTotal = 15.46M,
-                OrderDateTimeUTC = DateTime.UtcNow,
-                IsPaymentAvailable = true
+                OrderSubTotal = 15.46M,
+                OrderDateTimeUTC = DateTime.UtcNow
             });
         }
 
@@ -77,7 +83,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SubmitOrderPayment([FromRoute] Guid orderGuid, PaymentInfoMBE paymentInfo)
+        public async Task<ActionResult> SubmitOrderPayment([FromRoute] Guid orderGuid, PaymentInfoMBE paymentInfo)
         {
             #region === Validation =====================
             if (orderGuid != GeneralConstants.ORDER_1_GUID)
@@ -125,7 +131,7 @@ namespace PayAway.WebAPI.Controllers.v0
             }
             #endregion
 
-            _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
+            await _messageHub.Clients.All.SendAsync("ReceiveMessage", "Server", $"Order: [{orderGuid}] updated");
 
             return NoContent();
         }

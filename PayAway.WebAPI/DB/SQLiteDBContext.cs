@@ -167,7 +167,7 @@ namespace PayAway.WebAPI.DB
         /// Resets the database.
         /// </summary>
         /// <param name="isPreloadEnabled">The is preload enabled.</param>
-        public async void ResetDB(bool isPreloadEnabled)
+        public async Task ResetDBAsync(bool isPreloadEnabled)
         {
             // Step 1: Purge the exisiting Merchants all dependant items
             //         1.1     DemoCustomers
@@ -180,7 +180,7 @@ namespace PayAway.WebAPI.DB
             
             foreach (var existingMerchant in existingMerchants)
             {
-                this.DeleteMerchant(existingMerchant.MerchantId);
+                await this.DeleteMerchantAsync(existingMerchant.MerchantId);
                 // this deletes via cascading delete
                 //  === Step 1.1: Demo Customers ======================================
                 //  === Step 1.2: OrderEvents ======================================
@@ -189,11 +189,11 @@ namespace PayAway.WebAPI.DB
             }
 
             // delete "default" catalog items under MerchantId 0
-            var existingCatalogItems = this.GetCatalogItems(0);
+            var existingCatalogItems = await this.GetCatalogItemsAsync(0);
 
             foreach (var existingCatalogItem in existingCatalogItems)
             {
-                this.DeleteCatalogItem(existingCatalogItem.CatalogItemId);
+                await this.DeleteCatalogItemAsync(existingCatalogItem.CatalogItemId);
             }
 
             // Step 2:Optionally reload the seed data
@@ -208,7 +208,7 @@ namespace PayAway.WebAPI.DB
             var seedCatalogItems = SeedData.GetSeedCatalogueItems();
             foreach (var seedCatalogItem in seedCatalogItems)
             {
-                this.InsertCatalogItem(seedCatalogItem);
+                await this.InsertCatalogItemAsync(seedCatalogItem);
             }
             #endregion
 
@@ -218,7 +218,7 @@ namespace PayAway.WebAPI.DB
                 var seedMerchants = SeedData.GetSeedMerchants();
                 foreach (var seedMerchant in seedMerchants)
                 {
-                    this.InsertMerchant(seedMerchant);
+                    await this.InsertMerchantAsync(seedMerchant);
                 }
                 #endregion
 
@@ -226,7 +226,7 @@ namespace PayAway.WebAPI.DB
                 var seedDemoCustomers = SeedData.GetSeedDemoCustomers();
                 foreach(var seedDemoCustomer in seedDemoCustomers)
                 {
-                    this.InsertDemoCustomer(seedDemoCustomer);
+                    await this.InsertDemoCustomerAsync(seedDemoCustomer);
                 }
                 #endregion                
 
@@ -234,7 +234,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrders = SeedData.GetSeedOrders();
                 foreach(var seedOrder in seedOrders)
                 {
-                    this.InsertOrder(seedOrder);
+                    await this.InsertOrderAsync(seedOrder);
                 }
                 #endregion
 
@@ -242,7 +242,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrderEvents = SeedData.GetOrderEvents();
                 foreach(var seedOrderEvent in seedOrderEvents)
                 {
-                    this.InsertOrderEvent(seedOrderEvent);
+                    await this.InsertOrderEventAsync(seedOrderEvent);
                 }
                 #endregion
 
@@ -250,7 +250,7 @@ namespace PayAway.WebAPI.DB
                 var seedOrderLineItems = SeedData.GetOrderLineItems();
                 foreach(var seedOrderLineItem in seedOrderLineItems)
                 {
-                    this.InsertOrderLineItem(seedOrderLineItem);
+                    await this.InsertOrderLineItemAsync(seedOrderLineItem);
                 }
                 #endregion
             }
@@ -273,9 +273,9 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantGuid">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
-        internal MerchantDBE GetMerchant(Guid merchantGuid)
+        internal async Task<MerchantDBE> GetMerchantAsync(Guid merchantGuid)
         {
-            var dbMerchant = this.Merchants.FirstOrDefault(m => m.MerchantGuid == merchantGuid);
+            var dbMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantGuid == merchantGuid);
 
             return dbMerchant;
         }
@@ -286,12 +286,12 @@ namespace PayAway.WebAPI.DB
         /// <param name="merchantGuid">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
         /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
-        internal MerchantDBE GetMerchantAndDemoCustomers(Guid merchantGuid)
+        internal async Task<MerchantDBE> GetMerchantAndDemoCustomersAsync(Guid merchantGuid)
         {
-            var dbMerchantAndDemoCustomers = this.Merchants
+            var dbMerchantAndDemoCustomers = await this.Merchants
                                                     .Include(m => m.DemoCustomers)
                                                     .Where(m => m.MerchantGuid == merchantGuid)
-                                                    .FirstOrDefault();
+                                                    .FirstOrDefaultAsync();
 
             return dbMerchantAndDemoCustomers;
         }
@@ -301,9 +301,9 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>MerchantDBE.</returns>
-        internal MerchantDBE GetMerchant(int merchantId)
+        internal async Task<MerchantDBE> GetMerchantAsync(int merchantId)
         {
-            var dbMerchant = this.Merchants.FirstOrDefault(m => m.MerchantId == merchantId);
+            var dbMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantId == merchantId);
 
             return dbMerchant;
         }
@@ -316,13 +316,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal void InsertMerchant(MerchantDBE newMerchant)
+        internal async Task InsertMerchantAsync(MerchantDBE newMerchant)
         {
             this.Merchants.Add(newMerchant);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -343,14 +343,14 @@ namespace PayAway.WebAPI.DB
         /// Deletes the merchant.
         /// </summary>
         /// <param name="merchantID">The merchant unique identifier.</param>
-        internal bool DeleteMerchant(int merchantID)
+        internal async Task<bool> DeleteMerchantAsync(int merchantID)
         {
-            var currentMerchant = this.Merchants.FirstOrDefault(m => m.MerchantId == merchantID);
+            var currentMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantId == merchantID);
 
             if (currentMerchant != null)
             {
                 this.Merchants.Remove(currentMerchant);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
 
                 return true;
             }
@@ -366,14 +366,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchant">The merchant.</param>
         /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
-        internal void UpdateMerchant(MerchantDBE merchant)
+        internal async Task UpdateMerchantAsync(MerchantDBE merchant)
         {
             // turn off change tracking since we are going to overwite the entity
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
             // try and find the existing merchant
-            var currentMerchant = this.Merchants.FirstOrDefault(m => m.MerchantGuid == merchant.MerchantGuid);
+            var currentMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantGuid == merchant.MerchantGuid);
 
             if (currentMerchant == null)
             {
@@ -384,7 +384,7 @@ namespace PayAway.WebAPI.DB
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -405,7 +405,7 @@ namespace PayAway.WebAPI.DB
         /// Sets the active merchant for demo.
         /// </summary>
         /// <param name="merchantToMakeActive">The merchant to make active.</param>
-        internal async void SetActiveMerchantForDemo(MerchantDBE merchantToMakeActive)
+        internal async Task SetActiveMerchantForDemoAsync(MerchantDBE merchantToMakeActive)
         {
             //gets all merchants who are already active (logically should only be 0 or 1)
             var allMerchants = await this.GetAllMerchantsAsync();
@@ -415,24 +415,24 @@ namespace PayAway.WebAPI.DB
             foreach (var merchant in merchantsToChange)
             {
                 merchant.IsActive = false;
-                this.UpdateMerchant(merchant);
+                await this.UpdateMerchantAsync(merchant);
             }
 
             //set merchant to active
             merchantToMakeActive.IsActive = true;
 
             //update merchant in the db
-            this.UpdateMerchant(merchantToMakeActive);
+            await this.UpdateMerchantAsync(merchantToMakeActive);
         }
 
         /// <summary>
         /// Gets active merchant
         /// </summary>
         /// <returns>active merchant</returns>
-        internal MerchantDBE GetActiveMerchant()
+        internal async Task<MerchantDBE> GetActiveMerchantAsync()
         {
             //query the db to get active merchant
-            var activeMerchant = this.Merchants.Where(m => m.IsActive).FirstOrDefault();
+            var activeMerchant = await this.Merchants.Where(m => m.IsActive).FirstOrDefaultAsync();
 
             return activeMerchant;
         }
@@ -447,10 +447,10 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>List&lt;CustomerDBE&gt;.</returns>
-        internal List<DemoCustomerDBE> GetDemoCustomers(int merchantId)
+        internal async Task<List<DemoCustomerDBE>> GetDemoCustomersAsync(int merchantId)
         {
-            var dbDemoCustomers = this.DemoCustomers
-                                        .Where(m => m.MerchantId == merchantId).ToList();
+            var dbDemoCustomers = await this.DemoCustomers
+                                            .Where(m => m.MerchantId == merchantId).ToListAsync();
 
             return dbDemoCustomers;
         }
@@ -463,13 +463,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal void InsertDemoCustomer( DemoCustomerDBE newDemoCustomer)
+        internal async Task InsertDemoCustomerAsync( DemoCustomerDBE newDemoCustomer)
         {
             this.DemoCustomers.Add(newDemoCustomer);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -491,14 +491,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="demoCustomerId">The customer identifier.</param>
         /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
-        internal bool DeleteDemoCustomer(int demoCustomerId)
+        internal async Task<bool> DeleteDemoCustomerAsync(int demoCustomerId)
         {
-            var currentDemoCustomer = this.DemoCustomers.SingleOrDefault(c => c.DemoCustomerId == demoCustomerId);
+            var currentDemoCustomer = await this.DemoCustomers.SingleOrDefaultAsync(c => c.DemoCustomerId == demoCustomerId);
 
             if (currentDemoCustomer != null)
             {
                 this.DemoCustomers.Remove(currentDemoCustomer);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
 
                 return true;
             }
@@ -514,13 +514,13 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="demoCustomer">object containing information about customers</param>
         /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
-        public void UpdateDemoCustomer(DemoCustomerDBE demoCustomer)
+        public async Task UpdateDemoCustomerAsync(DemoCustomerDBE demoCustomer)
         {
             // turn off change tracking since we are going to overwite the entity
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var currentCustomer = this.DemoCustomers.SingleOrDefault(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
+            var currentCustomer = await this.DemoCustomers.SingleOrDefaultAsync(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
 
             if (currentCustomer != null)
             {
@@ -528,7 +528,7 @@ namespace PayAway.WebAPI.DB
 
                 try
                 {
-                    this.SaveChanges();
+                    await this.SaveChangesAsync();
                 }
                 catch (DbUpdateException ex)
                 {
@@ -560,12 +560,12 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
-        internal  List<CatalogItemDBE> GetCatalogItems(int merchantId)
+        internal  async Task<List<CatalogItemDBE>> GetCatalogItemsAsync(int merchantId)
         {
-            var dbCatalogItems = this.CatalogItems
+            var dbCatalogItems = await this.CatalogItems
                                             .Where(ci => ci.MerchantId == merchantId)
                                             .OrderBy(ci => ci.CatalogItemId)
-                                            .ToList();
+                                            .ToListAsync();
 
             return dbCatalogItems;
         }
@@ -575,9 +575,9 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="catalogItemGuid">The unique catalog item identifier.</param>
         /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
-        internal CatalogItemDBE GetCatalogItem(Guid catalogItemGuid)
+        internal async Task<CatalogItemDBE> GetCatalogItemAsync(Guid catalogItemGuid)
         {
-            var dbCatalogItem = this.CatalogItems.SingleOrDefault(ci => ci.CatalogItemGuid == catalogItemGuid);
+            var dbCatalogItem = await this.CatalogItems.SingleOrDefaultAsync(ci => ci.CatalogItemGuid == catalogItemGuid);
 
             return dbCatalogItem;
         }
@@ -590,13 +590,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        private void InsertCatalogItem(CatalogItemDBE newCatalogItem)
+        private async Task InsertCatalogItemAsync(CatalogItemDBE newCatalogItem)
         {
             this.CatalogItems.Add(newCatalogItem);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -619,14 +619,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="catalogItemId">The catalog item identifier.</param>
         /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
-        internal bool DeleteCatalogItem(int catalogItemId)
+        internal async Task<bool> DeleteCatalogItemAsync(int catalogItemId)
         {
-            var currentCatalogItem = this.CatalogItems.SingleOrDefault(ci => ci.CatalogItemId == catalogItemId);
+            var currentCatalogItem = await this.CatalogItems.SingleOrDefaultAsync(ci => ci.CatalogItemId == catalogItemId);
 
             if (currentCatalogItem != null)
             {
                 this.CatalogItems.Remove(currentCatalogItem);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
 
                 return true;
             }
@@ -645,12 +645,12 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchantId">Merchant Unique Indentifier.</param>
         /// <returns>List of orders</returns>
-        internal List<OrderDBE> GetOrders(int merchantId)
+        internal async Task<List<OrderDBE>> GetOrdersAsync(int merchantId)
         {
-            var dbOrders = this.Orders
+            var dbOrders = await this.Orders
                                     .Where(o => o.MerchantId == merchantId)
                                     .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
-                                    .ToList();
+                                    .ToListAsync();
 
             return dbOrders;
         }
@@ -660,9 +660,9 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderGuid">order Unique Indentifier.</param>
         /// <returns>a specific order</returns>
-        internal OrderDBE GetOrder(Guid orderGuid)
+        internal async Task<OrderDBE> GetOrderAsync(Guid orderGuid)
         {
-            var dbOrder = this.Orders.SingleOrDefault(o => o.OrderGuid == orderGuid);
+            var dbOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderGuid == orderGuid);
 
             return dbOrder;
         }
@@ -672,12 +672,12 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="refOrderId">The reference order identifier.</param>
         /// <returns>List&lt;OrderDBE&gt;.</returns>
-        internal List<OrderDBE> GetOrdersViaRefOrderId(int refOrderId)
+        internal async Task<List<OrderDBE>> GetOrdersViaRefOrderIdAsync(int refOrderId)
         {
-            var dbOrders = this.Orders
+            var dbOrders = await this.Orders
                                     .Where(o => o.RefOrderId == refOrderId)
                                     .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
-                                    .ToList();
+                                    .ToListAsync();
 
             return dbOrders;
         }
@@ -687,14 +687,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderGuid">order Unique Indentifier.</param>
         /// <returns>a specific order</returns>
-        internal OrderDBE GetOrderExploded(Guid orderGuid)
+        internal async Task<OrderDBE> GetOrderExplodedAsync(Guid orderGuid)
         {
-            var dbOrder = this.Orders
-                                .Include(o => o.Merchant)
-                                .Include(o => o.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC))
-                                .Include(o => o.OrderLineItems)
-                                .Where(o => o.OrderGuid == orderGuid)
-                                .SingleOrDefault();
+            var dbOrder = await this.Orders
+                                        .Include(o => o.Merchant)
+                                        .Include(o => o.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC))
+                                        .Include(o => o.OrderLineItems)
+                                        .Where(o => o.OrderGuid == orderGuid)
+                                        .SingleOrDefaultAsync();
 
             return dbOrder;
         }
@@ -707,13 +707,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal void InsertOrder(OrderDBE newOrder)
+        internal async Task InsertOrderAsync(OrderDBE newOrder)
         {
             this.Orders.Add(newOrder);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -735,14 +735,14 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="orderID">Identifier for order</param>
         /// <returns></returns>
-        internal bool DeleteOrder(int orderID)
+        internal async Task<bool> DeleteOrderAsync(int orderID)
         {
-            var currentOrder = this.Orders.SingleOrDefault(o => o.OrderId == orderID);
+            var currentOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderId == orderID);
 
             if (currentOrder != null)
             {
                 this.Orders.Remove(currentOrder);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
 
                 return true;
             }
@@ -758,13 +758,13 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="dbOrder">The order</param>
         /// <exception cref="ApplicationException">Order: [{order.OrderGuid}] is not valid</exception>
-        internal void UpdateOrder(OrderDBE dbOrder)
+        internal async Task UpdateOrderAsync(OrderDBE dbOrder)
         {
             // turn off change tracking since we are going to overwite the entity
             // Note: I would not do this if there was a db assigned unique id for the record
             this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
-            var currentOrder = this.Orders.AsNoTracking().SingleOrDefault(o => o.OrderGuid == dbOrder.OrderGuid);
+            var currentOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderGuid == dbOrder.OrderGuid);
 
             if (currentOrder == null)
             {
@@ -775,7 +775,7 @@ namespace PayAway.WebAPI.DB
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -804,13 +804,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal void InsertOrderEvent(OrderEventDBE newOrderEvent)
+        internal async Task InsertOrderEventAsync(OrderEventDBE newOrderEvent)
         {
             this.OrderEvents.Add(newOrderEvent);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -839,13 +839,13 @@ namespace PayAway.WebAPI.DB
         /// <remarks>
         /// only used by the ResetDB method so we can keep the same guids across reloads.
         /// </remarks>
-        internal void InsertOrderLineItem(OrderLineItemDBE newLineItem)
+        internal async Task InsertOrderLineItemAsync(OrderLineItemDBE newLineItem)
         {
             this.OrderLineItems.Add(newLineItem);
 
             try
             {
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
             {
@@ -866,14 +866,14 @@ namespace PayAway.WebAPI.DB
         /// Delete Order line items
         /// </summary>
         /// <param name="orderId"></param>
-        internal void DeleteOrderLineItems(int orderId)
+        internal async Task DeleteOrderLineItemsAsync(int orderId)
         {
             var orderLineItems = this.OrderLineItems.Where(a => a.OrderId == orderId);
 
             foreach(var orderLineItem in orderLineItems)
             {
                 this.Remove(orderLineItem);
-                this.SaveChanges();
+                await this.SaveChangesAsync();
             }
                 
         }

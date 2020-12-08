@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,8 +28,10 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet()]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ActiveMerchantMBE), StatusCodes.Status200OK)]
-        public ActionResult<ActiveMerchantMBE> GetActiveMerchant()
+        public async Task<ActionResult<ActiveMerchantMBE>> GetActiveMerchant()
         {
+            await Task.Delay(100);
+
             return Ok(new ActiveMerchantMBE
             {
                 MerchantGuid = GeneralConstants.MERCHANT_1_GUID,
@@ -64,8 +68,10 @@ namespace PayAway.WebAPI.Controllers.v0
         [HttpGet("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderQueueMBE), StatusCodes.Status200OK)]
-        public ActionResult<OrderQueueMBE> GetOrderQueue()
+        public async Task<ActionResult<OrderQueueMBE>> GetOrderQueue()
         {
+            await Task.Delay(100);
+
             return Ok(new List<OrderHeaderMBE>()
                 {
                     new OrderHeaderMBE
@@ -100,12 +106,14 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> GetOrder(Guid orderGuid)
+        public async Task<ActionResult<MerchantOrderMBE>> GetOrder(Guid orderGuid)
         {
             if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order: [{orderGuid}] not found");
             }
+
+            await Task.Delay(100);
 
             return Ok(new MerchantOrderMBE
             {
@@ -159,7 +167,7 @@ namespace PayAway.WebAPI.Controllers.v0
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantOrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
+        public async Task<ActionResult<MerchantOrderMBE>> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
             var order = new MerchantOrderMBE
             {
@@ -191,6 +199,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 }
             };
 
+            await Task.Delay(100);
+
             return CreatedAtAction(nameof(GetOrder), new { orderID = order.OrderGuid }, order);
         }
 
@@ -204,12 +214,14 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
+        public async Task<ActionResult> UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
+
+            await Task.Delay(100);
 
             return NoContent();
         }
@@ -223,14 +235,16 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SendOrderPaymentRequest(Guid orderGuid)
+        public async Task<ActionResult> SendOrderPaymentRequest(Guid orderGuid)
         {
             if (orderGuid != GeneralConstants.ORDER_1_GUID)
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
+
+            await Task.Delay(100);
+
             return NoContent();
         }
-
     }
 }

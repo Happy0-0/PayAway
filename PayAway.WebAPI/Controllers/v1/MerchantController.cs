@@ -57,10 +57,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpGet()]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ActiveMerchantMBE), StatusCodes.Status200OK)]
-        public ActionResult<ActiveMerchantMBE> GetActiveMerchant()
+        public async Task<ActionResult<ActiveMerchantMBE>> GetActiveMerchant()
         {
             //Query the db for the active merchant
-            var dbMerchant = _dbContext.GetActiveMerchant();
+            var dbMerchant = await _dbContext.GetActiveMerchantAsync();
 
             if (dbMerchant == null)
             {
@@ -69,16 +69,16 @@ namespace PayAway.WebAPI.Controllers.v1
 
             //query the db for catalogue Items
             // 1st: look for unique catalog items for this merchant
-            var dbCatalogueItems = _dbContext.GetCatalogItems(dbMerchant.MerchantId);
+            var dbCatalogueItems = await _dbContext.GetCatalogItemsAsync(dbMerchant.MerchantId);
 
             // 2nd: if the merchant did not have unique catalog items, use the default ones on merchantId = 0
             if (dbCatalogueItems == null || dbCatalogueItems.Count == 0)
             {
-                dbCatalogueItems = _dbContext.GetCatalogItems(0);
+                dbCatalogueItems = await _dbContext.GetCatalogItemsAsync(0);
             }
 
             // query the db for demo customers
-            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbMerchant.MerchantId);
+            var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbMerchant.MerchantId);
 
             // build the return object
             var activeMerchant = new ActiveMerchantMBE
@@ -101,10 +101,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpGet("orders")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(OrderQueueMBE), StatusCodes.Status200OK)]
-        public ActionResult<OrderQueueMBE> GetOrderQueue()
+        public async Task<ActionResult<OrderQueueMBE>> GetOrderQueue()
         {
             //Query the db
-            var dbMerchant = _dbContext.GetActiveMerchant();
+            var dbMerchant = await _dbContext.GetActiveMerchantAsync();
 
             if (dbMerchant == null)
             {
@@ -118,14 +118,14 @@ namespace PayAway.WebAPI.Controllers.v1
             };
 
             // get the list of current orders
-            var dbOrders = _dbContext.GetOrders(dbMerchant.MerchantId);
+            var dbOrders = await _dbContext.GetOrdersAsync(dbMerchant.MerchantId);
 
             if(dbOrders != null && dbOrders.Count > 0)
             {
                 foreach(var dbOrder in dbOrders)
                 {
                     // get the exploded order w/ the line items
-                    var dbOrderExploded = _dbContext.GetOrderExploded(dbOrder.OrderGuid);
+                    var dbOrderExploded = await _dbContext.GetOrderExplodedAsync(dbOrder.OrderGuid);
 
                     // convert to the MBE 
                     var orderHeader = (OrderHeaderMBE)dbOrderExploded;
@@ -152,10 +152,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantOrderMBE> GetOrder([FromRoute] Guid orderGuid)
+        public async Task<ActionResult<MerchantOrderMBE>> GetOrder([FromRoute] Guid orderGuid)
         {
             //query the db
-            var dbExplodedOrder = _dbContext.GetOrderExploded(orderGuid);
+            var dbExplodedOrder = await _dbContext.GetOrderExplodedAsync(orderGuid);
 
             // if we did not find a matching merchant order
             if (dbExplodedOrder == null)
@@ -179,7 +179,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantOrderMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantOrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder)
+        public async Task<ActionResult<MerchantOrderMBE>> CreateOrder([FromBody] NewOrderMBE newOrder)
         {
             //trims customer name so that it doesn't have trailing characters
             newOrder.CustomerName = newOrder.CustomerName.Trim();
@@ -196,7 +196,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
             foreach (var orderLineItem in newOrder.OrderLineItems)
             {
-                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = await _dbContext.GetCatalogItemAsync(orderLineItem.ItemGuid);
                 if(catalogItem == null)
                 {
                     return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
@@ -214,12 +214,12 @@ namespace PayAway.WebAPI.Controllers.v1
             #endregion
 
             //query the db for the active merchant
-            var dbActiveMerchant = _dbContext.GetActiveMerchant();
+            var dbActiveMerchant = await _dbContext.GetActiveMerchantAsync();
 
             try
             {
                 // insert the order
-                var dbExplodedOrder = InsertNewExplodedOrder(dbActiveMerchant.MerchantId, newOrder);
+                var dbExplodedOrder = await InsertNewExplodedOrderAsync(dbActiveMerchant.MerchantId, newOrder);
 
                 // convert to MBE
                 var explodedOrder = BuildExplodedMerchantOrderMBE(dbExplodedOrder);
@@ -244,10 +244,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateOrder([FromRoute] Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
+        public async Task<ActionResult> UpdateOrder([FromRoute] Guid orderGuid, [FromBody] NewOrderMBE updatedOrder)
         {
             // get the existing order
-            var dbOrder = _dbContext.GetOrder(orderGuid);
+            var dbOrder = await _dbContext.GetOrderAsync(orderGuid);
 
             // if we did not find a matching order
             if (dbOrder == null)
@@ -285,7 +285,7 @@ namespace PayAway.WebAPI.Controllers.v1
             foreach (var orderLineItem in updatedOrder.OrderLineItems)
             {
                 // try to find the catalog item
-                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = await _dbContext.GetCatalogItemAsync(orderLineItem.ItemGuid);
 
                 // if it did not exist (ie: a invalid guid)
                 if (catalogItem == null)
@@ -303,15 +303,15 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbOrder.PhoneNumber = updatedOrder.CustomerPhoneNo;
                 dbOrder.Status = Enums.ORDER_STATUS.Updated;
 
-                _dbContext.UpdateOrder(dbOrder);
+                await _dbContext.UpdateOrderAsync(dbOrder);
 
                 // Step 2: in this demo code we are just going to delete and re-add the order line items
-                _dbContext.DeleteOrderLineItems(dbOrder.OrderId);
+                await _dbContext.DeleteOrderLineItemsAsync(dbOrder.OrderId);
 
                 //iterate through orderLineItems collection to save it in the db
                 foreach (var orderLineItem in updatedOrder.OrderLineItems)
                 {
-                    var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
+                    var catalogItem = await _dbContext.GetCatalogItemAsync(orderLineItem.ItemGuid);
 
                     var dbOrderLineItem = new OrderLineItemDBE()
                     {
@@ -321,7 +321,7 @@ namespace PayAway.WebAPI.Controllers.v1
                         CatalogItemGuid = orderLineItem.ItemGuid
                     };
 
-                    _dbContext.InsertOrderLineItem(dbOrderLineItem);
+                    await _dbContext.InsertOrderLineItemAsync(dbOrderLineItem);
                 }
 
                 // Step 3: create an event
@@ -334,7 +334,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 };
 
                 //save order event
-                _dbContext.InsertOrderEvent(dbOrderEvent);
+                await _dbContext.InsertOrderEventAsync(dbOrderEvent);
 
                 return NoContent();
             }
@@ -354,10 +354,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult SendOrderPaymentRequest([FromRoute] Guid orderGuid)
+        public async Task<ActionResult> SendOrderPaymentRequest([FromRoute] Guid orderGuid)
         {
             // get the exploded order w/ the line items
-            var dbOrderExploded = _dbContext.GetOrderExploded(orderGuid);
+            var dbOrderExploded = await _dbContext.GetOrderExplodedAsync(orderGuid);
 
             // if we did not find a matching order
             if (dbOrderExploded == null)
@@ -377,16 +377,16 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException($"You cannot send the Payment link if the order does not have any line items", nameof(orderGuid)));
             }
 
-            SendSMSMessage(dbOrderExploded, _webUrlConfig);
+            await SendSMSMessageAsync(dbOrderExploded, _webUrlConfig);
 
             // only create the demo customer orders if this order was itself NOT a demo customer order
             // this allows the SMS for a specific demo customer order to be resent
             if (!dbOrderExploded.RefOrderId.HasValue)
             {
-                var dbDemoCustomersOrders = _dbContext.GetOrdersViaRefOrderId(dbOrderExploded.OrderId);
+                var dbDemoCustomersOrders = await _dbContext.GetOrdersViaRefOrderIdAsync(dbOrderExploded.OrderId);
 
                 // Step 4:1 Get the merchant's demo customers
-                var dbDemoCustomers = _dbContext.GetDemoCustomers(dbOrderExploded.MerchantId);
+                var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbOrderExploded.MerchantId);
 
                 // Step 4:2 Loop for each demo customer
                 foreach (var dbDemoCustomer in dbDemoCustomers)
@@ -404,10 +404,10 @@ namespace PayAway.WebAPI.Controllers.v1
                     };
 
                     // insert the order
-                    var dbDemoCustomerExplodedOrder = InsertNewExplodedOrder(dbOrderExploded.MerchantId, newDemoCustomerOrderExploded, dbOrderExploded.OrderId);
+                    var dbDemoCustomerExplodedOrder = await InsertNewExplodedOrderAsync(dbOrderExploded.MerchantId, newDemoCustomerOrderExploded, dbOrderExploded.OrderId);
 
                     // send sms message to demo customer
-                    SendSMSMessage(dbDemoCustomerExplodedOrder, _webUrlConfig);
+                    await SendSMSMessageAsync(dbDemoCustomerExplodedOrder, _webUrlConfig);
                 }
             }
 
@@ -415,7 +415,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         #region === Helper Methods =============================================
-        private OrderDBE InsertNewExplodedOrder(int merchantId, NewOrderMBE newExplodedOrder, int? refOrderId = null)
+        private async Task<OrderDBE> InsertNewExplodedOrderAsync(int merchantId, NewOrderMBE newExplodedOrder, int? refOrderId = null)
         {
             //Step 1: Store the new merchant Order
             var newDBOrder = new OrderDBE()
@@ -428,7 +428,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 RefOrderId = refOrderId
             };
 
-            _dbContext.InsertOrder(newDBOrder);
+            await _dbContext.InsertOrderAsync(newDBOrder);
  
             //Step 2: create the first event
             var newDBOrderEvent = new OrderEventDBE()
@@ -439,13 +439,13 @@ namespace PayAway.WebAPI.Controllers.v1
                 EventDescription = "Order created."
             };
 
-            _dbContext.InsertOrderEvent(newDBOrderEvent);
-            newDBOrder.OrderEvents.Add(newDBOrderEvent);        // build exploded order
+            await _dbContext.InsertOrderEventAsync(newDBOrderEvent);
+            //newDBOrder.OrderEvents.Add(newDBOrderEvent);        // build exploded order
 
             //Step 3: iterate through orderLineItems collection to save it in the db
             foreach (var orderLineItem in newExplodedOrder.OrderLineItems)
             {
-                var catalogItem = _dbContext.GetCatalogItem(orderLineItem.ItemGuid);
+                var catalogItem = await _dbContext.GetCatalogItemAsync(orderLineItem.ItemGuid);
 
                 var newDBOrderLineItem = new OrderLineItemDBE()
                 {
@@ -455,8 +455,8 @@ namespace PayAway.WebAPI.Controllers.v1
                     CatalogItemGuid = orderLineItem.ItemGuid
                 };
 
-                _dbContext.InsertOrderLineItem(newDBOrderLineItem);
-                newDBOrder.OrderLineItems.Add(newDBOrderLineItem);        // build exploded order
+                await _dbContext.InsertOrderLineItemAsync(newDBOrderLineItem);
+                //newDBOrder.OrderLineItems.Add(newDBOrderLineItem);        // build exploded order
             }
 
             return newDBOrder;
@@ -492,7 +492,7 @@ namespace PayAway.WebAPI.Controllers.v1
             return order;
         }
 
-        private void SendSMSMessage(OrderDBE dbOrderExploded, WebUrlConfigurationBE webUrlConfig)
+        private async Task SendSMSMessageAsync(OrderDBE dbOrderExploded, WebUrlConfigurationBE webUrlConfig)
         {
             // Step 1: calc the order total
             decimal orderTotal = (dbOrderExploded.OrderLineItems != null)
@@ -525,11 +525,11 @@ namespace PayAway.WebAPI.Controllers.v1
                 EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
             };
 
-            _dbContext.InsertOrderEvent(dbOrderEvent);
+            await _dbContext.InsertOrderEventAsync(dbOrderEvent);
 
             // Step 5: Update the order status
             dbOrderExploded.Status = Enums.ORDER_STATUS.SMS_Sent;
-            _dbContext.UpdateOrder(dbOrderExploded);
+            await _dbContext.UpdateOrderAsync(dbOrderExploded);
         }
 
         #endregion

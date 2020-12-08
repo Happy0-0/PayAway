@@ -55,9 +55,9 @@ namespace PayAway.WebAPI.Controllers.v1
         /// <remarks>You can choose to preload a set of default data</remarks>
         [HttpPost("reset", Name = nameof(ResetDatabase))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult ResetDatabase([FromQuery] bool isPreloadEnabled)
+        public async Task<ActionResult> ResetDatabase([FromQuery] bool isPreloadEnabled)
         {
-            _dbContext.ResetDB(isPreloadEnabled);
+            await _dbContext.ResetDBAsync(isPreloadEnabled);
 
             // purge all uploaded logo files except the demo ones
             var logoFolderName = System.IO.Path.Combine(_environment.ContentRootPath, GeneralConstants.LOGO_IMAGES_FOLDER_NAME);
@@ -105,7 +105,7 @@ namespace PayAway.WebAPI.Controllers.v1
             foreach(var merchant in merchants)
             {
                merchant.LogoUrl = (!string.IsNullOrEmpty(merchant.LogoFileName)) ? HttpHelpers.BuildFullURL(this.Request, merchant.LogoFileName) : null;
-               var dbDemoCustomers = _dbContext.GetDemoCustomers(merchant.MerchantId);
+               var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(merchant.MerchantId);
                merchant.DemoCustomers = dbDemoCustomers.ConvertAll(dbDc => (DemoCustomerMBE)dbDc);
             }
             
@@ -122,10 +122,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<MerchantMBE> GetMerchant([FromRoute] Guid merchantGuid)
+        public async Task<ActionResult<MerchantMBE>> GetMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = _dbContext.GetMerchantAndDemoCustomers(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAndDemoCustomersAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if(dbMerchant == null)
@@ -163,7 +163,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(MerchantMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<MerchantMBE> AddMerchant([FromBody] NewMerchantMBE newMerchant)
+        public async Task<ActionResult<MerchantMBE>> AddMerchant([FromBody] NewMerchantMBE newMerchant)
         {
             //trims merchant name so that it doesn't have trailing characters
             newMerchant.MerchantName = newMerchant.MerchantName.Trim();
@@ -184,7 +184,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     MerchantUrl = new Uri("https://www.testmerchant.com")
                 };
 
-                _dbContext.InsertMerchant(newDBMerchant);
+                await _dbContext.InsertMerchantAsync(newDBMerchant);
 
                 // convert DB entity to the public entity type
                 var merchant = (MerchantMBE)newDBMerchant;
@@ -209,7 +209,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateMerchant([FromRoute] Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
+        public async Task<ActionResult> UpdateMerchant([FromRoute] Guid merchantGuid, [FromBody] NewMerchantMBE updatedMerchant)
         {
             //trims merchant name so that it doesn't have trailing characters
             updatedMerchant.MerchantName = updatedMerchant.MerchantName.Trim();
@@ -222,7 +222,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }*/
 
             // query the DB
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -239,7 +239,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
                 dbMerchant.MerchantUrl = new Uri("https://www.testmerchant.com");
 
-                _dbContext.UpdateMerchant(dbMerchant);
+                await _dbContext.UpdateMerchantAsync(dbMerchant);
             }
             catch(Exception ex)
             {
@@ -258,10 +258,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteMerchant([FromRoute] Guid merchantGuid)
+        public async Task<ActionResult> DeleteMerchant([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             if (dbMerchant == null)
             {
@@ -279,7 +279,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 System.IO.File.Delete(logoFilePathName);
             }
 
-            _dbContext.DeleteMerchant(dbMerchant.MerchantId);
+            await _dbContext.DeleteMerchantAsync(dbMerchant.MerchantId);
 
             return NoContent();
         }
@@ -293,10 +293,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult SetActiveMerchantForDemo([FromRoute] Guid merchantGuid)
+        public async Task<ActionResult> SetActiveMerchantForDemo([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var merchantToMakeActive = _dbContext.GetMerchant(merchantGuid);
+            var merchantToMakeActive = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (merchantToMakeActive == null)
@@ -305,7 +305,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //update merchant in the db
-            _dbContext.SetActiveMerchantForDemo(merchantToMakeActive);
+            await _dbContext.SetActiveMerchantForDemoAsync(merchantToMakeActive);
 
             return NoContent();
         }
@@ -322,10 +322,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<string> UploadLogoImage([FromRoute] Guid merchantGuid, IFormFile imageFile)
+        public async Task<ActionResult<string>> UploadLogoImage([FromRoute] Guid merchantGuid, IFormFile imageFile)
         {
             // Step 1: Get the merchant
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -354,7 +354,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // Step 4: Update the merchant
             dbMerchant.LogoFileName = imageFileName;
-            _dbContext.UpdateMerchant(dbMerchant);
+            await _dbContext.UpdateMerchantAsync(dbMerchant);
 
             // Step 5: Return results        https://localhost:44318/LogoImages/f8c6f5b6-533e-455f-87a1-ced552898e1d.png
             var imageUri = HttpHelpers.BuildFullURL(this.Request, imageFileName);
@@ -374,10 +374,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [HttpGet("merchants/{merchantGuid:guid}/customers", Name = nameof(GetDemoCustomers))]
         [ProducesResponseType(typeof(List<DemoCustomerMBE>), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<IEnumerable<DemoCustomerMBE>> GetDemoCustomers([FromRoute] Guid merchantGuid)
+        public async Task<ActionResult<IEnumerable<DemoCustomerMBE>>> GetDemoCustomers([FromRoute] Guid merchantGuid)
         {
             // query the DB
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -385,7 +385,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 return BadRequest(new ArgumentException($"MerchantGuid: [{merchantGuid}] not found", nameof(merchantGuid)));
             }
 
-            var dbDemoCustomers = _dbContext.GetDemoCustomers(dbMerchant.MerchantId);
+            var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbMerchant.MerchantId);
 
             // if no results from DB, return an empty list
             if (dbDemoCustomers == null)
@@ -412,10 +412,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult<DemoCustomerMBE> GetDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
+        public async Task<ActionResult<DemoCustomerMBE>> GetDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the DB
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -424,16 +424,16 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //query DB for a collection of customers from a specific merchant.
-            var dbCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId)
-                                            .Where(dc => dc.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+            var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbMerchant.MerchantId);
+            var dbDemoCustomer = dbDemoCustomers.Where(dc => dc.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             // if we did not find a matching demo customer
-            if (dbCustomer == null)
+            if (dbDemoCustomer == null)
             {
                 return NotFound($"CustomerGuid: [{demoCustomerGuid}] on MerchantGuid: [{merchantGuid}] not found");
             }
 
-            var customer = (DemoCustomerMBE)dbCustomer;
+            var customer = (DemoCustomerMBE)dbDemoCustomer;
 
             return Ok(customer);
         }
@@ -449,7 +449,7 @@ namespace PayAway.WebAPI.Controllers.v1
         [Produces("application/json")]
         [ProducesResponseType(typeof(DemoCustomerMBE), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        public ActionResult<DemoCustomerMBE> AddDemoCustomer([FromRoute] Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
+        public async Task<ActionResult<DemoCustomerMBE>> AddDemoCustomer([FromRoute] Guid merchantGuid, [FromBody] NewDemoCustomerMBE newDemoCustomer)
         {
             //trims Customer name so that it doesn't have trailing characters
             newDemoCustomer.CustomerName = newDemoCustomer.CustomerName.Trim();
@@ -463,7 +463,7 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             //query the db for the merchant
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -485,7 +485,7 @@ namespace PayAway.WebAPI.Controllers.v1
                     CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
                 };
 
-                _dbContext.InsertDemoCustomer(newDBDemoCustomer);
+                await _dbContext.InsertDemoCustomerAsync(newDBDemoCustomer);
 
                 // convert DB entity to the public entity type
                 var customer = (DemoCustomerMBE)newDBDemoCustomer;
@@ -512,10 +512,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult UpdateDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
+        public async Task<ActionResult> UpdateDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid, [FromBody] NewDemoCustomerMBE updatedDemoCustomer)
         {
             // query the db for the merchant
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -534,7 +534,8 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // get the existing demo customer
-            var dbDemoCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+            var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbMerchant.MerchantId);
+            var dbDemoCustomer = dbDemoCustomers.Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             if (dbDemoCustomer == null)
             {
@@ -550,7 +551,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 dbDemoCustomer.CustomerName = updatedDemoCustomer.CustomerName;
                 dbDemoCustomer.CustomerPhoneNo = formatedPhoneNo;
 
-                _dbContext.UpdateDemoCustomer(dbDemoCustomer);
+                await _dbContext.UpdateDemoCustomerAsync(dbDemoCustomer);
             }
             catch (Exception ex)
             {
@@ -571,10 +572,10 @@ namespace PayAway.WebAPI.Controllers.v1
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public ActionResult DeleteDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
+        public async Task<ActionResult> DeleteDemoCustomer([FromRoute] Guid merchantGuid, [FromRoute] Guid demoCustomerGuid)
         {
             // query the db for the merchant
-            var dbMerchant = _dbContext.GetMerchant(merchantGuid);
+            var dbMerchant = await _dbContext.GetMerchantAsync(merchantGuid);
 
             // if we did not find a matching merchant
             if (dbMerchant == null)
@@ -583,14 +584,15 @@ namespace PayAway.WebAPI.Controllers.v1
             }
 
             // get the existing demo customer
-            var dbDemoCustomer = _dbContext.GetDemoCustomers(dbMerchant.MerchantId).Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
+            var dbDemoCustomers = await _dbContext.GetDemoCustomersAsync(dbMerchant.MerchantId);
+            var dbDemoCustomer = dbDemoCustomers.Where(c => c.DemoCustomerGuid == demoCustomerGuid).FirstOrDefault();
 
             if (dbDemoCustomer == null)
             {
                 return NotFound($"CustomerID: [{demoCustomerGuid}] on MerchantID: [{merchantGuid}] not found");
             }
 
-            _dbContext.DeleteDemoCustomer(dbDemoCustomer.DemoCustomerId);
+            await _dbContext.DeleteDemoCustomerAsync(dbDemoCustomer.DemoCustomerId);
 
             return NoContent();
         }

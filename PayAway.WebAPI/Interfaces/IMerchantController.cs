@@ -1,23 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+
+using Microsoft.AspNetCore.Mvc;
+
 using PayAway.WebAPI.Entities.v1;
-using System;
 
 namespace PayAway.WebAPI.Interfaces
 {
     public interface IMerchantController
     {
-        ActionResult<ActiveMerchantMBE> GetActiveMerchant();
+        Task<ActionResult<ActiveMerchantMBE>> GetActiveMerchant();
 
-        ActionResult<OrderQueueMBE> GetOrderQueue();
+        Task<ActionResult<OrderQueueMBE>> GetOrderQueue();
 
 
-        ActionResult<MerchantOrderMBE> CreateOrder([FromBody] NewOrderMBE newOrder);
+        Task<ActionResult<MerchantOrderMBE>> CreateOrder([FromBody] NewOrderMBE newOrder);
 
-        ActionResult UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder);
+        Task<ActionResult> UpdateOrder(Guid orderGuid, [FromBody] NewOrderMBE updatedOrder);
 
-        ActionResult<MerchantOrderMBE> GetOrder(Guid orderGuid);
+        Task<ActionResult<MerchantOrderMBE>> GetOrder(Guid orderGuid);
 
-        ActionResult SendOrderPaymentRequest(Guid orderGuid);
-
+        Task<ActionResult> SendOrderPaymentRequest(Guid orderGuid);
     }
 }

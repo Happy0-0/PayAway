@@ -49,7 +49,9 @@ namespace PayAway.WebAPI.Entities.Database
         public string CreditCardNumber { get; set; }
 
         public string AuthCode { get; set; }
-                
+
+        public decimal TipAmount { get; set; }
+
         public int ExpMonth { get; set; }
 
         public int ExpYear { get; set; }
@@ -78,7 +80,9 @@ namespace PayAway.WebAPI.Entities.Database
                     OrderStatus = from.Status,
                     PhoneNumber = from.PhoneNumber,
                     Name = from.CustomerName,
-                    MaskedPAN = from.CreditCardNumber.Mask()
+                    MaskedPAN = from.CreditCardNumber.Mask(),
+                    AuthortizationCode = from.AuthCode,
+                    TipAmount = from.TipAmount
                 };
             }
             return to;
@@ -112,13 +116,17 @@ namespace PayAway.WebAPI.Entities.Database
                 to = new CustomerOrderMBE()
                 {
                     OrderGuid = from.OrderGuid,
+                    OrderStatus = from.Status,
                     CustomerPhoneNo = from.PhoneNumber,
                     CustomerName = from.CustomerName,
                     OrderId = from.OrderId,
                     OrderDateTimeUTC = from.OrderDateTimeUTC,
                     MerchantName = from.Merchant.MerchantName,
                     IsSupportsTips = from.Merchant.IsSupportsTips,
-                    MaskedPAN = from.CreditCardNumber.Mask()
+                    MaskedPAN = from.CreditCardNumber.Mask(),
+                    AuthortizationCode = from.AuthCode,
+                    OrderSubTotal = (from.OrderLineItems != null) ? from.OrderLineItems.Sum(oli => oli.ItemUnitPrice) : 0.0M,
+                    TipAmount = from.TipAmount
                 };
             }
             return to;
