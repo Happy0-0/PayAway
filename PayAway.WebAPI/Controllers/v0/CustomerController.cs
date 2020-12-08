@@ -12,6 +12,7 @@ using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Entities.Config;
 using PhoneNumbers;
+using System.Linq;
 
 namespace PayAway.WebAPI.Controllers.v0
 {
@@ -83,17 +84,24 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
-            if (paymentInfo.ExpYear > (DateTime.UtcNow.Year) && paymentInfo.ExpYear < (DateTime.UtcNow.Year + 10))
+            // Step: Is it even a valid date (this takes care of wacky month values)
+            DateTime parsedDate;
+            if (!DateTime.TryParse($"{paymentInfo.ExpMonth}/1/{ paymentInfo.ExpYear}", out parsedDate))
             {
-                return BadRequest($"Payment info with expiration year: {paymentInfo.ExpYear} is not valid. ");
+                return BadRequest($"{paymentInfo.ExpMonth}/{paymentInfo.ExpYear} is not a valid expiration date");
             }
-            if (paymentInfo.ExpMonth < 12 && paymentInfo.ExpMonth > 1)
+
+            // Step 2: The expiration date cannot be to far into the future (this takes care of yrs too far into the future)
+            if (parsedDate > DateTime.Today.AddYears(5))
             {
-                return BadRequest($"Payment info with expiration month: {paymentInfo.ExpMonth} is not valid. ");
+                return BadRequest($"{paymentInfo.ExpMonth}/{ paymentInfo.ExpYear} is not a valid expiration date");
             }
-            if ((paymentInfo.ExpMonth > DateTime.UtcNow.Month && paymentInfo.ExpYear >= DateTime.UtcNow.Year))
+
+            // Step 3: Is the card still valid today (cards are valid thru the last day of the month  (this check prevents dates in the past)
+            DateTime calcExpireDate = parsedDate.AddMonths(1).AddDays(-1);
+            if (DateTime.Today > calcExpireDate)
             {
-                return BadRequest($"Payment info with expiration month and year: {paymentInfo.ExpMonth} / {paymentInfo.ExpYear} is not valid. ");
+                return BadRequest($"Payment Instrument is no longer valid, expired on {calcExpireDate:MM/dd/yyyy}");
             }
             if (paymentInfo.TipAmount < 0)
             {
@@ -102,6 +110,18 @@ namespace PayAway.WebAPI.Controllers.v0
             if (String.IsNullOrEmpty(paymentInfo.PAN))
             {
                 return BadRequest($"Your Credit card number cannot be empty. ");
+            }
+            // == CC Number ===================================
+            string paymentPan = paymentInfo.PAN.Trim().CleanUp();
+            // // Step 4a: Biz Logi  cc: check to see if credit card number is fine.
+            if (paymentPan.Length != 16)
+            {
+                return BadRequest("Your Credit card number must be 16 digits.");
+            }
+
+            if (!paymentPan.CheckLuhn())
+            {
+                return BadRequest("Your Credit card number must pass a LUN check.");
             }
             #endregion
 

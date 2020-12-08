@@ -128,7 +128,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             // == CC Number ===================================
             string paymentPan = paymentInfo.PAN.Trim().CleanUp();
-            // // Step 4a: Biz Logic: check to see if credit card number is fine.
+            // // Step 4a: Biz Logi  cc: check to see if credit card number is fine.
             if (paymentPan.Length != 16)
             {
                 return BadRequest("Your Credit card number must be 16 digits.");
