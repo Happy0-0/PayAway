@@ -91,8 +91,7 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Merchant order with ID: {orderGuid} not found");
             }
             // Step: Is it even a valid date (this takes care of wacky month values)
-            DateTime parsedDate;
-            if (!DateTime.TryParse($"{paymentInfo.ExpMonth}/1/{ paymentInfo.ExpYear}", out parsedDate))
+            if (!DateTime.TryParse($"{paymentInfo.ExpMonth}/1/{ paymentInfo.ExpYear}", out DateTime parsedDate))
             {
                 return BadRequest($"{paymentInfo.ExpMonth}/{paymentInfo.ExpYear} is not a valid expiration date");
             }

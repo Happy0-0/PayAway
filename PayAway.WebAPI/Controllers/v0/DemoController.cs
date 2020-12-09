@@ -31,6 +31,8 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult> ResetDatabase(bool isPreloadEnabled)
         {
+            await Task.Delay(100);
+
             return NoContent();
         }
         #endregion
@@ -46,6 +48,8 @@ namespace PayAway.WebAPI.Controllers.v0
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<MerchantMBE>>> GetAllMerchants()
         {
+            await Task.Delay(100);
+
             return Ok(new List<MerchantMBE>
             {
                 new MerchantMBE
@@ -85,6 +89,8 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
+
+            await Task.Delay(100);
 
             return Ok(new MerchantMBE
             {
@@ -143,6 +149,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 IsSupportsTips = newMerchant.IsSupportsTips
             };
 
+            await Task.Delay(100);
+
             return CreatedAtAction(nameof(GetMerchant), new { merchantGuid = merchant.MerchantGuid }, merchant);
         }
 
@@ -171,6 +179,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 return BadRequest(new ArgumentException(nameof(updatedMerchant.MerchantUrl), @"The merchant url is incorrect. Make sure the url has https:// or http://"));
             }*/
 
+            await Task.Delay(100);
+
             return NoContent();
         }
 
@@ -190,6 +200,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
 
+            await Task.Delay(100);
+
             return NoContent();
         }
 
@@ -208,6 +220,8 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
+
+            await Task.Delay(100);
 
             return NoContent();
 
@@ -230,6 +244,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 return BadRequest($"Merchant with ID: {merchantGuid} not found");
             }
 
+            await Task.Delay(100);
+
             return Ok();
         }
 
@@ -250,6 +266,8 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Merchant with ID: {merchantGuid} not found");
             }
+
+            await Task.Delay(100);
 
             return new List<DemoCustomerMBE>
             {
@@ -288,6 +306,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
+            await Task.Delay(100);
+
             return new DemoCustomerMBE
             {
                 CustomerGuid = GeneralConstants.MERCHANT_1_CUSTOMER_1_GUID,
@@ -322,6 +342,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 CustomerPhoneNo = newDemoCustomer.CustomerPhoneNo
             };
 
+            await Task.Delay(100);
+
             return CreatedAtAction(nameof(GetDemoCustomer), new { merchantGuid = merchantGuid, customerGuid = customer.CustomerGuid }, customer);
         }
 
@@ -348,6 +370,8 @@ namespace PayAway.WebAPI.Controllers.v0
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
 
+            await Task.Delay(100);
+
             return NoContent();
         }
 
@@ -370,6 +394,8 @@ namespace PayAway.WebAPI.Controllers.v0
             {
                 return NotFound($"Customer with ID: {demoCustomerGuid} on Merchant with ID: {merchantGuid} not found");
             }
+
+            await Task.Delay(100);
 
             return NoContent();
         }
