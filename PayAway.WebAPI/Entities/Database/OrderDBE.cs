@@ -126,7 +126,8 @@ namespace PayAway.WebAPI.Entities.Database
                     MaskedPAN = from.CreditCardNumber.Mask(),
                     AuthortizationCode = from.AuthCode,
                     OrderSubTotal = (from.OrderLineItems != null) ? from.OrderLineItems.Sum(oli => oli.ItemUnitPrice) : 0.0M,
-                    TipAmount = from.TipAmount
+                    TipAmount = from.TipAmount,
+                    LogoFileName = from.Merchant.LogoFileName
                 };
             }
             return to;

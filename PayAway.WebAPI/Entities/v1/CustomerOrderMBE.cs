@@ -82,6 +82,16 @@ namespace PayAway.WebAPI.Entities.v1
         public Uri LogoUrl { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of the logo file.
+        /// </summary>
+        /// <value>The name of the logo file.</value>
+        /// <remarks>
+        /// This property is from the DB, its value is dynamically converted to LogoUrl to be returned to the front end
+        /// </remarks>
+        [JsonIgnore]
+        public string LogoFileName { get; set; }
+
+        /// <summary>
         /// Gets or sets the merchant url
         /// </summary>
         /// <value>The merchant website</value>
