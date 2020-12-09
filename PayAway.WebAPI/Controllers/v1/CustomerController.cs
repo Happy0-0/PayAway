@@ -64,6 +64,7 @@ namespace PayAway.WebAPI.Controllers.v1
 
             var customerOrder = (CustomerOrderMBE)dbCustomerOrder;
             customerOrder.LogoUrl = HttpHelpers.BuildFullURL(this.Request, dbCustomerOrder.Merchant.LogoFileName);
+            customerOrder.MerchantUrl = dbCustomerOrder.Merchant.MerchantUrl;
 
             return Ok(customerOrder);
         }
