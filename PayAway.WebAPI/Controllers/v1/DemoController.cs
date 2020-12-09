@@ -530,7 +530,7 @@ namespace PayAway.WebAPI.Controllers.v1
             (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(updatedDemoCustomer.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
-                return BadRequest(new ArgumentNullException(nameof(updatedDemoCustomer.CustomerPhoneNo), $"[{updatedDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format."));
+                return BadRequest(new ArgumentNullException($"[{updatedDemoCustomer.CustomerPhoneNo}] is NOT a supported Phone No format.", nameof(updatedDemoCustomer.CustomerPhoneNo)));
             }
 
             // get the existing demo customer

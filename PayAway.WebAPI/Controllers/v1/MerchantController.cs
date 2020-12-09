@@ -188,24 +188,24 @@ namespace PayAway.WebAPI.Controllers.v1
             // validate request data
             if (string.IsNullOrEmpty(newOrder.CustomerName))
             {
-                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerName), @"You must supply a non blank value for the Order Name."));
+                return BadRequest(new ArgumentNullException(@"You must supply a non blank value for the Order Name.", nameof(newOrder.CustomerName)));
             }
             else if (string.IsNullOrEmpty(newOrder.CustomerPhoneNo))
             {
-                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerPhoneNo), @"You must supply a non blank value for the Order Phone No."));
+                return BadRequest(new ArgumentNullException(@"You must supply a non blank value for the Order Phone No.", nameof(newOrder.CustomerPhoneNo)));
             }
             foreach (var orderLineItem in newOrder.OrderLineItems)
             {
                 var catalogItem = await _dbContext.GetCatalogItemAsync(orderLineItem.ItemGuid);
                 if(catalogItem == null)
                 {
-                    return BadRequest(new ArgumentNullException(nameof(orderLineItem.ItemGuid), $"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid."));
+                    return BadRequest(new ArgumentNullException($"Error : [{orderLineItem.ItemGuid}] Is not a valid catalog item guid.", nameof(orderLineItem.ItemGuid)));
                 }
             }
             (bool isValidPhoneNo, string formatedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(newOrder.CustomerPhoneNo);
             if (!isValidPhoneNo)
             {
-                return BadRequest(new ArgumentNullException(nameof(newOrder.CustomerPhoneNo), $"[{newOrder.CustomerPhoneNo}] is NOT a supported Phone No format."));
+                return BadRequest(new ArgumentNullException($"[{newOrder.CustomerPhoneNo}] is NOT a supported Phone No format.", nameof(newOrder.CustomerPhoneNo)));
             }
             else
             {
@@ -265,11 +265,11 @@ namespace PayAway.WebAPI.Controllers.v1
             // validate the input params
             if (string.IsNullOrEmpty(updatedOrder.CustomerName))
             {
-                return BadRequest(new ArgumentException(nameof(updatedOrder.CustomerName), @"The order name cannot be blank."));
+                return BadRequest(new ArgumentException(@"The order name cannot be blank.", nameof(updatedOrder.CustomerName)));
             }
             else if (string.IsNullOrEmpty(updatedOrder.CustomerPhoneNo))
             {
-                return BadRequest(new ArgumentException(nameof(updatedOrder.CustomerPhoneNo), @"The order phone number cannot be blank."));
+                return BadRequest(new ArgumentException(@"The order phone number cannot be blank.", nameof(updatedOrder.CustomerPhoneNo)));
             }
             (bool isValidPhoneNo, string formatedPhoneNo, _) = PhoneNoHelpers.NormalizePhoneNo(updatedOrder.CustomerPhoneNo);
             if (!isValidPhoneNo)
@@ -514,7 +514,7 @@ namespace PayAway.WebAPI.Controllers.v1
             // Step 3: Send the SMS msg
             // convert the phone no to the "normalized format"  +15131234567 that the SMS api accepts
             (bool isValidPhoneNo, string formattedPhoneNo, string normalizedPhoneNo) = Utilities.PhoneNoHelpers.NormalizePhoneNo(dbOrderExploded.PhoneNumber);
-            SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
+            var msgSid = SMSController.SendSMSMessage(String.Empty, formattedPhoneNo, messageBody.ToString());
 
             // Step 4 Create & Save the SMS event
             var dbOrderEvent = new OrderEventDBE()
@@ -522,7 +522,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 OrderId = dbOrderExploded.OrderId,
                 EventDateTimeUTC = DateTime.UtcNow,
                 OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
-                EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
+                EventDescription = $"SMS sent to [{normalizedPhoneNo}], Sid [{msgSid}]."
             };
 
             await _dbContext.InsertOrderEventAsync(dbOrderEvent);
