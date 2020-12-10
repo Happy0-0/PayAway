@@ -43,7 +43,7 @@ namespace PayAway.WebAPI.Controllers.v1
         }
 
         /// <summary>
-        /// Gets customer orders
+        /// Gets customer order
         /// </summary>
         /// <param name="orderGuid">unique identifier for the order</param>
         /// <returns></returns>
