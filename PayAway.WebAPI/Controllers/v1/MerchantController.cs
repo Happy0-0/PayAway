@@ -522,7 +522,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 OrderId = dbOrderExploded.OrderId,
                 EventDateTimeUTC = DateTime.UtcNow,
                 OrderStatus = Enums.ORDER_STATUS.SMS_Sent,
-                EventDescription = $"SMS sent to [{normalizedPhoneNo}], Sid [{msgSid}]."
+                EventDescription = $"SMS sent to [{normalizedPhoneNo}]."
             };
 
             await _dbContext.InsertOrderEventAsync(dbOrderEvent);
