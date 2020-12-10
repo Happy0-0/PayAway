@@ -436,7 +436,7 @@ namespace PayAway.WebAPI.Controllers.v1
                 OrderId = newDBOrder.OrderId,
                 EventDateTimeUTC = DateTime.UtcNow,
                 OrderStatus = Enums.ORDER_STATUS.New,
-                EventDescription = "Order created."
+                EventDescription = refOrderId.HasValue ? $"Order created (from {refOrderId.Value})." : "Order created"
             };
 
             await _dbContext.InsertOrderEventAsync(newDBOrderEvent);
