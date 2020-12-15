@@ -46,7 +46,6 @@ namespace PayAway.WebAPI.Controllers.v1
             _dbContext = dbContext;
             _environment = environment;
         }
-
         #region === Overall Demo Methods ================================
         /// <summary>
         /// Resets Database
