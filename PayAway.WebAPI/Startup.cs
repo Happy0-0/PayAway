@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 
 using Hellang.Middleware.ProblemDetails;
@@ -438,6 +439,12 @@ namespace PayAway.WebAPI
             // enable serving static merchant logo image files
             app.UseStaticFiles(new StaticFileOptions()
             {
+                OnPrepareResponse = ctx =>
+                {
+                    // do not cache logo images (so we can see changes when we upload a new one)
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "No-Cache";
+                },
+
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), GeneralConstants.LOGO_IMAGES_FOLDER_NAME)), RequestPath = new PathString($"/{GeneralConstants.LOGO_IMAGES_URI_FOLDER}")
             });
 

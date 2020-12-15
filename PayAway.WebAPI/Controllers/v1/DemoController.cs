@@ -181,7 +181,9 @@ namespace PayAway.WebAPI.Controllers.v1
                 {
                     MerchantName = newMerchant.MerchantName,
                     IsSupportsTips = newMerchant.IsSupportsTips,
-                    //MerchantUrl = new Uri("https://www.testmerchant.com")
+                    MerchantUrl = (Uri.IsWellFormedUriString(newMerchant.MerchantUrl.ToString(), UriKind.Absolute)) 
+                                    ? newMerchant.MerchantUrl 
+                                    : new Uri("https://www.testmerchant.com")
                 };
 
                 await _dbContext.InsertMerchantAsync(newDBMerchant);
@@ -237,7 +239,9 @@ namespace PayAway.WebAPI.Controllers.v1
                 // save the updated merchant
                 dbMerchant.MerchantName = updatedMerchant.MerchantName;
                 dbMerchant.IsSupportsTips = updatedMerchant.IsSupportsTips;
-                //dbMerchant.MerchantUrl = new Uri("https://www.testmerchant.com");
+                dbMerchant.MerchantUrl = (Uri.IsWellFormedUriString(updatedMerchant.MerchantUrl.ToString(), UriKind.Absolute))
+                                            ? updatedMerchant.MerchantUrl
+                                            : new Uri("https://www.testmerchant.com");
 
                 await _dbContext.UpdateMerchantAsync(dbMerchant);
             }
