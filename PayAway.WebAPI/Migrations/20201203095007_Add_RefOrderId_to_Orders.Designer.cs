@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PayAway.WebAPI.DB;
 
 namespace PayAway.WebAPI.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    partial class SQLiteDBContextModelSnapshot : ModelSnapshot
+    [Migration("20201203095007_Add_RefOrderId_to_Orders")]
+    partial class Add_RefOrderId_to_Orders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -154,9 +156,6 @@ namespace PayAway.WebAPI.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("TipAmount")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("OrderId");
 

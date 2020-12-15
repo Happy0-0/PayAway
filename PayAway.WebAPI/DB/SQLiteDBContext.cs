@@ -1,42 +1,66 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PayAway.WebAPI.Entities.v0;
-using PayAway.WebAPI.Entities.v1;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
+using Microsoft.Extensions.DependencyInjection;
+
+using PayAway.WebAPI.Entities.Database;
 
 namespace PayAway.WebAPI.DB
 {
+    /// <summary>
+    /// Class SQLiteDBContext./
+    /// Implements the <see cref="Microsoft.EntityFrameworkCore.DbContext" />
+    /// </summary>
+    /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
+    /// <remarks>
+    /// MBE entities should NOT leak down into this class
+    /// </remarks>
     public class SQLiteDBContext : DbContext
     {
 
+        public SQLiteDBContext(DbContextOptions<SQLiteDBContext> options)
+            : base(options)
+        {
+        }
+
         public DbSet<MerchantDBE> Merchants { get; set; }
 
-        public DbSet<CustomerDBE> Customers { get; set; }
+        public DbSet<DemoCustomerDBE> DemoCustomers { get; set; }
+
+        public DbSet<CatalogItemDBE> CatalogItems { get; set; }
+
+        public DbSet<OrderDBE> Orders { get; set; }
+
+        public DbSet<OrderEventDBE> OrderEvents { get; set; }
+
+        public DbSet<OrderLineItemDBE> OrderLineItems { get; set; }
+
 
         #region ==== Configure DB ================
 
         /// <summary>
-        /// <para>
         /// Override this method to configure the database (and other options) to be used for this context.
         /// This method is called for each instance of the context that is created.
-        /// The base implementation does nothing.
-        /// </para>
-        /// <para>
-        /// In situations where an instance of <see cref="T:Microsoft.EntityFrameworkCore.DbContextOptions" /> may or may not have been passed
-        /// to the constructor, you can use <see cref="P:Microsoft.EntityFrameworkCore.DbContextOptionsBuilder.IsConfigured" /> to determine if
-        /// the options have already been set, and skip some or all of the logic in
-        /// <see cref="M:Microsoft.EntityFrameworkCore.DbContext.OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder)" />.
-        /// </para>
         /// </summary>
         /// <param name="optionsBuilder">A builder used to create or modify options for this context. Databases (and other extensions)
         /// typically define extension methods on this object that allow you to configure the context.</param>
+        /// <remarks>
+        /// Debug lines are compiled out of Release Builds
+        /// </remarks>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlite(@"Data Source=PrestoPayv2.db;");
+              //.UseSqlite(@"Data Source=xxxxxxxxxxx;")
+              .LogTo(message => System.Diagnostics.Debug.WriteLine(message))
+              .EnableSensitiveDataLogging();
         }
 
         /// <summary>
@@ -51,196 +75,289 @@ namespace PayAway.WebAPI.DB
         /// then this method will not be run.</remarks>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // By convention, non-composite primary keys of type short, int, long, or Guid are set up to have values generated for inserted entities,
+            // if a value isn't provided by the application. 
+
+            #region === Merchants =========================================================
             modelBuilder.Entity<MerchantDBE>().ToTable("Merchants");
             modelBuilder.Entity<MerchantDBE>()
-                .HasKey(m => new { m.MerchantID });
+                .HasKey(m => new { m.MerchantId });         // <== auto generated value in DB
             modelBuilder.Entity<MerchantDBE>()
-                .HasIndex(m => new { m.MerchantName })
+                .HasIndex(m => new { m.MerchantGuid })
                 .IsUnique();
+            modelBuilder.Entity<MerchantDBE>()
+                .HasIndex(m => new { m.MerchantName })      // you can have dup merchant names
+                .IsUnique();
+            modelBuilder.Entity<MerchantDBE>()
+                .Property(m => m.MerchantGuid)
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
+            #endregion
 
-            modelBuilder.Entity<CustomerDBE>().ToTable("Customers");
-            modelBuilder.Entity<CustomerDBE>()
-                .HasKey(c => new { c.MerchantID, c.CustomerID });
-            modelBuilder.Entity<CustomerDBE>()
-                .HasIndex(c => new { c.MerchantID, c.CustomerPhoneNo })
+            #region === DemoCustomers =========================================================
+            modelBuilder.Entity<DemoCustomerDBE>().ToTable("DemoCustomers");
+            modelBuilder.Entity<DemoCustomerDBE>()
+                .HasKey(dc => new { dc.DemoCustomerId });     // <== auto generated value in DB
+            modelBuilder.Entity<DemoCustomerDBE>()
+                .HasIndex(dc => new { dc.DemoCustomerGuid })
                 .IsUnique();
+            modelBuilder.Entity<DemoCustomerDBE>()  
+                .HasIndex(dc => new { dc.MerchantId, dc.CustomerPhoneNo })  // cannot have dup customer phone nos
+                .IsUnique();
+            modelBuilder.Entity<DemoCustomerDBE>()
+                .Property(dc => dc.DemoCustomerGuid)
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
+            #endregion
+
+            #region === CatalogItems =========================================================
+            modelBuilder.Entity<CatalogItemDBE>().ToTable("CatalogItems");
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasKey(ci => new { ci.CatalogItemId });      // <== auto generated value in DB
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasIndex(ci => new { ci.MerchantId, ci.ItemName })    // cannot have dump Item names on the same merchant
+                .IsUnique();
+            modelBuilder.Entity<CatalogItemDBE>()
+                .HasIndex(ci => new { ci.CatalogItemGuid })
+                .IsUnique();
+            modelBuilder.Entity<CatalogItemDBE>()
+                .Property(ci => ci.CatalogItemGuid)
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
+            #endregion
+
+            #region === Orders =========================================================
+            modelBuilder.Entity<OrderDBE>().ToTable("Orders");
+            modelBuilder.Entity<OrderDBE>()
+                .HasKey(o => new { o.OrderId });            // <== auto generated value in DB
+            modelBuilder.Entity<OrderDBE>()
+                .HasIndex(o => new { o.OrderGuid})
+                .IsUnique();
+            modelBuilder.Entity<OrderDBE>()
+                .Property(o => o.OrderGuid)
+                .HasValueGenerator<GuidValueGenerator>();   // <== auto generated value by EF before calling db
+            modelBuilder.Entity<OrderDBE>()
+                .Property(c => c.Status)
+                .HasConversion<int>();
+            #endregion
+
+            #region === OrderLineItems =========================================================
+            modelBuilder.Entity<OrderLineItemDBE>().ToTable("OrderLineItems");
+            modelBuilder.Entity<OrderLineItemDBE>()
+                .HasKey(oli => new { oli.OrderLineItemId});  // <== auto generated value in DB
+            modelBuilder.Entity<OrderLineItemDBE>()
+                .HasIndex(oli => new { oli.OrderId, oli.ItemName })  // cannot have dump Item names on the same order
+                .IsUnique();
+            #endregion
+
+            #region === OrderEvents =========================================================
+            modelBuilder.Entity<OrderEventDBE>().ToTable("OrderEvents");
+            modelBuilder.Entity<OrderEventDBE>()
+                .HasKey(oe => new { oe.OrderEventId});       // <== auto generated value
+            modelBuilder.Entity<OrderEventDBE>()
+                .HasIndex(oe => new { oe.OrderId });        // <= not unqiue key, used for faster retrieval
+            modelBuilder.Entity<OrderEventDBE>()
+                .Property(c => c.OrderStatus)
+                .HasConversion<int>();
+            #endregion
         }
 
         #endregion
 
-        #region === Reset DB =============
+        #region ==== Reset DB =============
 
         /// <summary>
         /// Resets the database.
         /// </summary>
         /// <param name="isPreloadEnabled">The is preload enabled.</param>
-        public static void ResetDB(bool isPreloadEnabled)
+        public async Task ResetDBAsync(bool isPreloadEnabled)
         {
-            // Step 1a: Purge the exisiting Merchants & Orders & Order Events
-            var existingMerchants = SQLiteDBContext.GetAllMerchants();
+            // Step 1: Purge the exisiting Merchants all dependant items
+            //         1.1     DemoCustomers
+            //         1.2     OrderEvents
+            //         1.3     OrderItems
+            //         1.4     Orders
+            //         1.5     CatalogItems
+            //         1.6     Merchant
+            var existingMerchants = await this.GetAllMerchantsAsync();
+            
             foreach (var existingMerchant in existingMerchants)
             {
-                var existingCustomers = SQLiteDBContext.GetCustomers(existingMerchant.MerchantID);
-
-                foreach (var existingCustomer in existingCustomers)
-                {
-                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
-                }
-
-                SQLiteDBContext.DeleteMerchant(existingMerchant.MerchantID);
+                await this.DeleteMerchantAsync(existingMerchant.MerchantId);
+                // this deletes via cascading delete
+                //  === Step 1.1: Demo Customers ======================================
+                //  === Step 1.2: OrderEvents ======================================
+                //  === Step 1.3: OrderItems ======================================
+                //  === Step 1.4: CatalogItems ======================================
             }
+
+            // delete "default" catalog items under MerchantId 0
+            var existingCatalogItems = await this.GetCatalogItemsAsync(0);
+
+            foreach (var existingCatalogItem in existingCatalogItems)
+            {
+                await this.DeleteCatalogItemAsync(existingCatalogItem.CatalogItemId);
+            }
+
+            // Step 2:Optionally reload the seed data
+            //         2.1     Merchant
+            //         2.1     DemoCustomers
+            //         2.3     CatalogItems
+            //         2.4     Orders
+            //         2.5     OrderEvents
+            //         2.6     OrderItems
+
+            #region === Reload the Catalog Items ===========================
+            var seedCatalogItems = SeedData.GetSeedCatalogueItems();
+            foreach (var seedCatalogItem in seedCatalogItems)
+            {
+                await this.InsertCatalogItemAsync(seedCatalogItem);
+            }
+            #endregion
 
             if (isPreloadEnabled)
             {
-                // Step 2: Reload the Merchants
-                var seedMerchants = ModelBuilderExtensions.GetSeedMerchants();
+                #region === Step 2.1: Reload the Merchants ===============================
+                var seedMerchants = SeedData.GetSeedMerchants();
                 foreach (var seedMerchant in seedMerchants)
                 {
-                    SQLiteDBContext.InsertMerchant(seedMerchant);
+                    await this.InsertMerchantAsync(seedMerchant);
                 }
+                #endregion
 
-                // Step 3: Reload the Customers
-                var seedCustomers = ModelBuilderExtensions.GetSeedCustomers(seedMerchants);
-                //TODO: Gabe, write this step
-                foreach(var seedCustomer in seedCustomers)
+                #region === Step 2.2: Reload the DemoCustomers ===========================
+                var seedDemoCustomers = SeedData.GetSeedDemoCustomers();
+                foreach(var seedDemoCustomer in seedDemoCustomers)
                 {
-                    SQLiteDBContext.InsertCustomer(seedCustomer);
+                    await this.InsertDemoCustomerAsync(seedDemoCustomer);
                 }
+                #endregion                
+
+                #region === Step 2.4: Reload the Orders ===========================
+                var seedOrders = SeedData.GetSeedOrders();
+                foreach(var seedOrder in seedOrders)
+                {
+                    await this.InsertOrderAsync(seedOrder);
+                }
+                #endregion
+
+                #region === Step 2.5: Reload the Order Events ===========================
+                var seedOrderEvents = SeedData.GetOrderEvents();
+                foreach(var seedOrderEvent in seedOrderEvents)
+                {
+                    await this.InsertOrderEventAsync(seedOrderEvent);
+                }
+                #endregion
+
+                #region === Step 2.6: Reload the Order Line Items ===========================
+                var seedOrderLineItems = SeedData.GetOrderLineItems();
+                foreach(var seedOrderLineItem in seedOrderLineItems)
+                {
+                    await this.InsertOrderLineItemAsync(seedOrderLineItem);
+                }
+                #endregion
             }
         }
-
+                
         #endregion
 
-        #region === Merchant Methods =====
+        #region ==== Merchant Methods =====
         /// <summary>
         /// Gets the merchants.
         /// </summary>
         /// <returns>List&lt;MerchantDBE&gt;.</returns>
-        internal static List<MerchantDBE> GetAllMerchants()
+        internal async Task<List<MerchantDBE>> GetAllMerchantsAsync()
         {
-            using (var context = new SQLiteDBContext())
-            {
-                return context.Merchants.ToList();
-            }
+            return await this.Merchants.ToListAsync();
         }
 
         /// <summary>
-        /// Gets the merchant.
+        /// Gets a specific merchant using the public guid.
         /// </summary>
-        /// <param name="merchantID">The merchant unique identifier.</param>
+        /// <param name="merchantGuid">The merchant unique identifier.</param>
+        /// <returns>MerchantDBE.</returns>
+        internal async Task<MerchantDBE> GetMerchantAsync(Guid merchantGuid)
+        {
+            var dbMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantGuid == merchantGuid);
+
+            return dbMerchant;
+        }
+
+        /// <summary>
+        /// Gets the merchant and any related demo customers.
+        /// </summary>
+        /// <param name="merchantGuid">The merchant unique identifier.</param>
         /// <returns>MerchantDBE.</returns>
         /// <exception cref="ApplicationException">Merchant: [{merchantGuid}] is not valid</exception>
-        internal static MerchantDBE GetMerchant(Guid merchantID)
+        internal async Task<MerchantDBE> GetMerchantAndDemoCustomersAsync(Guid merchantGuid)
         {
-            using (var context = new SQLiteDBContext())
-            { 
-                var dbMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchantID);
+            var dbMerchantAndDemoCustomers = await this.Merchants
+                                                    .Include(m => m.DemoCustomers)
+                                                    .Where(m => m.MerchantGuid == merchantGuid)
+                                                    .FirstOrDefaultAsync();
 
-                return dbMerchant;
-            }
+            return dbMerchantAndDemoCustomers;
         }
 
         /// <summary>
-        /// Inserts the merchant (used by the public controllers).
+        /// Gets a specific merchant using the internal id.
         /// </summary>
-        /// <param name="newMerchant">The merchant.</param>
+        /// <param name="merchantId">The merchant identifier.</param>
         /// <returns>MerchantDBE.</returns>
-        internal static MerchantDBE InsertMerchant(NewMerchantMBE newMerchant)
+        internal async Task<MerchantDBE> GetMerchantAsync(int merchantId)
         {
-            using (var context = new SQLiteDBContext())
-            {
-                // make the db entity
-                var dbMerchant = new MerchantDBE
-                {
-                    // create a new guid
-                    MerchantID = Guid.NewGuid(),
+            var dbMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantId == merchantId);
 
-                    MerchantName = newMerchant.MerchantName,
-                    IsSupportsTips = newMerchant.IsSupportsTips
-                };
-
-                context.Merchants.Add(dbMerchant);
-
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw;
-                }
-
-                return dbMerchant;
-            }
+            return dbMerchant;
         }
 
         /// <summary>
-        /// Inserts the merchant (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// Inserts the merchant 
         /// </summary>
         /// <param name="newMerchant">The new merchant.</param>
         /// <returns>MerchantDBE.</returns>
-        private static MerchantDBE InsertMerchant(MerchantDBE newMerchant)
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal async Task InsertMerchantAsync(MerchantDBE newMerchant)
         {
-            using (var context = new SQLiteDBContext())
+            this.Merchants.Add(newMerchant);
+
+            try
             {
-                context.Merchants.Add(newMerchant);
-                context.SaveChanges();
-
-                return newMerchant;
+                await this.SaveChangesAsync();
             }
-        }
-
-        /// <summary>
-        /// Deletes the merchant and customers.
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        internal static bool DeleteMerchantAndCustomers(Guid merchantID)
-        {
-            // try to get any associated customers
-            var existingCustomers = SQLiteDBContext.GetCustomers(merchantID);
-
-            // there may not be any customers
-            if (existingCustomers != null)
+            catch (DbUpdateException ex)
             {
-                foreach (var existingCustomer in existingCustomers)
-                {
-                    SQLiteDBContext.DeleteCustomer(existingCustomer.MerchantID, existingCustomer.CustomerID);
-                }
-            }
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
 
-            return SQLiteDBContext.DeleteMerchant(merchantID);
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
         }
 
         /// <summary>
         /// Deletes the merchant.
         /// </summary>
         /// <param name="merchantID">The merchant unique identifier.</param>
-        private static bool DeleteMerchant(Guid merchantID)
+        internal async Task<bool> DeleteMerchantAsync(int merchantID)
         {
-            using (var context = new SQLiteDBContext())
+            var currentMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantId == merchantID);
+
+            if (currentMerchant != null)
             {
-                var currentMerchant = context.Merchants.FirstOrDefault(o => o.MerchantID == merchantID);
+                this.Merchants.Remove(currentMerchant);
+                await this.SaveChangesAsync();
 
-                if (currentMerchant != null)
-                {
-                    context.Merchants.Remove(currentMerchant);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
+            }
+            else
+            {
+                // returns false if the merchant did not exist
+                return false;
             }
         }
 
@@ -249,27 +366,169 @@ namespace PayAway.WebAPI.DB
         /// </summary>
         /// <param name="merchant">The merchant.</param>
         /// <exception cref="ApplicationException">Merchant: [{merchant.MerchantID}] is not valid</exception>
-        internal static void UpdateMerchant(MerchantDBE merchant)
+        internal async Task UpdateMerchantAsync(MerchantDBE merchant)
         {
-            using (var context = new SQLiteDBContext())
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            // try and find the existing merchant
+            var currentMerchant = await this.Merchants.FirstOrDefaultAsync(m => m.MerchantGuid == merchant.MerchantGuid);
+
+            if (currentMerchant == null)
             {
-                // turn off change tracking since we are going to overwite the entity
-                // Note: I would not do this if there was a db assigned unique id for the record
-                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+                throw new ApplicationException($"Merchant: [{merchant.MerchantGuid}] is not valid");
+            }
 
-                // try and find the existing merchant
-                var currentMerchant = context.Merchants.FirstOrDefault(m => m.MerchantID == merchant.MerchantID);
+            this.Update(merchant);
 
-                if (currentMerchant == null)
-                {
-                    throw new ApplicationException($"Merchant: [{merchant.MerchantID}] is not valid");
-                }
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
 
-                context.Update(merchant);
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Sets the active merchant for demo.
+        /// </summary>
+        /// <param name="merchantToMakeActive">The merchant to make active.</param>
+        internal async Task SetActiveMerchantForDemoAsync(MerchantDBE merchantToMakeActive)
+        {
+            //gets all merchants who are already active (logically should only be 0 or 1)
+            var allMerchants = await this.GetAllMerchantsAsync();
+            var merchantsToChange = allMerchants.Where(am => am.IsActive).ToList();
+
+            //set other active merchant to inactive
+            foreach (var merchant in merchantsToChange)
+            {
+                merchant.IsActive = false;
+                await this.UpdateMerchantAsync(merchant);
+            }
+
+            //set merchant to active
+            merchantToMakeActive.IsActive = true;
+
+            //update merchant in the db
+            await this.UpdateMerchantAsync(merchantToMakeActive);
+        }
+
+        /// <summary>
+        /// Gets active merchant
+        /// </summary>
+        /// <returns>active merchant</returns>
+        internal async Task<MerchantDBE> GetActiveMerchantAsync()
+        {
+            //query the db to get active merchant
+            var activeMerchant = await this.Merchants.Where(m => m.IsActive).FirstOrDefaultAsync();
+
+            return activeMerchant;
+        }
+
+
+        #endregion
+
+        #region ==== DemoCustomer Methods =======
+
+        /// <summary>
+        /// Gets the demo customers.
+        /// </summary>
+        /// <param name="merchantId">The merchant identifier.</param>
+        /// <returns>List&lt;CustomerDBE&gt;.</returns>
+        internal async Task<List<DemoCustomerDBE>> GetDemoCustomersAsync(int merchantId)
+        {
+            var dbDemoCustomers = await this.DemoCustomers
+                                            .Where(m => m.MerchantId == merchantId).ToListAsync();
+
+            return dbDemoCustomers;
+        }
+
+        /// <summary>
+        /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
+        /// </summary>
+        /// <param name="newDemoCustomer">object containing information for new customer</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal async Task InsertDemoCustomerAsync( DemoCustomerDBE newDemoCustomer)
+        {
+            this.DemoCustomers.Add(newDemoCustomer);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes the customer.
+        /// </summary>
+        /// <param name="demoCustomerId">The customer identifier.</param>
+        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
+        internal async Task<bool> DeleteDemoCustomerAsync(int demoCustomerId)
+        {
+            var currentDemoCustomer = await this.DemoCustomers.SingleOrDefaultAsync(c => c.DemoCustomerId == demoCustomerId);
+
+            if (currentDemoCustomer != null)
+            {
+                this.DemoCustomers.Remove(currentDemoCustomer);
+                await this.SaveChangesAsync();
+
+                return true;
+            }
+            else
+            {
+                // returns false if the demoCustomer did not exist
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Updates a customer
+        /// </summary>
+        /// <param name="demoCustomer">object containing information about customers</param>
+        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
+        public async Task UpdateDemoCustomerAsync(DemoCustomerDBE demoCustomer)
+        {
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            var currentCustomer = await this.DemoCustomers.SingleOrDefaultAsync(dc => dc.DemoCustomerId == demoCustomer.DemoCustomerId);
+
+            if (currentCustomer != null)
+            {
+                this.Update(demoCustomer);
 
                 try
                 {
-                    context.SaveChanges();
+                    await this.SaveChangesAsync();
                 }
                 catch (DbUpdateException ex)
                 {
@@ -285,185 +544,340 @@ namespace PayAway.WebAPI.DB
                     throw;
                 }
             }
-        }
-
-        internal static void SetActiveMerchant(Guid merchantID)
-        {
-            //gets all merchants who are already active (logically should only be 0 or 1)
-            var merchantsToChange = SQLiteDBContext.GetAllMerchants().Where(am => am.IsActive).ToList();
-
-            //set other active merchant to inactive
-            foreach (var merchant in merchantsToChange)
+            else
             {
-                merchant.IsActive = false;
-                SQLiteDBContext.UpdateMerchant(merchant);
-            }
-
-            // query the DB
-            var activeMerchant = SQLiteDBContext.GetMerchant(merchantID);
-
-            //set merchant to active
-            activeMerchant.IsActive = true;
-
-            //update merchant in the db
-            SQLiteDBContext.UpdateMerchant(activeMerchant);
-        }
-
-        #endregion
-
-        #region ==== Customer Methods =======
-
-        /// <summary>
-        /// Gets the customers.
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        /// <returns>List&lt;CustomerDBE&gt;.</returns>
-        internal static List<CustomerDBE> GetCustomers(Guid merchantID)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                var dbCustomers = context.Customers.Where(m => m.MerchantID == merchantID).ToList();
-
-                return dbCustomers;
-            }
-        }
-
-        /// <summary>
-        /// Inserts new customer into DB (used by the public controllers).
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        /// <param name="newCustomer">object containing information for new customer</param>
-        /// <returns></returns>
-        internal static CustomerDBE InsertCustomer(Guid merchantID, NewCustomerMBE newCustomer)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                // make the db entity
-                var dbCustomer = new CustomerDBE
-                {
-                    MerchantID = merchantID,
-                    // create a new guid
-                    CustomerID = Guid.NewGuid(),
-                    CustomerName = newCustomer.CustomerName,
-                    CustomerPhoneNo = newCustomer.CustomerPhoneNo
-                };
-
-                context.Customers.Add(dbCustomer);
-                try
-                {
-                    context.SaveChanges();
-                }
-                catch (DbUpdateException ex)
-                {
-                    // exception was raised by the db (ex: UK violation)
-                    var sqlException = ex.InnerException;
-
-                    // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                    throw new ApplicationException(sqlException.Message);
-                }
-                catch (Exception)
-                {
-                    // rethrow exception
-                    throw; 
-                }
-
-                return dbCustomer;
-            }
-        }
-
-        /// <summary>
-        /// Inserts new customer into DB (only used by the ResetDB method so we can keep the same guids across reloads).
-        /// </summary>
-        /// <param name="newCustomer">object containing information for new customer</param>
-        /// <returns></returns>
-        private static CustomerDBE InsertCustomer( CustomerDBE newCustomer)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                context.Customers.Add(newCustomer);
-                context.SaveChanges();
-
-                return newCustomer;
-            }
-        }
-
-        /// <summary>
-        /// Deletes the customer.
-        /// </summary>
-        /// <param name="merchantID">The merchant identifier.</param>
-        /// <param name="customerID">The customer identifier.</param>
-        /// <exception cref="ApplicationException">Customer: [{customerID}] on Merchant: [{merchantID}] is not valid</exception>
-        internal static bool DeleteCustomer(Guid merchantID, Guid customerID)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customerID);
-
-                if (currentCustomer != null)
-                {
-                    context.Customers.Remove(currentCustomer);
-                    context.SaveChanges();
-
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates a customer
-        /// </summary>
-        /// <param name="merchantID">Unique identifier for merchant</param>
-        /// <param name="customer">object containing information about customers</param>
-        /// <exception cref="ApplicationException">Customer: [{customer.CustomerID}] is not valid</exception>
-        public static void UpdateCustomer(Guid merchantID, CustomerDBE customer)
-        {
-            using (var context = new SQLiteDBContext())
-            {
-                // turn off change tracking since we are going to overwite the entity
-                // Note: I would not do this if there was a db assigned unique id for the record
-                context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-
-                if(customer.MerchantID == Guid.Empty)
-                {
-                    customer.MerchantID = merchantID;
-                }
-
-                var currentCustomer = context.Customers.FirstOrDefault(c => c.MerchantID == merchantID && c.CustomerID == customer.CustomerID);
-
-                if (currentCustomer != null)
-                {
-                    context.Update(customer);
-
-                    try
-                    {
-                        context.SaveChanges();
-                    }
-                    catch (DbUpdateException ex)
-                    {
-                        // exception was raised by the db (ex: UK violation)
-                        var sqlException = ex.InnerException;
-
-                        // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
-                        throw new ApplicationException(sqlException.Message);
-                    }
-                    catch (Exception)
-                    {
-                        // rethrow exception
-                        throw;
-                    }
-                }
-                else
-                {
-                    throw new ApplicationException($"Customer: [{customer.CustomerID}] is not valid on MerchantID: [{merchantID}]");
-                }
+                throw new ApplicationException($"Customer: [{demoCustomer.DemoCustomerId}] is not valid on MerchantID: [{demoCustomer.MerchantId}]");
             }
         }
 
 
         #endregion
+
+        #region ==== CatalogItem Methods =======
+
+        /// <summary>
+        /// Gets the catalog items.
+        /// </summary>
+        /// <param name="merchantId">The merchant identifier.</param>
+        /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
+        internal  async Task<List<CatalogItemDBE>> GetCatalogItemsAsync(int merchantId)
+        {
+            var dbCatalogItems = await this.CatalogItems
+                                            .Where(ci => ci.MerchantId == merchantId)
+                                            .OrderBy(ci => ci.CatalogItemId)
+                                            .ToListAsync();
+
+            return dbCatalogItems;
+        }
+
+        /// <summary>
+        /// Gets a catalog item.
+        /// </summary>
+        /// <param name="catalogItemGuid">The unique catalog item identifier.</param>
+        /// <returns>System.Collections.Generic.List&lt;PayAway.WebAPI.Entities.v1.CatalogItemDBE&gt;.</returns>
+        internal async Task<CatalogItemDBE> GetCatalogItemAsync(Guid catalogItemGuid)
+        {
+            var dbCatalogItem = await this.CatalogItems.SingleOrDefaultAsync(ci => ci.CatalogItemGuid == catalogItemGuid);
+
+            return dbCatalogItem;
+        }
+
+        /// <summary>
+        /// Inserts the catalog item.
+        /// </summary>
+        /// <param name="newCatalogItem">The new catalog item.</param>
+        /// <returns>CatalogItemDBE.</returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        private async Task InsertCatalogItemAsync(CatalogItemDBE newCatalogItem)
+        {
+            this.CatalogItems.Add(newCatalogItem);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+
+        /// <summary>
+        /// Deletes the catalog item.
+        /// </summary>
+        /// <param name="catalogItemId">The catalog item identifier.</param>
+        /// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
+        internal async Task<bool> DeleteCatalogItemAsync(int catalogItemId)
+        {
+            var currentCatalogItem = await this.CatalogItems.SingleOrDefaultAsync(ci => ci.CatalogItemId == catalogItemId);
+
+            if (currentCatalogItem != null)
+            {
+                this.CatalogItems.Remove(currentCatalogItem);
+                await this.SaveChangesAsync();
+
+                return true;
+            }
+            else
+            {
+                // returns false if the CatalogItem did not exist
+                return false;
+            }
+        }
+        #endregion
+
+        #region ==== Order Methods =======
+
+        /// <summary>
+        /// Gets a list of Orders
+        /// </summary>
+        /// <param name="merchantId">Merchant Unique Indentifier.</param>
+        /// <returns>List of orders</returns>
+        internal async Task<List<OrderDBE>> GetOrdersAsync(int merchantId)
+        {
+            var dbOrders = await this.Orders
+                                    .Where(o => o.MerchantId == merchantId)
+                                    .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
+                                    .ToListAsync();
+
+            return dbOrders;
+        }
+
+        /// <summary>
+        /// Get a specific order by orderGuid
+        /// </summary>
+        /// <param name="orderGuid">order Unique Indentifier.</param>
+        /// <returns>a specific order</returns>
+        internal async Task<OrderDBE> GetOrderAsync(Guid orderGuid)
+        {
+            var dbOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderGuid == orderGuid);
+
+            return dbOrder;
+        }
+
+        /// <summary>
+        /// Gets the orders via reference order identifier.
+        /// </summary>
+        /// <param name="refOrderId">The reference order identifier.</param>
+        /// <returns>List&lt;OrderDBE&gt;.</returns>
+        internal async Task<List<OrderDBE>> GetOrdersViaRefOrderIdAsync(int refOrderId)
+        {
+            var dbOrders = await this.Orders
+                                    .Where(o => o.RefOrderId == refOrderId)
+                                    .OrderByDescending(o => o.OrderId)          // delegate sorting to DB
+                                    .ToListAsync();
+
+            return dbOrders;
+        }
+
+        /// <summary>
+        /// Get a specific order by orderGuid
+        /// </summary>
+        /// <param name="orderGuid">order Unique Indentifier.</param>
+        /// <returns>a specific order</returns>
+        internal async Task<OrderDBE> GetOrderExplodedAsync(Guid orderGuid)
+        {
+            var dbOrder = await this.Orders
+                                        .Include(o => o.Merchant)
+                                        .Include(o => o.OrderEvents.OrderByDescending(oe => oe.EventDateTimeUTC))
+                                        .Include(o => o.OrderLineItems)
+                                        .Where(o => o.OrderGuid == orderGuid)
+                                        .SingleOrDefaultAsync();
+
+            return dbOrder;
+        }
+
+        /// <summary>
+        /// Inserts new order
+        /// </summary>
+        /// <param name="newOrder">The new order</param>
+        /// <returns>A new order.</returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal async Task InsertOrderAsync(OrderDBE newOrder)
+        {
+            this.Orders.Add(newOrder);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes order
+        /// </summary>
+        /// <param name="orderID">Identifier for order</param>
+        /// <returns></returns>
+        internal async Task<bool> DeleteOrderAsync(int orderID)
+        {
+            var currentOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderId == orderID);
+
+            if (currentOrder != null)
+            {
+                this.Orders.Remove(currentOrder);
+                await this.SaveChangesAsync();
+
+                return true;
+            }
+            else
+            {
+                // returns false if the order did not exist
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Updates an order
+        /// </summary>
+        /// <param name="dbOrder">The order</param>
+        /// <exception cref="ApplicationException">Order: [{order.OrderGuid}] is not valid</exception>
+        internal async Task UpdateOrderAsync(OrderDBE dbOrder)
+        {
+            // turn off change tracking since we are going to overwite the entity
+            // Note: I would not do this if there was a db assigned unique id for the record
+            this.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+
+            var currentOrder = await this.Orders.SingleOrDefaultAsync(o => o.OrderGuid == dbOrder.OrderGuid);
+
+            if (currentOrder == null)
+            {
+                throw new ApplicationException($"Order: [{dbOrder.OrderGuid}] is not valid");
+            }
+
+            this.Update(dbOrder);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region ==== OrderEvent Methods =======
+
+        /// <summary>
+        /// Inserts new order event
+        /// </summary>
+        /// <param name="newOrderEvent">The new order event.</param>
+        /// <returns>OrderEventDBE</returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal async Task InsertOrderEventAsync(OrderEventDBE newOrderEvent)
+        {
+            this.OrderEvents.Add(newOrderEvent);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region ==== OrderLineItem Methods =======
+
+        /// <summary>
+        /// Inserts new line item
+        /// </summary>
+        /// <param name="newLineItem"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// only used by the ResetDB method so we can keep the same guids across reloads.
+        /// </remarks>
+        internal async Task InsertOrderLineItemAsync(OrderLineItemDBE newLineItem)
+        {
+            this.OrderLineItems.Add(newLineItem);
+
+            try
+            {
+                await this.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // exception was raised by the db (ex: UK violation)
+                var sqlException = ex.InnerException;
+
+                // we do this to disconnect the exception that bubbles up from the dbcontext which will be disposed when it leaves this method
+                throw new ApplicationException(sqlException.Message);
+            }
+            catch (Exception)
+            {
+                // rethrow exception
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete Order line items
+        /// </summary>
+        /// <param name="orderId"></param>
+        internal async Task DeleteOrderLineItemsAsync(int orderId)
+        {
+            var orderLineItems = this.OrderLineItems.Where(a => a.OrderId == orderId);
+
+            foreach(var orderLineItem in orderLineItems)
+            {
+                this.Remove(orderLineItem);
+                await this.SaveChangesAsync();
+            }
+                
+        }
+        #endregion
+
     }
 }

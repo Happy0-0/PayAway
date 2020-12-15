@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PayAway.WebAPI.DB;
 
 namespace PayAway.WebAPI.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    partial class SQLiteDBContextModelSnapshot : ModelSnapshot
+    [Migration("20201201153150_NewPaymentColumns")]
+    partial class NewPaymentColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,10 +101,6 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MerchantUrl")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("MerchantId");
 
                     b.HasIndex("MerchantGuid")
@@ -149,14 +147,8 @@ namespace PayAway.WebAPI.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("RefOrderId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("TipAmount")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("OrderId");
 
