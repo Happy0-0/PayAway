@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using PayAway.WebAPI.Shared.Entities.v1;
 
-namespace PayAway.WebAPI.Entities.Database
+namespace PayAway.WebAPI.DataAccess.Entities
 {
     /// <summary>
     /// This class represents a "Shadow" Customer pre-setup on a Merchant to use during a demo

@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PayAway.WebAPI.DB;
+using PayAway.WebAPI.DataAccess;
+using PayAway.WebAPI.DataAccess;
 
 namespace PayAway.WebAPI.Migrations
 {

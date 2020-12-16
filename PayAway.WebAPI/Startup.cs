@@ -25,7 +25,7 @@ using Hellang.Middleware.ProblemDetails;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.PushNotifications;
-using PayAway.WebAPI.DB;
+using PayAway.WebAPI.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;

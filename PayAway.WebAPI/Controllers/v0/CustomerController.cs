@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -11,12 +9,6 @@ using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Shared.Entities.v1;
 using PayAway.WebAPI.Utilities;
 using PayAway.WebAPI.PushNotifications;
-using PayAway.WebAPI.Shared;
-using PayAway.WebAPI.DB;
-using PayAway.WebAPI.Entities.Database;
-using PayAway.WebAPI.Entities.Config;
-
-using PhoneNumbers;
 
 namespace PayAway.WebAPI.Controllers.v0
 {

@@ -12,10 +12,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Http.Headers;
 
-using PayAway.WebAPI.DB;
+using PayAway.WebAPI.DataAccess;
 using PayAway.WebAPI.Entities.Config;
 using PayAway.WebAPI.Shared.Entities.v1;
-using PayAway.WebAPI.Entities.Database;
+using PayAway.WebAPI.DataAccess.Entities;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;

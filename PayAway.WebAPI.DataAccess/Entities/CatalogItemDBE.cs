@@ -1,11 +1,8 @@
 ﻿using PayAway.WebAPI.Shared.Entities.v1;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Entities.Database
+namespace PayAway.WebAPI.DataAccess.Entities
 {
     public class CatalogItemDBE
     {

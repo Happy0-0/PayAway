@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using PayAway.WebAPI.Shared.Entities.v1;
 
-namespace PayAway.WebAPI.Entities.Database
+namespace PayAway.WebAPI.DataAccess.Entities
 {
     public class MerchantDBE
     {

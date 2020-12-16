@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
+using PayAway.WebAPI.DataAccess.Entities;
 
-using PayAway.WebAPI.Controllers.v0;
-using PayAway.WebAPI.Entities.Database;
-
-namespace PayAway.WebAPI.DB
+namespace PayAway.WebAPI.DataAccess
 {
     public static class SeedData
     {

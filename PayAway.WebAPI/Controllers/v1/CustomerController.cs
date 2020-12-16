@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Shared.Entities.v1;
-using PayAway.WebAPI.Entities.Database;
+using PayAway.WebAPI.DataAccess.Entities;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Utilities;
 using PayAway.WebAPI.PushNotifications;
+using PayAway.WebAPI.DataAccess;
 
 namespace PayAway.WebAPI.Controllers.v1
 {

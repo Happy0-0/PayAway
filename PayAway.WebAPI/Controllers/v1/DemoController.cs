@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using PayAway.WebAPI.DB;
+using PayAway.WebAPI.DataAccess;
 using PayAway.WebAPI.Shared.Entities.v1;
-using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Utilities;
-
-using static System.Net.Mime.MediaTypeNames;
+using PayAway.WebAPI.DataAccess.Entities;
 
 namespace PayAway.WebAPI.Controllers.v1
 {

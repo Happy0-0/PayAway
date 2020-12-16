@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<ProjectReference Include="..\PayAway.WebAPI.DataAccess\PayAway.WebAPI.DataAccess.csproj" />
 	<ProjectReference Include="..\Shared\PayAway.WebAPI.Shared.csproj" />
   </ItemGroup>
 
