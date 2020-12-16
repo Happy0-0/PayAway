@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Shared.Entities.v1;
 using PayAway.WebAPI.Interfaces;
 using PayAway.WebAPI.Utilities;
 

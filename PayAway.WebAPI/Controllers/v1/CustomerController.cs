@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Http;
@@ -8,11 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 using PayAway.WebAPI.DB;
-using PayAway.WebAPI.Entities.Config;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Shared.Entities.v1;
 using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Interfaces;
-using PayAway.WebAPI.BizTier;
 using PayAway.WebAPI.Utilities;
 using PayAway.WebAPI.PushNotifications;
 

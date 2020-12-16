@@ -5,26 +5,30 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="3.1.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="5.0.0-preview3" />
     <PackageReference Include="BouncyCastle.NetCore" Version="1.8.8" />
     <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="5.1.1" />
-    <PackageReference Include="libphonenumber-csharp" Version="8.12.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0">
+    <PackageReference Include="libphonenumber-csharp" Version="8.12.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="5.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.1" />
     <PackageReference Include="MySql.Data" Version="8.0.22" />
     <PackageReference Include="SSH.NET" Version="2020.0.0-beta1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-    <PackageReference Include="Twilio" Version="5.50.0" />
+    <PackageReference Include="Twilio" Version="5.52.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<ProjectReference Include="..\Shared\PayAway.WebAPI.Shared.csproj" />
   </ItemGroup>
 
 	<PropertyGroup>

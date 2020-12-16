@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 using PayAway.WebAPI.Interfaces;
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Shared.Entities.v1;
 using PayAway.WebAPI.Utilities;
 using PayAway.WebAPI.PushNotifications;
+using PayAway.WebAPI.Shared;
 using PayAway.WebAPI.DB;
 using PayAway.WebAPI.Entities.Database;
 using PayAway.WebAPI.Entities.Config;

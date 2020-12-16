@@ -2,12 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace PayAway.WebAPI.Entities.v1
+namespace PayAway.WebAPI.Shared.Entities.v1
 {
     /// <summary>
     /// Class represents a new or updated merchant
     /// </summary>
-    public class NewMerchantMBE
+public class NewMerchantMBE
     {
         /// <summary>
         /// Gets or sets the merchant name

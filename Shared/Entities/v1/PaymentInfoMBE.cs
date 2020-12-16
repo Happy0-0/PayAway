@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace PayAway.WebAPI.Entities.v1
+namespace PayAway.WebAPI.Shared.Entities.v1
 {
     public record PaymentInfoMBE
     {

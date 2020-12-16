@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PayAway.WebAPI", "PayAway.W
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{2ACA623F-6D7D-4FD6-BF95-88AB89549BBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PayAway.WebAPI.Shared", "Shared\PayAway.WebAPI.Shared.csproj", "{D8C65F9A-4C4E-4992-A34B-F9D05CE7265C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PayAway.WebAPI.Shared", "Shared\PayAway.WebAPI.Shared.csproj", "{D8C65F9A-4C4E-4992-A34B-F9D05CE7265C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

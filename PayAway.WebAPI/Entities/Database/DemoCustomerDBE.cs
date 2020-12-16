@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-using PayAway.WebAPI.Entities.v1;
+using PayAway.WebAPI.Shared.Entities.v1;
 
 namespace PayAway.WebAPI.Entities.Database
 {
